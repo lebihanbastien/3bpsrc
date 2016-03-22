@@ -6,6 +6,8 @@ function [ default ] = parameters_default_init(cst)
 %-------------------------------------------------------------------------%
 default.ode45.RelTol = 1e-12;
 default.ode45.AbsTol = 1e-12;
+default.ode87.RelTol = 1e-12;
+default.ode87.AbsTol = 1e-12;
 
 %-------------------------------------------------------------------------%
 %Differential correction
