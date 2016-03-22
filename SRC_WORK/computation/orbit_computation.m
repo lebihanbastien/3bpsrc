@@ -20,7 +20,7 @@
 % Version: 1.0
 % Year: 2015
 %-------------------------------------------------------------------------%
-function orbit = orbit_computation(cr3bp, orbit, params, cst, isOrbitOnly)
+function orbit = orbit_computation(cr3bp, orbit, params, cst)
                
 %-------------------------------------------------------------------------%
 % Initialization from third order approximation
@@ -29,7 +29,7 @@ yv_guess =  third_order_orbit(orbit, 0.0, cst);
 
 %-------------------------------------------------------------------------%
 % Refinement
-%-------------------------------------------------------------------------%     
-orbit = orbit_refinement(cr3bp, orbit, params, yv_guess, cst, isOrbitOnly);
+%-------------------------------------------------------------------------%  
+orbit = orbit_refinement(cr3bp, orbit, params, yv_guess, cst);
 
 end

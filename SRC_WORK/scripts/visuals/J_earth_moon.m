@@ -15,30 +15,23 @@ init;
 
 %% Inner changes from default parameters
 
-% 1. Decomment the next line to use only MATLAB routines (very slow!)
-%--------------------------------------------------------------------------
-%default.computation.type = cst.computation.MATLAB;
+default.plot.XY              = false;     %plot also the results in X-Z plane
+default.plot.firstPrimDisp   = cst.TRUE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
+default.plot.allLibPoints    = cst.TRUE;  %are all libration points displayed?
+default.plot.names           = cst.TRUE;  %are the names displayed?
+default.plot.tdAxes          = cst.TRUE;  %are the pretty 3D axes displayed?
+default.plot.bigPrimFac      = 3.0;       %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
-% 2. Decomment the next lines to change the absolute and relative precision during integration with MATLAB routines  (ode45)
-%--------------------------------------------------------------------------
-default.ode45.AbsTol = 1e-12;
-default.ode45.RelTol = 1e-12;
-
-% 3. Decomment the next lines to change the plotting options
-%--------------------------------------------------------------------------
-default.plot.XY        = false; %plot also the results in X-Z plane
-
-% 4. See parameters_default_init.m to see other options
+% See parameters_default_init.m to see other options
 %--------------------------------------------------------------------------
 
 %% Environment init
-cr3bp = init_CR3BP('SUN', 'EARTH', default);
+cr3bp = init_CR3BP('EARTH', 'MOON', default);
 
 
 %% Same for a halo orbit
 %Initialization
-isOrbitOnly = 0;
-for kalt = 120000:10000:170000
+for kalt = 15000:1000:20000
 halo = init_orbit(cr3bp, ...       % Parent CR3BP
     cr3bp.l2, ...                  % Parent libration point
     cst.orbit.type.HALO, ...       % HALO orbit
@@ -47,14 +40,10 @@ halo = init_orbit(cr3bp, ...       % Parent CR3BP
     cst);                          % Numerical constants
 
 %Computation
-halo = orbit_computation(cr3bp, halo, default, cst, isOrbitOnly);
-if(~isOrbitOnly) 
-    isOrbitOnly = 1;
-end
+halo = orbit_computation(cr3bp, halo, default, cst);
 end
 %Initialization
-isOrbitOnly = 0;
-for kalt = 120000:10000:170000
+for kalt = 5000:1000:10000
     halo = init_orbit(cr3bp, ...                     % Parent CR3BP
         cr3bp.l1, ...                  % Parent libration point
         cst.orbit.type.HALO, ...       % HALO orbit
@@ -63,10 +52,7 @@ for kalt = 120000:10000:170000
         cst);                          % Numerical constants
     
     %Computation
-    halo = orbit_computation(cr3bp, halo, default, cst, isOrbitOnly);
-    if(~isOrbitOnly) 
-    isOrbitOnly = 1;
-end
+    halo = orbit_computation(cr3bp, halo, default, cst);
 end
 %% Change the orientation of the 3D plot, if it exists
 if(any(findall(0,'Type','Figure')==4))
@@ -82,7 +68,3 @@ zoom(2)
 hold on;
 grid off;
 axis off;
-
-%% Export
-% h = prepareFig(h);
-% exportFig(h,'CRTBP');

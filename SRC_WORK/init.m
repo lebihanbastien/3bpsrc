@@ -7,8 +7,8 @@
 %--------------------------------------------------------------------------
 
 %% Reboot
-%clear all;
-%close all;
+clear all;
+close all;
 
 
 %% Add subfolders to the path

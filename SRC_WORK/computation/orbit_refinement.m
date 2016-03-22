@@ -23,7 +23,7 @@
 % Version: 1.0
 % Year: 2015
 %-------------------------------------------------------------------------%
-function orbit = orbit_refinement(cr3bp, orbit, params, yv_guess, cst, isOrbitOnly)
+function orbit = orbit_refinement(cr3bp, orbit, params, yv_guess, cst, varargin)
                
 % Integration vector
 yv0 = (1:42)';
@@ -224,7 +224,7 @@ orbit.status = cst.orbit.REAL;
 % Plotting (potentially)
 %-------------------------------------------------------------------------%
 if(params.plot.orbit == 1) %plotting 
-    orbit_plot(yv, orbit, params, cst, isOrbitOnly);
+    orbit_plot(yv, orbit, params, cst);
 end
     
 end

@@ -19,7 +19,18 @@
 
 %% Initialization: reboot, addpath, constants, default parameters. See init.m
 init;
-default.plot.XY        = false; %plot also the results in X-Z plane
+
+%% Inner changes from default parameters
+
+default.plot.XY              = false; %plot also the results in X-Z plane
+default.plot.firstPrimDisp   = cst.TRUE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
+default.plot.allLibPoints    = cst.TRUE;  %are all libration points displayed?
+default.plot.names           = cst.TRUE;  %are the names displayed?
+default.plot.tdAxes          = cst.TRUE;  %are the pretty 3D axes displayed?
+default.plot.bigPrimFac      = 3.0;       %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
+
+% 4. See parameters_default_init.m to see other options
+%--------------------------------------------------------------------------
 
 %% Structures init
 %Environment

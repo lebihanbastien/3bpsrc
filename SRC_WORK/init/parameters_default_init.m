@@ -4,8 +4,8 @@
 % Initializes the parameters at default values.
 %       
 % Author: BLB
-% Version: 1.0
-% Year: 2015
+% Version: 2.0
+% Year: 2016
 %-------------------------------------------------------------------------%
 function [ default ] = parameters_default_init(cst)
 %-------------------------------------------------------------------------%
@@ -13,6 +13,8 @@ function [ default ] = parameters_default_init(cst)
 %-------------------------------------------------------------------------%
 default.ode45.RelTol = 3e-14; %minimum allowed by ode45
 default.ode45.AbsTol = 1e-14; %arbitrary (already very slow!)
+default.ode87.RelTol = 3e-14; %minimum allowed by ode45
+default.ode87.AbsTol = 1e-14; %arbitrary (already very slow!)
 
 %-------------------------------------------------------------------------%
 %Differential correction
@@ -38,6 +40,12 @@ default.plot.XZ              = cst.FALSE; %Plot the XZ view
 default.plot.TD              = cst.TRUE;  %Plot the 3D view
 default.plot.manifold_branch = cst.TRUE;  %during manifold computation
 default.plot.LineSmoothing   = 'off';     %during manifold computation
+
+default.plot.firstPrimDisp   = cst.FALSE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
+default.plot.allLibPoints    = cst.FALSE;  %are all libration points displayed?
+default.plot.names           = cst.FALSE;  %are the names displayed?
+default.plot.tdAxes          = cst.FALSE;  %are the pretty 3D axes displayed?
+default.plot.bigPrimFac      = 1.0;         %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
 %[Deprecated]
 default.plot.halo_orbit      = cst.TRUE;  %during halo orbit computation (deprecated)

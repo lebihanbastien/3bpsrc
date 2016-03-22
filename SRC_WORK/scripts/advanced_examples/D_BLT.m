@@ -33,13 +33,16 @@
 init;
 
 %% Inner changes from default parameters
-default.plot.XY = false;
 default.plot.TD = true;
-%default.computation.type = cst.computation.MATLAB;
-% if(default.computation.type == cst.computation.MATLAB)
-%     default.ode45.AbsTol = 1e-15;
-%     default.ode45.RelTol = 1e-15;
-% end
+default.plot.XY              = false; %plot also the results in X-Z plane
+default.plot.firstPrimDisp   = cst.TRUE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
+default.plot.allLibPoints    = cst.FALSE;  %are all libration points displayed?
+default.plot.names           = cst.FALSE;  %are the names displayed?
+default.plot.tdAxes          = cst.FALSE;  %are the pretty 3D axes displayed?
+default.plot.bigPrimFac      = 1.0;       %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
+
+% 4. See parameters_default_init.m to see other options
+%--------------------------------------------------------------------------
 
 %% Structures init
 %Environment
@@ -115,8 +118,8 @@ isPreviousSolution = false;
 % For saving outputs throughout the loop
 it = 1;
 
-thetaVec = 10:10:180;
-sunPVec = 10:10:180;
+thetaVec = 10:20:180;
+sunPVec = 10:20:180;
 iter = 0;
 for theta = thetaVec
     for sunP = sunPVec

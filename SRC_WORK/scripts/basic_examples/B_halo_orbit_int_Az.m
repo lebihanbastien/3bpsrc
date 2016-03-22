@@ -16,25 +16,8 @@
 % Year: 2015
 %--------------------------------------------------------------------------
 
-% Reboot
-clear all;
-close all;
-
-% Add subfolders to the path
-addpath('./computation');
-addpath('./data');
-addpath('./init');
-addpath('./ode');
-
-%% Data loading (abacus)
-load halo_init_matrix_EML2 halo_init_EML2;
-load halo_init_matrix_EML1 halo_init_EML1;
-
-%% Constants init
-cst = constants_init();
-
-%% Parameters init (to default values, see values within routine)
-default = parameters_default_init(cst);
+%% Initialization: reboot, addpath, constants, default parameters. See init.m
+init;
 
 %% Structures init
 %Environment
