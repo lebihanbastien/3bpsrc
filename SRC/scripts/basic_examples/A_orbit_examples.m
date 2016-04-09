@@ -11,7 +11,7 @@ init;
 cr3bp = init_CR3BP('EARTH', 'MOON', default);
 
 %% Orbit init & computation
-lyap = init_lyap_orbit(cr3bp, cr3bp.l1, 8000 , cst);
+lyap = init_lyap_orbit(cr3bp, cr3bp.l1, 8000, cst);
 lyap = lyapunov_orbit_computation(cr3bp, lyap, default, cst);
 
 %% Same for a halo orbit

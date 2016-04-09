@@ -63,7 +63,7 @@ manifold_branch_stable_exterior  = init_manifold_branch_event(cst.manifold.STABL
 manifold_branch_stable_interior  = init_manifold_branch_event(cst.manifold.STABLE,...
                                           cst.manifold.INTERIOR,...
                                           cst.manifold.event.type.X_SECTION,...
-                                          0.0,...
+                                          -0.5,...
                                           cst.manifold.event.isterminal.YES,...
                                           cst.manifold.event.direction.ALL,...
                                           cr3bp.m1.pos,...
@@ -75,31 +75,21 @@ manifold_branch_stable_interior  = init_manifold_branch_event(cst.manifold.STABL
 t = 10;
 
 
-% Unstable interior
-for theta = 0:0.05:1 %position on the orbit
-    manifold_branch_unstable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_interior, theta, t, default, cst);
-end
-
-% Unstable exterior
-for theta = 0:0.05:1 %position on the orbit
-    manifold_branch_unstable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_exterior, theta, t, default, cst);end
-
-% Stable exterior
-for theta = 0:0.05:1 %position on the orbit
-    manifold_branch_stable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_exterior, theta, t, default, cst);end
+% % Unstable interior
+% for theta = 0:0.05:1 %position on the orbit
+%     manifold_branch_unstable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_interior, theta, t, default, cst);
+% end
+% 
+% % Unstable exterior
+% for theta = 0:0.05:1 %position on the orbit
+%     manifold_branch_unstable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_exterior, theta, t, default, cst);end
+% 
+% % Stable exterior
+% for theta = 0:0.05:1 %position on the orbit
+%     manifold_branch_stable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_exterior, theta, t, default, cst);end
 
 % Stable interior
-for theta = 0:0.05:1 %position on the orbit
+for theta = 0:0.1:1 %position on the orbit
     manifold_branch_stable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_interior, theta, t, default, cst);
 end
-
-
-%% Print
-orbit = halo_orbit_interpolation(cr3bp, orbit, halo_init, default, cst);
-print('manifold_stable_interior.eps', figure(1), '-depsc')
-print('manifold_stable_interior_3d.eps', figure(4), '-depsc')
-
-print('manifold_stable_interior.png', figure(1), '-dpng')
-print('manifold_stable_interior_3d.png', figure(4), '-dpng')
-
 
