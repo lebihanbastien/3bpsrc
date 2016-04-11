@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of arrow3</title>
+  <meta name="keywords" content="arrow3">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">plot</a> &gt; arrow3.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for plot&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>arrow3
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+ 3D arrow.
+ Emilien Fabacher
+ 2015
+
+ Log:
+ 03/2016 Minor modifications for Matlab 2013a compatibility
+--------------------------------------------------------------------------</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="rotation.html" class="code" title="function XYZrot = rotation(XYZ,P)">rotation</a>	--------------------------------------------------------------------------</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="initplot3D.html" class="code" title="function [] = initplot3D(index, cr3bp, params)">initplot3D</a>	--------------------------------------------------------------------------</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%--------------------------------------------------------------------------</span>
+0002 <span class="comment">% 3D arrow.</span>
+0003 <span class="comment">% Emilien Fabacher</span>
+0004 <span class="comment">% 2015</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Log:</span>
+0007 <span class="comment">% 03/2016 Minor modifications for Matlab 2013a compatibility</span>
+0008 <span class="comment">%--------------------------------------------------------------------------</span>
+0009 <a name="_sub0" href="#_subfunctions" class="code">function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)</a>
+0010 
+0011 N = 20;
+0012 t = (0:30/N:360)'/180*pi;
+0013 X = [0; cos(t)];
+0014 Y = [0; sin(t)];
+0015 Z = [1; 0*X(1:end-1)];
+0016 
+0017 
+0018 <span class="comment">% loF = norm(Xi-Xf);</span>
+0019 X = X*laF*loF;
+0020 Y = Y*laF*loF;
+0021 Z = Z*loF-loF;
+0022 
+0023 XYZ = <a href="rotation.html" class="code" title="function XYZrot = rotation(XYZ,P)">rotation</a>([X Y Z],vrrotvec2mat(vrrotvec([0 0 1],Xf-Xi)));
+0024 XYZ = XYZ+ones(size(XYZ,1),1)*(Xf);
+0025 XYZbase = XYZ(2:<span class="keyword">end</span>,:);
+0026 
+0027 vert = [XYZ];
+0028 fac = [ones(1,length(vert)-1); 2:length(vert); 3:length(vert) 2]';
+0029 fac = [fac NaN*ones(size(fac,1),length(vert)-3); 1:length(vert)];
+0030 pointe = patch(<span class="string">'Faces'</span>,fac,<span class="string">'Vertices'</span>,vert,<span class="string">'FaceColor'</span>,col, <span class="string">'FaceAlpha'</span>, 1, <span class="string">'EdgeColor'</span>, col);
+0031 hold on
+0032 
+0033 aux = [Xi; Xf-loF*(Xf-Xi)/norm(Xf-Xi)];
+0034 ligne = plot3(aux(:,1),aux(:,2),aux(:,3),<span class="string">'Color'</span>,col,<span class="string">'LineWidth'</span>,lw);
+0035 
+0036 axis equal</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

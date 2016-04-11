@@ -1,0 +1,325 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of diff_corr_3D_bb</title>
+  <meta name="keywords" content="diff_corr_3D_bb">
+  <meta name="description" content="DIFF_CORR_3D_BB Differential correction to compute 3D periodic orbits of">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">diffcorr</a> &gt; diff_corr_3D_bb.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for diffcorr&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>diff_corr_3D_bb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>DIFF_CORR_3D_BB Differential correction to compute 3D periodic orbits of</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = diff_corr_3D_bb(v0, cr3bp , orbit, xi0, xif, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> DIFF_CORR_3D_BB Differential correction to compute 3D periodic orbits of
+ the CRTBP, symmetric with respect to the xz-plane (halo, vertical lyapunov).
+
+ This routines iteratively correct the initial state v0 via an iterative
+ Newton method. This method is illustrated below with the example of the
+ Halo orbits.
+
+ For Halo orbits, at each step:
+ The free variables are
+       X0 = [x0 vy0]^T 
+ or
+       X0 = [z0 vy0]^T
+
+ The constraint vector is FX = F(X) = [y vx vz]^T. The goal is to
+ satisfy the constraint FX = 0, so as to produce a periodic orbit
+ symmetric with respect to the xz-plane.
+
+ Starting with initial condition Y0 = [x0 y0 z0 vx0 vy0 vz0]^T,
+ the equations of motion of the CRTBP are integrated until the xz-plane is
+ reached.
+ With this choice the first constraint y = 0 is automatically satisfied.
+
+ Then, the Newton's correction dX0 to be applied so as to obtain
+               FXr = [vx vz]^T = 0
+ satisfies the following equation:
+
+ Case (i):
+   FXr                  Af               ppf               Bf        dX0
+ [dvx]  = ( [Phi41  Phi45] - 1/ypoint * [ax] * [Phi21   Phi25] ) * [dx0 ]
+ [dvz]      [Phi61  Phi65]              [az]                       [dvy0]
+
+ Case (ii):
+                      Af                 ppf           Bf
+ [dvx]  = ( [Phi43  Phi45] - 1/ypoint * [ax] * [Phi23   Phi25] ) * [dz0 ]
+ [dvz]      [Phi63  Phi65]              [az]                       [dvy0]
+
+  where Phi is the State Transition Matrix (STM), numerically
+  integrated along with the state.
+
+ This correction is applied iteratively on the initial state until a
+ use-defined precision threshold is reached.
+ The vectors X0 and FXr as well as the equations (i) and (ii)
+ are encoded in the inputs xi0 and xif. Example in case (i):
+           xi0 = [3, 5];  %X0  = [z0 vy0]^T is corrected
+           xif = [4, 6];  %FXr = [vx vz]^T = 0 is targeted
+
+ The vectors X0 and FXr may differ from the ones written here for
+ other types of orbits (e.g. vertical lyapunov orbits).
+
+ At the end of the routine, the following elements are updated:
+ - orbit.y0:         initial conditions.
+ - orbit.T12:        half period.
+ - orbit.T:          period.
+
+ BLB 2016.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function shiftedIndix = findIndix(i0, j0)</a></li><li><a href="#_sub2" class="code">function [] = plotDiffCorr(yv, cr3bp, iter)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function orbit = diff_corr_3D_bb(v0, cr3bp , orbit, xi0, xif, params, cst)</a>
+0002 <span class="comment">% DIFF_CORR_3D_BB Differential correction to compute 3D periodic orbits of</span>
+0003 <span class="comment">% the CRTBP, symmetric with respect to the xz-plane (halo, vertical lyapunov).</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% This routines iteratively correct the initial state v0 via an iterative</span>
+0006 <span class="comment">% Newton method. This method is illustrated below with the example of the</span>
+0007 <span class="comment">% Halo orbits.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">% For Halo orbits, at each step:</span>
+0010 <span class="comment">% The free variables are</span>
+0011 <span class="comment">%       X0 = [x0 vy0]^T</span>
+0012 <span class="comment">% or</span>
+0013 <span class="comment">%       X0 = [z0 vy0]^T</span>
+0014 <span class="comment">%</span>
+0015 <span class="comment">% The constraint vector is FX = F(X) = [y vx vz]^T. The goal is to</span>
+0016 <span class="comment">% satisfy the constraint FX = 0, so as to produce a periodic orbit</span>
+0017 <span class="comment">% symmetric with respect to the xz-plane.</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% Starting with initial condition Y0 = [x0 y0 z0 vx0 vy0 vz0]^T,</span>
+0020 <span class="comment">% the equations of motion of the CRTBP are integrated until the xz-plane is</span>
+0021 <span class="comment">% reached.</span>
+0022 <span class="comment">% With this choice the first constraint y = 0 is automatically satisfied.</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Then, the Newton's correction dX0 to be applied so as to obtain</span>
+0025 <span class="comment">%               FXr = [vx vz]^T = 0</span>
+0026 <span class="comment">% satisfies the following equation:</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">% Case (i):</span>
+0029 <span class="comment">%   FXr                  Af               ppf               Bf        dX0</span>
+0030 <span class="comment">% [dvx]  = ( [Phi41  Phi45] - 1/ypoint * [ax] * [Phi21   Phi25] ) * [dx0 ]</span>
+0031 <span class="comment">% [dvz]      [Phi61  Phi65]              [az]                       [dvy0]</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">% Case (ii):</span>
+0034 <span class="comment">%                      Af                 ppf           Bf</span>
+0035 <span class="comment">% [dvx]  = ( [Phi43  Phi45] - 1/ypoint * [ax] * [Phi23   Phi25] ) * [dz0 ]</span>
+0036 <span class="comment">% [dvz]      [Phi63  Phi65]              [az]                       [dvy0]</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%  where Phi is the State Transition Matrix (STM), numerically</span>
+0039 <span class="comment">%  integrated along with the state.</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">% This correction is applied iteratively on the initial state until a</span>
+0042 <span class="comment">% use-defined precision threshold is reached.</span>
+0043 <span class="comment">% The vectors X0 and FXr as well as the equations (i) and (ii)</span>
+0044 <span class="comment">% are encoded in the inputs xi0 and xif. Example in case (i):</span>
+0045 <span class="comment">%           xi0 = [3, 5];  %X0  = [z0 vy0]^T is corrected</span>
+0046 <span class="comment">%           xif = [4, 6];  %FXr = [vx vz]^T = 0 is targeted</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">% The vectors X0 and FXr may differ from the ones written here for</span>
+0049 <span class="comment">% other types of orbits (e.g. vertical lyapunov orbits).</span>
+0050 <span class="comment">%</span>
+0051 <span class="comment">% At the end of the routine, the following elements are updated:</span>
+0052 <span class="comment">% - orbit.y0:         initial conditions.</span>
+0053 <span class="comment">% - orbit.T12:        half period.</span>
+0054 <span class="comment">% - orbit.T:          period.</span>
+0055 <span class="comment">%</span>
+0056 <span class="comment">% BLB 2016.</span>
+0057 
+0058 <span class="comment">%--------------------------------------------------------------------------</span>
+0059 <span class="comment">%Iteration counts</span>
+0060 <span class="comment">%--------------------------------------------------------------------------</span>
+0061 iter = 0;
+0062 
+0063 <span class="comment">%--------------------------------------------------------------------------</span>
+0064 <span class="comment">%Type of event: reaching the y = 0 plane</span>
+0065 <span class="comment">%--------------------------------------------------------------------------</span>
+0066 options = odeset(<span class="string">'Events'</span>, @odezero_y,<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0067 section = cst.manifold.event.type.Y_SECTION;
+0068 si = 2; <span class="comment">% y = 0 is targeted.</span>
+0069 
+0070 <span class="comment">%Associated event structure for MEX routines</span>
+0071 val_par = init_event(section,<span class="keyword">...</span>
+0072                      0.0,<span class="keyword">...</span>
+0073                      cst.manifold.event.isterminal.YES,<span class="keyword">...</span>
+0074                      cst.manifold.event.direction.ALL,<span class="keyword">...</span><span class="comment"> </span>
+0075                      cr3bp.m1.pos,<span class="keyword">...</span>
+0076                      cst);
+0077                  
+0078         
+0079 <span class="comment">%--------------------------------------------------------------------------</span>
+0080 <span class="comment">% Differential correction loop</span>
+0081 <span class="comment">%--------------------------------------------------------------------------</span>
+0082 <span class="keyword">while</span>(true)
+0083     iter = iter+1;
+0084     
+0085      <span class="keyword">if</span>(iter &gt; 50)
+0086         disp(<span class="string">'WARNING: maximum iterations reached in differential_correction'</span>);
+0087         <span class="keyword">break</span>;
+0088     <span class="keyword">end</span>
+0089     
+0090     <span class="comment">%----------------------------------------------------------------------</span>
+0091     <span class="comment">% Integration stops at y=0</span>
+0092     <span class="comment">%----------------------------------------------------------------------</span>
+0093     <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0094         <span class="comment">%-----------------------------</span>
+0095         <span class="comment">% If MATLAB routines only</span>
+0096         <span class="comment">%-----------------------------</span>
+0097         [~,yv,te,ve,~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 10],v0,options);
+0098     <span class="keyword">else</span>
+0099         <span class="comment">%-----------------------------</span>
+0100         <span class="comment">% If MEX routines are allowed</span>
+0101         <span class="comment">%-----------------------------</span>
+0102         <span class="keyword">if</span>(params.plot.diff_corr == 1)
+0103             [te, ve, ~, yv] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+0104         <span class="keyword">else</span>
+0105             [te, ve] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+0106         <span class="keyword">end</span>
+0107         
+0108     <span class="keyword">end</span>
+0109     
+0110     
+0111     <span class="comment">%----------------------------------------------------------------------</span>
+0112     <span class="comment">% Update the final state: FX = [vx vz]^T.</span>
+0113     <span class="comment">%----------------------------------------------------------------------</span>
+0114     FXr = [ve(xif(1)) ; ve(xif(2))];
+0115  
+0116     <span class="comment">%----------------------------------------------------------------------</span>
+0117     <span class="comment">% Compute the first order correction with Newton's method</span>
+0118     <span class="comment">%----------------------------------------------------------------------</span>
+0119     <span class="comment">% Example, for HALO orbits, and corr_type == cst.corr.Z0_FIXED:</span>
+0120     <span class="comment">%  FXr               Af                   ppf         Bf              dX0</span>
+0121     <span class="comment">% [dvx]  = ( [Phi41  Phi45] - 1/ypoint * [ax] * [Phi21   Phi25] ) * [dx0 ]</span>
+0122     <span class="comment">% [dvz]      [Phi61  Phi65]              [az]                       [dvy0]</span>
+0123     <span class="comment">%</span>
+0124     <span class="comment">%----------------------------------------------------------------------</span>
+0125     <span class="comment">% Example, for HALO orbits, corr_type == cst.corr.X0_FIXED:</span>
+0126     <span class="comment">%  FXr               Af                   ppf         Bf              dX0</span>
+0127     <span class="comment">% [dvx]  = ( [Phi43  Phi45] - 1/ypoint * [ax] * [Phi23   Phi25] ) * [dz0 ]</span>
+0128     <span class="comment">% [dvz]      [Phi63  Phi65]              [az]                       [dvy0]</span>
+0129     <span class="comment">%</span>
+0130     <span class="comment">%----------------------------------------------------------------------</span>
+0131     <span class="comment">% Example, for VLYAP orbits, corr_type == cst.corr.Z0_FIXED:</span>
+0132     <span class="comment">%  FXr               Af                   ppf         Bf              dX0</span>
+0133     <span class="comment">% [dz]   = ( [Phi31  Phi35] - 1/ypoint * [zp]  * [Phi21   Phi25] ) * [dx0 ]</span>
+0134     <span class="comment">% [dvx]      [Phi41  Phi45]              [ax]                        [dvy0]</span>
+0135     <span class="comment">%</span>
+0136     <span class="comment">%----------------------------------------------------------------------</span>
+0137     <span class="comment">% Example, for VLYAP orbits, corr_type == cst.corr.X0_FIXED:</span>
+0138     <span class="comment">%  FXr               Af                   ppf         Bf              X0</span>
+0139     <span class="comment">% [dz]   = ( [Phi33  Phi35] - 1/ypoint * [zp]  * [Phi23   Phi25] ) * [dz0 ]</span>
+0140     <span class="comment">% [dvx]      [Phi43  Phi45]              [ax]                        [dvy0]</span>
+0141     <span class="comment">%----------------------------------------------------------------------</span>
+0142     <span class="comment">%Af matrix</span>
+0143     Af = zeros(2);
+0144     <span class="keyword">for</span> i0 = 1:2
+0145        <span class="keyword">for</span> j0 = 1:2 
+0146             Af(i0,j0) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(xif(i0), xi0(j0)));
+0147        <span class="keyword">end</span>
+0148     <span class="keyword">end</span>
+0149     <span class="comment">% Bf matrix</span>
+0150     Bf = (1:2);
+0151     Bf(1) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(si,xi0(1)));
+0152     Bf(2) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(si,xi0(2)));
+0153     
+0154     <span class="comment">%Derivative of ve at y=0 (t = te)</span>
+0155     vep = cr3bp_derivatives_6(te, ve, cr3bp.mu);
+0156        
+0157     <span class="comment">%ppf vector</span>
+0158     ppf = (1:2)';
+0159     ppf(1) = vep(xif(1))/ve(si+3);
+0160     ppf(2) = vep(xif(2))/ve(si+3);
+0161     
+0162     <span class="comment">%New Af</span>
+0163     Af = Af - ppf*Bf;
+0164 
+0165     <span class="comment">%Stops if precision is good enough</span>
+0166     <span class="keyword">if</span>(norm(FXr) &lt; params.diff_corr.precision);
+0167         
+0168         <span class="keyword">break</span>;
+0169     <span class="keyword">end</span>
+0170     
+0171     <span class="comment">%----------------------------------------------------------------------</span>
+0172     <span class="comment">% The first order correction is computed as dX0 = inv(Af)*FXr</span>
+0173     <span class="comment">%----------------------------------------------------------------------</span>
+0174     dX0 = Af \ FXr;
+0175     
+0176     <span class="comment">%----------------------------------------------------------------------</span>
+0177     <span class="comment">%Updating initial state</span>
+0178     <span class="comment">%----------------------------------------------------------------------</span>
+0179     v0(xi0(1)) = v0(xi0(1)) - dX0(1);
+0180     v0(xi0(2)) = v0(xi0(2)) - dX0(2);   
+0181     
+0182     
+0183     <span class="comment">%----------------------------------------------------------------------</span>
+0184     <span class="comment">% Plotting (potentially)</span>
+0185     <span class="comment">%----------------------------------------------------------------------</span>
+0186     <span class="keyword">if</span>(params.plot.diff_corr == 1)
+0187         <a href="#_sub2" class="code" title="subfunction [] = plotDiffCorr(yv, cr3bp, iter)">plotDiffCorr</a>(yv, cr3bp, iter);
+0188     <span class="keyword">end</span>
+0189    
+0190 <span class="keyword">end</span>
+0191 
+0192 <span class="comment">%Orbit update</span>
+0193 orbit.y0  = v0;
+0194 orbit.T12 = te;   <span class="comment">%1/2 period</span>
+0195 orbit.T   = 2*te; <span class="comment">%period</span>
+0196 
+0197 <span class="keyword">end</span>
+0198 
+0199 <span class="comment">%--------------------------------------------------------------------------</span>
+0200 <span class="comment">% Return the right indix to find Phi(i0, j0) in ve</span>
+0201 <span class="comment">%--------------------------------------------------------------------------</span>
+0202 <a name="_sub1" href="#_subfunctions" class="code">function shiftedIndix = findIndix(i0, j0)</a>
+0203     shiftedIndix = 6 + 6*(i0-1)+j0;
+0204 <span class="keyword">end</span>
+0205 
+0206 <span class="comment">%--------------------------------------------------------------------------</span>
+0207 <span class="comment">% Plotting the iterations</span>
+0208 <span class="comment">%--------------------------------------------------------------------------</span>
+0209 <a name="_sub2" href="#_subfunctions" class="code">function [] = plotDiffCorr(yv, cr3bp, iter)</a>
+0210     figure(1)
+0211     <span class="keyword">if</span>(iter==1)
+0212         plot(yv(:,1)*cr3bp.L,yv(:,2)*cr3bp.L, <span class="string">'g'</span>);
+0213     <span class="keyword">else</span>
+0214         plot(yv(:,1)*cr3bp.L,yv(:,2)*cr3bp.L, <span class="string">'r'</span>);
+0215     <span class="keyword">end</span>
+0216     hold on
+0217     xlabel(<span class="string">'X (km)'</span>)
+0218     ylabel(<span class="string">'Y (km)'</span>)
+0219     axis equal
+0220     grid on
+0221     title(<span class="string">'Halo orbit in X-Y plane'</span>);
+0222 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

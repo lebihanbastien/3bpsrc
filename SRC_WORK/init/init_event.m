@@ -1,5 +1,5 @@
-%-------------------------------------------------------------------------%
-% Initializes an event structure, with the following structure:
+function [ event ] = init_event(type, value, isterminal, direction, center, cst)
+% INIT_EVENT initializes an event structure, with the following structure:
 %
 %   1. event.type:  the type of event (X_SECTION, ANGLE_SECTION...)
 %   2. event.value: the associated value (example: X0 for the plane X = X0)
@@ -13,12 +13,10 @@
 %   events can be used to terminate the integration. This field is used in
 %   place of event.isterminal to check wether the integration must be
 %   stopped.
-%       
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-function [ event ] = init_event(type, value, isterminal, direction, center, cst)
+%
+%  See also EVENT
+%
+%  BLB 2015
 
 %Event type during integration
 event.type = type;
@@ -45,5 +43,6 @@ event.direction = direction;
 event.center = center;
 %maximum number of events (only for mex integration)
 event.max_events = 1;
+
 end
 

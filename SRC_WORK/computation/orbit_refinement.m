@@ -1,230 +1,210 @@
-%-------------------------------------------------------------------------%
-% orbit_refinement(cr3bp, orbit, params, cst)
+function orbit = orbit_refinement(cr3bp, orbit, params, yvg, cst, varargin)
+% ORBIT_REFINEMENT computation of halo, vertical, and planar lyapunov 
+% symmetric periodic orbits in the CRTBP, from an initial guess.
 %
-% Computation of the initial conditions orbit.y0 and various orbital 
-% parameters from a given guess yv_guess
+% ORBIT = ORBIT_REFINEMENT(CR3BP, ORBIT, PARAMS, YVG, CST) computes an 
+% orbit in the system CR3BP, with the desired characteristics
+% listed in the structure ORBIT (size or energy, lagrange point), and from
+% an first guess of initial condition YVG.
+% A differential correction process is applied to get a real periodic 
+% orbit.
+% Finally, a post process routine is applied in order to compute various
+% characteristics of the orbit, listed below. Depending on the user-defined
+% parameter structure PARAMS, the result can be plotted at the end of the
+% routine.
 %
-% The routine makes use of a differential corrector adapted to three types
-% of orbits: halo, planar lyapunov and vertical lyapunov. As for all
-% differential correctors, the convergence strongly depends on the quality
-% of the supplied first guess.
-%-------------------------------------------------------------------------%
-% Inputs:
-% 1. cr3bp the structure containing the parent CR3BP
-% 2. orbit the structure containing the orbit to update
-% 3. params the structure containing the computation parameters
-% 4. yv_guess the initial guess
-% 5. cst the structure containing the numerical constants
+% See Koon et al. 2006, chapter 6, for details <a href="matlab: 
+% web('http://www.cds.caltech.edu/~marsden/volume/missiondesign/KoLoMaRo_DMissionBook_2011-04-25.pdf','-browser')">(link)</a>.
 %
-% Outputs:
-% 1. the udpated structure orbit
+% ORBIT = ORBIT_REFINEMENT(CR3BP, ORBIT, PARAMS, YVG, CST, DIFFCORR)
+% computes the orbit with a specific type differential correction procedure
+% defined by the integer constant DIFFCORR. The values allowed for DIFFCORR
+% are listed in the field CST.CORR. The value DIFFCORR overwrite the
+% default differential corrector defined in the PARAMS structure.
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-function orbit = orbit_refinement(cr3bp, orbit, params, yv_guess, cst, varargin)
-               
+% At the end of this routine, the following parameters are updated in the
+% orbit structure:
+%
+%   - ORBIT.y0:  the initial conditions.
+%   - ORBIT.T12: the half period.
+%   - ORBIT.T:   the full period.
+%   - Either the couple (Az, Azdim) - vertical extension for halo and
+%   vertical orbits, or the couple (Ax, Axdim), maximum planar extension
+%   for planar lyapunov orbits.
+%   - ORBIT.C: the jacobian constant
+%   - ORBIT.E: the energy
+%   - ORBIT.yv: the state along the orbit on a given grid over the interval
+%   [0, orbit.T].
+%   - ORBIT.monodromy: the monodromy matrix.
+%   - ORBIT.eigenvalues: the eigenvalues of the monodromy matrix in vector
+%   form.
+%   - ORBIT.stable_direction: the stable eigenvector of the monodromy
+%   matrix.
+%   - ORBIT.unstable_direction: the unstable eigenvector of the monodromy
+%   matrix.
+%
+% BLB 2016
+
+%--------------------------------------------------------------------------
+% Switch on the number of inputs:
+% The type of the differential corrector used by this routine can be
+% user-defined in the variable-size input varargin. If varargin = {} (no
+% additionnal input is provided), the routine makes use of the default
+% corrector type in the params structure.
+%--------------------------------------------------------------------------
+switch(nargin)
+    case 5 %no type of differential corrector is provided, the default one is used (in the params structrure).
+        diffcorr = params.diff_corr.type;
+    case 6 %a differential corrector was provided by the user.
+        diffcorr = varargin{1};
+    otherwise
+        error('Wrong number of inputs.');
+end
+
+%--------------------------------------------------------------------------
+% Initialisation of the initial conditions.
+%--------------------------------------------------------------------------
 % Integration vector
 yv0 = (1:42)';
-
 % 6-dim state
-yv0(1:6) = yv_guess(1:6);   
-
-%STM concatenation after the 6-dim state
+yv0(1:6) = yvg(1:6);
+% STM concatenation after the 6-dim state
 yv0 = matrixToVector(yv0, cst.orbit.STM0, 6, 6, 6);
 
-%First guess (output if no diff correction)
-orbit.y0 = yv0;
-
-%-------------------------------------------------------------------------%
-% Change of differential correction procedure if necessary
-% Base on heuristics on the Earth-Moon problem, not very robust!
-%-------------------------------------------------------------------------%
-if(isequal(orbit.type, cst.orbit.type.HALO) || isequal(orbit.type,cst.orbit.type.VLYAP))
-    if(isfield(orbit, 'Az_estimate') == 1 && orbit.Az_estimate > 0.0520 && params.diff_corr.type ~= cst.corr.X0_FIXED)
-        params.diff_corr.type = cst.corr.X0_FIXED;
-        %disp('WARNING: the differential correction type has been changed because the desired Az is big (see params)');
-    end
-end
-
-%-------------------------------------------------------------------------%
-% Differential correction. Two steps:
-% 
-%   1. Select the dimensions of the differential correction procedure (dcp):
-%       - The elements of the initial conditions (x0, y0...) that will be
-%       modified. The corresponding indices are stored in xi0
-%       - The elements of the final state (xf, yf, ...) that are targeted.
-%       The corresponding indices are stored in xif.
-%       - The section si = 0 (usually y = 0), on which the integration will
-%       be stopped.
-%
-%   2. Perform the dcp.
-%-------------------------------------------------------------------------%
-%Switch between orbit types
+%--------------------------------------------------------------------------
+% Differential correction procedure (DCP). At the end of this procedure,
+% the following elements (at least) are updated in the orbit structure:
+%   - orbit.y0:         initial conditions.
+%   - orbit.T12:        half period.
+%   - orbit.T:          period.
+%--------------------------------------------------------------------------
+%Switch between orbit types (Halo, Vertical, Lyapunov)
 switch(orbit.type)
     case cst.orbit.type.HALO
-       
         %---------------------------------------------
-        % Select the dimensions of the dcp
+        % Select the type of differential corrector procedure (DCP)
         %---------------------------------------------
-        if(isequal(params.diff_corr.type, cst.corr.X0_FIXED))
-            xi0 = [3, 5];  %(z0, vy0) are corrected
-        elseif(isequal(params.diff_corr.type, cst.corr.Z0_FIXED))
-            xi0 = [1, 5];  %(x0, vy0) are corrected
-        else
-            disp('orbit_refinement. Wrong type of differential correction for Halo orbits. return.');
+        switch(diffcorr)
+            case cst.corr.MIN_NORM
+                %---------------------------------------------
+                % In this case a 4-dimensionnal DCP is selected. The free
+                % variables are X0 = [x0 z0 vy0 T12]^T
+                %---------------------------------------------
+                orbit = diff_corr_3D_full(yv0, cr3bp , orbit, params, cst);
+                
+            case {cst.corr.X0_FIXED, cst.corr.Z0_FIXED}
+                %----------------------------------------------------------
+                % Warning if the DCP type is wrong for big orbits.
+                % If no DCP type was provided by the user (varargin = {}),
+                % then the right corrector type is forced. If the DCP type
+                % was directly user-provided varargin, we consider that the
+                % user knows what he's doing, and a simple warning is sent.
+                % The definition of 'big orbits' is loosesly based on
+                % results from the Earth-Moon system.
+                %----------------------------------------------------------
+                if(isfield(orbit, 'Az_estimate') && orbit.Az_estimate > 0.0520 && diffcorr ~= cst.corr.X0_FIXED)
+                    switch(nargin)
+                        case 5 %no type of differential corrector is provided, the default one is used (in the params structrure).
+                            diffcorr = cst.corr.X0_FIXED;
+                        case 6 %a differential corrector was provided by the user.
+                            warning(['You are trying to compute a big halo orbit. '...
+                                'For these orbits, the differential corrector of type '...
+                                'cst.corr.X0_FIXED is preferable.']);
+                    end
+                end
+                
+                %----------------------------------------------------------
+                % In this case, a simple 3-dimensional DCP is selected. One
+                % dimension is fixed (either x0 or z0), and the free
+                % variables are either x0 or z0, and vy0.
+                %----------------------------------------------------------
+                % 1. The right dimensions are selected
+                if(isequal(diffcorr, cst.corr.X0_FIXED))
+                    xi0 = [3, 5];  %(z0, vy0) are corrected
+                elseif(isequal(diffcorr, cst.corr.Z0_FIXED))
+                    xi0 = [1, 5];  %(x0, vy0) are corrected
+                end
+                xif = [4, 6]; %(vx, vz) = 0 is targeted
+                
+                % 2. Perform the DCP
+                orbit = diff_corr_3D_bb(yv0, cr3bp , orbit, xi0, xif, params, cst);
+            otherwise
+                error('Unknown differential corrector type.');
         end
-        xif = [4, 6]; %(vx0, vz0) = 0 is targeted
-        si = 2; %the termination section is y = 0
-        
-        %---------------------------------------------
-        % Perform the dcp
-        %---------------------------------------------
-        orbit = diff_corr_3D(orbit.y0, cr3bp , orbit, xi0, xif, si, params, cst);
-        
-        %---------------------------------------------
-        % Old version
-        %---------------------------------------------
-        %orbit = diff_corr_HALO(orbit.y0, cr3bp, orbit, params, cst);
         
     case cst.orbit.type.VLYAP
-        %---------------------------------------------
-        % Select the dimensions of the dcp
-        %---------------------------------------------
-        if(isequal(params.diff_corr.type, cst.corr.X0_FIXED))
-            xi0 = [3, 5];  %(z0, vy0) are corrected
-        elseif(isequal(params.diff_corr.type, cst.corr.Z0_FIXED))
-            xi0 = [1, 5];  %(x0, vy0) are corrected
-        else
-            disp('orbit_refinement. Wrong type of differential correction for Halo orbits. return.');
+        %------------------------------------------------------------------
+        % Select the type of differential corrector procedure (DCP)
+        %------------------------------------------------------------------
+        switch(diffcorr)
+            case cst.corr.MIN_NORM
+                %----------------------------------------------------------
+                % In this case a 4-dimensionnal DCP is selected. The free
+                % variables are X0 = [x0 z0 vy0 T12]^T
+                %----------------------------------------------------------
+                orbit = diff_corr_3D_full(yv0, cr3bp , orbit, params, cst);
+                
+            case {cst.corr.X0_FIXED, cst.corr.Z0_FIXED}
+                %----------------------------------------------------------
+                % In this case, a simple 3-dimensional DCP is selected. One
+                % dimension is fixed (either x0 or z0), and the free
+                % variables are either x0 or z0, and vy0.
+                %----------------------------------------------------------
+                % 1. The right dimensions are selected
+                if(isequal(diffcorr, cst.corr.X0_FIXED))
+                    xi0 = [3, 5];  %(z0, vy0) are corrected
+                elseif(isequal(diffcorr, cst.corr.Z0_FIXED))
+                    xi0 = [1, 5];  %(x0, vy0) are corrected
+                end
+                xif = [3, 4]; %(z, vx) = 0 is targeted
+                
+                % 2. Perform the DCP
+                orbit = diff_corr_3D_bb(yv0, cr3bp , orbit, xi0, xif, params, cst);
+            otherwise
+                error('Unknown differential corrector type.');
         end
-        xif = [3, 4]; %(z0, vx0) = 0 is targeted
-        si = 2;       %the termination section is y = 0
-        
-        %---------------------------------------------
-        % Perform the dcp
-        %---------------------------------------------
-        orbit = diff_corr_3D(orbit.y0, cr3bp , orbit, xi0, xif, si, params, cst);
-        
-        %---------------------------------------------
-        % Old version
-        %---------------------------------------------
-        %orbit = diff_corr_VLYAP(orbit.y0, cr3bp, orbit, params, cst);
-        
         
     case cst.orbit.type.PLYAP
-        orbit = diff_corr_2D(orbit.y0, cr3bp, orbit, params, cst);
+        %------------------------------------------------------------------
+        % In this case, a simple 2-dimensional DCP is selected. The free
+        % variables are x0 and vy0.
+        %------------------------------------------------------------------
+        orbit = diff_corr_2D(yv0, cr3bp, orbit, params, cst);
 end
 
 
-%-------------------------------------------------------------------------%
-% Period
-%-------------------------------------------------------------------------%
-if(params.computation.type == cst.computation.MATLAB)
-    %-----------------------------
-    % If MATLAB routines only
-    %-----------------------------
-    options = odeset('Events',@odezero_y,'Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);
-    [~,~,te, yve] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),[0 10],orbit.y0(1:6),options);
-else
-    %-----------------------------
-    % If MEX routines are allowed
-    %-----------------------------
-    %Event structure, for y = 0 section
-    val_par = init_event(cst.manifold.event.type.Y_SECTION,...
-        0.0,...
-        cst.manifold.event.isterminal.YES,...
-        cst.manifold.event.direction.ALL,...
-        cr3bp.m1.pos,...
-        cst);
-    %Integration over one 1/2 orbit
-    [te, yve] = ode78_cr3bp_event(0.0, 10, orbit.y0(1:6), 6, cr3bp.mu, val_par);
-end
 
-%Switch between orbit types for 1/2 period
-switch(orbit.type)
-    case {cst.orbit.type.HALO, cst.orbit.type.PLYAP}
-        orbit.T12 = te(end);   %1/2 period
-    case cst.orbit.type.VLYAP
-        orbit.T12 = 2*te(end); %1/2 period
-end
-orbit.T = 2*orbit.T12; %period
-
-%-------------------------------------------------------------------------%
-% True Az/Ax
-%-------------------------------------------------------------------------%
-switch(orbit.type)
-    case {cst.orbit.type.HALO, cst.orbit.type.VLYAP}
-        orbit.Az    = max(abs(yve(3)), abs(yv0(3)));
-        orbit.Azdim = orbit.Az*cr3bp.L;
-    case cst.orbit.type.PLYAP
-        orbit.Ax    = max(abs(yve(1)), abs(yv0(1)));
-        orbit.Axdim = orbit.Ax*cr3bp.L;
-end
-
-
-%-------------------------------------------------------------------------%
-% Energy
-%-------------------------------------------------------------------------%
-orbit.C = jacobi(orbit.y0, cr3bp.mu);  %jacobi constant
-orbit.E = -0.5*orbit.C;                %energy
-
-%-------------------------------------------------------------------------%
-% Linear algebra (monodromy matrix, etc)
-%-------------------------------------------------------------------------%
-%Integration over one orbit (42 variables: state + STM)
-if(params.computation.type == cst.computation.MATLAB)
-    %-----------------------------
-    % If MATLAB routines only
-    %-----------------------------
-    options = odeset('Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);
-    [~,yv] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T],orbit.y0, options);
-    yf = yv(end,:);
-else
-    %-----------------------------
-    % If MEX routines are allowed
-    %-----------------------------
-    if(params.plot.orbit == cst.TRUE)
-        [~, yf, ~, yv] = ode78_cr3bp(0.0, orbit.T, orbit.y0, 42, cr3bp.mu);
-    else
-        [~, yf] = ode78_cr3bp(0.0, orbit.T, orbit.y0, 42, cr3bp.mu);
-    end
-end
-
-%Monodromy matrix
-orbit.monodromy = eye(6);
-for i = 1 : 6
-    for j = 1 : 6
-        m = 6*(i-1) + j;
-        orbit.monodromy(i,j) = yf(m+6);
-    end
-end
-
-%Eigen
-[V,E] = eig(orbit.monodromy);
-
-%Eigenvalures
-for i = 1:6
-    orbit.eigenvalues(i) = E(i,i);
-end
-
-%Stable and unstable direction (linear approx of the manifolds)
-[~, posEigen] = min(orbit.eigenvalues);
-orbit.stable_direction = V(:,posEigen);
-[~, posEigen] = max(orbit.eigenvalues);
-orbit.unstable_direction = V(:,posEigen);
-
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 % Status
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 orbit.status = cst.orbit.REAL;
 
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
+% Postprocess. After this step, the following elements are updated in the
+% orbit structure:
+%
+%   - Either the couple (Az, Azdim) - vertical extension for halo and
+%   vertical orbits, or the couple (Ax, Axdim), maximum planar extension
+%   for planar lyapunov orbits.
+%   - orbit.C: the jacobian constant
+%   - orbit.E: the energy
+%   - orbit.yv: the state along the orbit on a given grid over the interval
+%   [0, orbit.T].
+%   - orbit.monodromy: the monodromy matrix.
+%   - orbit.eigenvalues: the eigenvalues of the monodromy matrix in vector
+%   form.
+%   - orbit.stable_direction: the stable eigenvector of the monodromy
+%   matrix.
+%   - orbit.unstable_direction: the unstable eigenvector of the monodromy
+%   matrix.
+%--------------------------------------------------------------------------
+orbit = orbit_postprocess(cr3bp, orbit, params, cst);
+
+%--------------------------------------------------------------------------
 % Plotting (potentially)
-%-------------------------------------------------------------------------%
-if(params.plot.orbit == 1) %plotting 
-    orbit_plot(yv, orbit, params, cst);
+%--------------------------------------------------------------------------
+if(params.plot.orbit) %plotting
+    orbit_plot(orbit, params);
 end
-    
+
 end

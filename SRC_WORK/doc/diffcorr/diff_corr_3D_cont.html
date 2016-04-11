@@ -1,0 +1,353 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of diff_corr_3D_cont</title>
+  <meta name="keywords" content="diff_corr_3D_cont">
+  <meta name="description" content="DIFF_CORR_3D_CONT Differential correction to compute for 3D periodic">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">diffcorr</a> &gt; diff_corr_3D_cont.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for diffcorr&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>diff_corr_3D_cont
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>DIFF_CORR_3D_CONT Differential correction to compute for 3D periodic</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = diff_corr_3D_cont(v0, T12, cr3bp , orbit, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> DIFF_CORR_3D_CONT Differential correction to compute for 3D periodic 
+ orbits of the CRTBP, symmetric with respect to the xz-plane (halo, 
+ vertical). This version include a pseudo-arclength continuation module.
+
+ This differential corrector is heavily based on the summary by Pavlak in
+ his PhD thesis (2013), although the basic principles are much older than
+ his work, and is best summarized in most of Doedel et al. papers (2003,
+ 2007).
+
+ This routines iteratively correct the initial state v0 via an iterative
+ Newton method, with an additional pseudo-arclength constraint.
+ The free variables X0 are:
+       X0 = [x0 z0 vy0 T12]^T, with vy0 = dot(y0), T12 = half period.
+
+ The initial targeted constraint is FX = F(X) = [y vx vz]^T = 0.
+ 
+ Suppose that we know the solution (X0i, DX0i) from a previous iteration
+ of this routine: X0i is the corrected state, and DX0i is the null vector
+ of the Jacobian matrix DFX = dF(X)/dX0. Then the pseudo-arclength
+ constraint is addedto the existing constraint vector FX. This constraint
+ is written as:
+       (X0 - X0i)^T * DX0i - ds = 0, 
+  where ds is the arclength stepsize (user-defined in orbit.cont.ds). 
+
+ Then the constraint is augmented in the form of:
+
+   GX = G(X) = |           F(X)           | = 0
+               | (X0 - X0i)^T * DX0i - ds |
+
+ The Jacobian associated to this constraint vector is:
+
+   DGX = | DFX    |
+         | DX0i^T |
+
+  with still:
+
+   DFX = | Phi21   Phi23  Phi25  vy |
+          | Phi41   Phi43  Phi45  ax |
+         | Phi61   Phi63  Phi65  az |
+
+  with vy = dot(y), ax = dot(vx) = dot(dot(x)), same for az.
+  and where Phi is the State Transition Matrix (STM), numerically
+  integrated along with the state.
+
+  Then, the correction dX0 to be applied to X0 satisfies the following equation:
+           dX0 = inv(DGX)*GX
+
+ At the end of the routine, the following elements are updated:
+ - orbit.y0:         initial conditions.
+ - orbit.T12:        half period.
+ - orbit.T:          period.
+ - orbit.cont.gv:    final vector of free variables for a potential continuation procedure.
+ - orbit.cont.nv:    null vector of the Jacobian for a potential continuation procedure.
+ - orbit.C:          jacobi constant
+ - orbit.E:          energy constant
+ - orbit.cont.iter:  number of iterations in the differential corrector
+ process (can monitored outside of this routine, e.g. in order to adapt
+ the stepsize orbit.cont.ds.
+
+ Important remark: the null vector orbit.cont.nv is forced to be in the
+ same direction as its previous instance (positive dot product). This
+ allows to avoid U-turn in the family, because of a change of sign in the
+ routine NULL of MATLAB.
+
+ BLB 2016.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function shiftedIndix = findIndix(i0, j0)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function orbit = diff_corr_3D_cont(v0, T12, cr3bp , orbit, params, cst)</a>
+0002 <span class="comment">% DIFF_CORR_3D_CONT Differential correction to compute for 3D periodic</span>
+0003 <span class="comment">% orbits of the CRTBP, symmetric with respect to the xz-plane (halo,</span>
+0004 <span class="comment">% vertical). This version include a pseudo-arclength continuation module.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% This differential corrector is heavily based on the summary by Pavlak in</span>
+0007 <span class="comment">% his PhD thesis (2013), although the basic principles are much older than</span>
+0008 <span class="comment">% his work, and is best summarized in most of Doedel et al. papers (2003,</span>
+0009 <span class="comment">% 2007).</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% This routines iteratively correct the initial state v0 via an iterative</span>
+0012 <span class="comment">% Newton method, with an additional pseudo-arclength constraint.</span>
+0013 <span class="comment">% The free variables X0 are:</span>
+0014 <span class="comment">%       X0 = [x0 z0 vy0 T12]^T, with vy0 = dot(y0), T12 = half period.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% The initial targeted constraint is FX = F(X) = [y vx vz]^T = 0.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Suppose that we know the solution (X0i, DX0i) from a previous iteration</span>
+0019 <span class="comment">% of this routine: X0i is the corrected state, and DX0i is the null vector</span>
+0020 <span class="comment">% of the Jacobian matrix DFX = dF(X)/dX0. Then the pseudo-arclength</span>
+0021 <span class="comment">% constraint is addedto the existing constraint vector FX. This constraint</span>
+0022 <span class="comment">% is written as:</span>
+0023 <span class="comment">%       (X0 - X0i)^T * DX0i - ds = 0,</span>
+0024 <span class="comment">%  where ds is the arclength stepsize (user-defined in orbit.cont.ds).</span>
+0025 <span class="comment">%</span>
+0026 <span class="comment">% Then the constraint is augmented in the form of:</span>
+0027 <span class="comment">%</span>
+0028 <span class="comment">%   GX = G(X) = |           F(X)           | = 0</span>
+0029 <span class="comment">%               | (X0 - X0i)^T * DX0i - ds |</span>
+0030 <span class="comment">%</span>
+0031 <span class="comment">% The Jacobian associated to this constraint vector is:</span>
+0032 <span class="comment">%</span>
+0033 <span class="comment">%   DGX = | DFX    |</span>
+0034 <span class="comment">%         | DX0i^T |</span>
+0035 <span class="comment">%</span>
+0036 <span class="comment">%  with still:</span>
+0037 <span class="comment">%</span>
+0038 <span class="comment">%   DFX = | Phi21   Phi23  Phi25  vy |</span>
+0039 <span class="comment">%          | Phi41   Phi43  Phi45  ax |</span>
+0040 <span class="comment">%         | Phi61   Phi63  Phi65  az |</span>
+0041 <span class="comment">%</span>
+0042 <span class="comment">%  with vy = dot(y), ax = dot(vx) = dot(dot(x)), same for az.</span>
+0043 <span class="comment">%  and where Phi is the State Transition Matrix (STM), numerically</span>
+0044 <span class="comment">%  integrated along with the state.</span>
+0045 <span class="comment">%</span>
+0046 <span class="comment">%  Then, the correction dX0 to be applied to X0 satisfies the following equation:</span>
+0047 <span class="comment">%           dX0 = inv(DGX)*GX</span>
+0048 <span class="comment">%</span>
+0049 <span class="comment">% At the end of the routine, the following elements are updated:</span>
+0050 <span class="comment">% - orbit.y0:         initial conditions.</span>
+0051 <span class="comment">% - orbit.T12:        half period.</span>
+0052 <span class="comment">% - orbit.T:          period.</span>
+0053 <span class="comment">% - orbit.cont.gv:    final vector of free variables for a potential continuation procedure.</span>
+0054 <span class="comment">% - orbit.cont.nv:    null vector of the Jacobian for a potential continuation procedure.</span>
+0055 <span class="comment">% - orbit.C:          jacobi constant</span>
+0056 <span class="comment">% - orbit.E:          energy constant</span>
+0057 <span class="comment">% - orbit.cont.iter:  number of iterations in the differential corrector</span>
+0058 <span class="comment">% process (can monitored outside of this routine, e.g. in order to adapt</span>
+0059 <span class="comment">% the stepsize orbit.cont.ds.</span>
+0060 <span class="comment">%</span>
+0061 <span class="comment">% Important remark: the null vector orbit.cont.nv is forced to be in the</span>
+0062 <span class="comment">% same direction as its previous instance (positive dot product). This</span>
+0063 <span class="comment">% allows to avoid U-turn in the family, because of a change of sign in the</span>
+0064 <span class="comment">% routine NULL of MATLAB.</span>
+0065 <span class="comment">%</span>
+0066 <span class="comment">% BLB 2016.</span>
+0067 
+0068 <span class="comment">%--------------------------------------------------------------------------</span>
+0069 <span class="comment">%Iteration counts</span>
+0070 <span class="comment">%--------------------------------------------------------------------------</span>
+0071 iter = 0;
+0072 
+0073 <span class="comment">%--------------------------------------------------------------------------</span>
+0074 <span class="comment">% Update the MATLAB ode options</span>
+0075 <span class="comment">%--------------------------------------------------------------------------</span>
+0076 <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0077     options = odeset(<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0078 <span class="keyword">end</span>
+0079 
+0080 <span class="comment">%--------------------------------------------------------------------------</span>
+0081 <span class="comment">%Diff corr loop</span>
+0082 <span class="comment">%--------------------------------------------------------------------------</span>
+0083 <span class="keyword">while</span>(true)
+0084     iter = iter+1;
+0085     
+0086     <span class="comment">%----------------------------------------------------------------------</span>
+0087     <span class="comment">%Stops if too much iterations</span>
+0088     <span class="comment">%----------------------------------------------------------------------</span>
+0089     <span class="keyword">if</span>(iter &gt; 50)
+0090         disp(<span class="string">'WARNING: maximum iterations reached in differential_correction'</span>);
+0091         <span class="keyword">break</span>;
+0092     <span class="keyword">end</span>
+0093     
+0094     <span class="comment">%----------------------------------------------------------------------</span>
+0095     <span class="comment">% Update the initial vector: X0 = [x0 z0 vy0 T12]^T</span>
+0096     <span class="comment">%----------------------------------------------------------------------</span>
+0097     X0    = [v0(1) ; v0(3) ; v0(5); T12];
+0098     
+0099     <span class="comment">%----------------------------------------------------------------------</span>
+0100     <span class="comment">% Integration stops at t = T12</span>
+0101     <span class="comment">%----------------------------------------------------------------------</span>
+0102     <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0103         <span class="comment">%-----------------------------</span>
+0104         <span class="comment">% If MATLAB routines only</span>
+0105         <span class="comment">%-----------------------------</span>
+0106         [t,yv] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 T12],v0,options);
+0107         <span class="comment">% Update final state</span>
+0108         te = t(end);
+0109         ve = yv(<span class="keyword">end</span>,:);
+0110     <span class="keyword">else</span>
+0111         <span class="comment">%-----------------------------</span>
+0112         <span class="comment">% If MEX routines are allowed</span>
+0113         <span class="comment">%-----------------------------</span>
+0114         [te, ve] = ode78_cr3bp(0.0, T12, v0, 42, cr3bp.mu);
+0115     <span class="keyword">end</span>
+0116     
+0117     <span class="comment">%----------------------------------------------------------------------</span>
+0118     <span class="comment">% Update the final vector: GX = [y vx vz (X0 - X0i)^T DX0i - ds]^T.</span>
+0119     <span class="comment">% The last component is the pseudo-arclength constraint.</span>
+0120     <span class="comment">%----------------------------------------------------------------------</span>
+0121     GX     = [ve(2) ; ve(4) ; ve(6)];
+0122     GX(4)  = (X0 - orbit.cont.gv)'*orbit.cont.nv - orbit.cont.ds;
+0123     
+0124     <span class="comment">%----------------------------------------------------------------------</span>
+0125     <span class="comment">% Compute the first order correction with Newton's method:</span>
+0126     <span class="comment">% Targeting the constraint GX = G(X) = 0, with the free variables X0,</span>
+0127     <span class="comment">% The correction dX0 to applied to these variables satisfies the</span>
+0128     <span class="comment">% equation:</span>
+0129     <span class="comment">%           GX = DGX*dX0</span>
+0130     <span class="comment">% With DGX the matrix defined as the Jacobian:</span>
+0131     <span class="comment">%           DGX = dG(X)/dX0</span>
+0132     <span class="comment">% In our case, the free variables are:</span>
+0133     <span class="comment">%           X0 = [x0 z0 vy0 T12]^T</span>
+0134     <span class="comment">%----------------------------------------------------------------------</span>
+0135     <span class="comment">% Build the Jacobian DFX = dF(X)/dX0, with X0 = [x0, z0, vy0 T12]^T</span>
+0136     <span class="comment">%</span>
+0137     <span class="comment">%   DGX = | Phi21   Phi23  Phi25  vy |</span>
+0138     <span class="comment">%          | Phi41   Phi43  Phi45  ax |</span>
+0139     <span class="comment">%         | Phi61   Phi63  Phi65  az |</span>
+0140     <span class="comment">%         |           DX0i^T         |</span>
+0141     <span class="comment">%</span>
+0142     <span class="comment">%   with vy = dot(y), ax = dot(vx) = dot(dot(x)), same for az.</span>
+0143     <span class="comment">%   and where Phi is the State Transition Matrix (STM).</span>
+0144     <span class="comment">%   finally, DX0i is the null vector of DGX(1:3,:) computed from the</span>
+0145     <span class="comment">%   previous step of the continuation procedure.</span>
+0146     <span class="comment">%----------------------------------------------------------------------</span>
+0147     <span class="comment">% Build the Jacobian</span>
+0148     DGX = zeros(4,4);
+0149     
+0150     <span class="comment">% Concatenate the elements of the STM</span>
+0151     DGX(1,1) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(2,1));
+0152     DGX(1,2) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(2,3));
+0153     DGX(1,3) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(2,5));
+0154     
+0155     DGX(2,1) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(4,1));
+0156     DGX(2,2) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(4,3));
+0157     DGX(2,3) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(4,5));
+0158     
+0159     DGX(3,1) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(6,1));
+0160     DGX(3,2) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(6,3));
+0161     DGX(3,3) = ve(<a href="#_sub1" class="code" title="subfunction shiftedIndix = findIndix(i0, j0)">findIndix</a>(6,5));
+0162     
+0163     <span class="comment">% Last column is [vy ax az]^T</span>
+0164     vep = cr3bp_derivatives_6(te, ve, cr3bp.mu);
+0165     DGX(1,4) = vep(2);
+0166     DGX(2,4) = vep(4);
+0167     DGX(3,4) = vep(6);
+0168     
+0169     <span class="comment">% Last line is the transposed null vector</span>
+0170     DGX(4,:) = orbit.cont.nv';
+0171     
+0172     <span class="comment">%----------------------------------------------------------------------</span>
+0173     <span class="comment">% Stops if precision is good enough, but after the Jacobian has been</span>
+0174     <span class="comment">% built, so that it is updated at the end.</span>
+0175     <span class="comment">%----------------------------------------------------------------------</span>
+0176     <span class="keyword">if</span>(norm(GX) &lt; params.diff_corr.precision);
+0177         <span class="keyword">break</span>;
+0178     <span class="keyword">end</span>
+0179     
+0180     <span class="comment">%----------------------------------------------------------------------</span>
+0181     <span class="comment">% The first order correction is dX0 = inv(DGX)*GX</span>
+0182     <span class="comment">%----------------------------------------------------------------------</span>
+0183     dX0 = DGX\GX;
+0184     
+0185     <span class="comment">%----------------------------------------------------------------------</span>
+0186     <span class="comment">%Updating initial state</span>
+0187     <span class="comment">%----------------------------------------------------------------------</span>
+0188     v0(1) = v0(1) - dX0(1);
+0189     v0(3) = v0(3) - dX0(2);
+0190     v0(5) = v0(5) - dX0(3);
+0191     T12   = T12   - dX0(4);
+0192 <span class="keyword">end</span>
+0193 
+0194 
+0195 <span class="comment">%--------------------------------------------------------------------------</span>
+0196 <span class="comment">%Orbit update</span>
+0197 <span class="comment">%--------------------------------------------------------------------------</span>
+0198 orbit.y0  = v0;    <span class="comment">%initial condition</span>
+0199 orbit.T12 = T12;   <span class="comment">%1/2 period</span>
+0200 orbit.T   = 2*T12; <span class="comment">%period</span>
+0201 
+0202 <span class="comment">%--------------------------------------------------------------------------</span>
+0203 <span class="comment">% Compute the null vector of the Jacobian for the next step of the</span>
+0204 <span class="comment">% continuation procedure.</span>
+0205 <span class="comment">% The null vector if forced to have the same direction as its previous</span>
+0206 <span class="comment">% instance if it exists (positive dot product).</span>
+0207 <span class="comment">%--------------------------------------------------------------------------</span>
+0208 nv = null(DGX(1:3,:));
+0209 <span class="keyword">if</span>(isfield(orbit.cont, <span class="string">'nv'</span>))
+0210     orbit.cont.nv = sign(orbit.cont.nv'*nv)*nv;
+0211 <span class="keyword">else</span>
+0212     orbit.cont.nv = nv;
+0213 <span class="keyword">end</span>
+0214 
+0215 <span class="comment">%--------------------------------------------------------------------------</span>
+0216 <span class="comment">% Compute the final vector of free variables for a potential continuation</span>
+0217 <span class="comment">% procedure.</span>
+0218 <span class="comment">%--------------------------------------------------------------------------</span>
+0219 orbit.cont.gv = [v0(1) ; v0(3) ; v0(5) ; T12];
+0220 
+0221 <span class="comment">%--------------------------------------------------------------------------</span>
+0222 <span class="comment">% Energy</span>
+0223 <span class="comment">%--------------------------------------------------------------------------</span>
+0224 orbit.C = jacobi(orbit.y0, cr3bp.mu);  <span class="comment">%jacobi constant</span>
+0225 orbit.E = -0.5*orbit.C;                <span class="comment">%energy</span>
+0226 
+0227 <span class="comment">%--------------------------------------------------------------------------</span>
+0228 <span class="comment">% Final iteration</span>
+0229 <span class="comment">%--------------------------------------------------------------------------</span>
+0230 orbit.cont.iter = iter;
+0231 
+0232 <span class="keyword">end</span>
+0233 
+0234 
+0235 <span class="comment">%--------------------------------------------------------------------------</span>
+0236 <span class="comment">% Return the right indix to find Phi(i0, j0) in ve</span>
+0237 <span class="comment">%--------------------------------------------------------------------------</span>
+0238 <a name="_sub1" href="#_subfunctions" class="code">function shiftedIndix = findIndix(i0, j0)</a>
+0239 shiftedIndix = 6 + 6*(i0-1)+j0;
+0240 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

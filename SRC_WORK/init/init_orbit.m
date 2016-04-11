@@ -1,25 +1,24 @@
-%-------------------------------------------------------------------------%
-% init_orbit(cr3bp, li, type, Afdim, family, cst).
+function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)
+% INIT_ORBIT initializes an orbit (halo, vertical of planar lyapunov)
+% of the CRTBP.
 %
-% Initializes an orbit of type: Halo, vertical lyapunov, or planar lyapunov
-%-------------------------------------------------------------------------%
 % Inputs:
 % 
-% 1. cr3bp the structure containing the parent CR3BP
-% 2. li the structure containing the parent libration point.
-% 3. type the orbit type: either Halo, vertical lyapunov, planar lyapunov
-% 4. family: the orbit family: either NORTHERN or SOUTHER for halo and
+% - cr3bp the structure containing the parent CR3BP
+% - li the structure containing the parent libration point.
+% - type the orbit type: either Halo, vertical lyapunov, planar lyapunov
+% - family: the orbit family: either NORTHERN or SOUTHER for halo and
 %    vertical lyapunov orbits. Always PLANAR for planar lyapunov orbits. 
 %    Note that the family is forced to PLANAR for planar lyapunov orbits,
 %    regardless of the input.
-% 5. Afdim: the size of the orbit (in km). Equal to the vertical extension
+% - Afdim: the size of the orbit (in km). Equal to the vertical extension
 %    Azdim in the case of halo and vertical lyapunov orbits; equal to the
 %    planar extension Axdim in the case of a planar lyapunov orbit.
-% 6. cst the structure containing the numerical constants
+% - cst the structure containing the numerical constants
 %
 % Outputs:
 %
-% 1. orbit the structure orbit, with the following fields:
+% - orbit: the structure orbit, with the following fields:
 %           - orbit.cr3bp       |
 %           - orbit.li          |
 %           - orbit.type        |
@@ -38,11 +37,8 @@
 %           - orbit.family      |
 %           - orbit.status      |   
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)
+% BLB 2016
+
 
 %CR3BP
 orbit.cr3bp = cr3bp;

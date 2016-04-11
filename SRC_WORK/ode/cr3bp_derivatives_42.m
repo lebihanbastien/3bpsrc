@@ -1,20 +1,29 @@
-%-------------------------------------------------------------------------%
-% Circular-Restricted Three-Body Problem:
-%     Equations of motion for the 6-dimension state + 6*6 State
-%     Transisition Matrix in ode45 format.
-%       
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
 function out = cr3bp_derivatives_42(t,y,mu)
+% CR3BP_DERIVATIVES_42 provide the equations of motion for the CIRCULAR
+% RESTRICTED THREE-BODY PROBLEM (CR3BP) in MATLAB ODE format.
+%
+% OUT = CR3BP_DERIVATIVES_42(T, Y, MU) computes the first-order
+% equations of motion of the CR3BPat time T and state Y.
+% The CR3BP mass ratio is MU. On top of the 6-dimensionnal state, the 36 
+% equations that govern the evoluation of the State Transition Matrix (STM) 
+% are also provided, for a total of 42 first-order equations of motion.
+%
+% The equations of motion are available in chapter 2 of Koon et al.
+% "Dynamical Systems, the Three-Body Problem and Space Mission Design" 2006
+% <a href="matlab: 
+% web('http://www.cds.caltech.edu/~marsden/volume/missiondesign/KoLoMaRo_DMissionBook_2011-04-25.pdf','-browser')">(link)</a>. 
+%
+% See also CR3BP_DERIVATIVES_6
+% 
+% BLB 2014
 
 %Output declaration
 out = (1:42)';
 
-%-------------------------------------------------------------------------------
-% Update first & second derivatives of the potential \bar{U} (cf Koon et al. 2006)
-%-------------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+% Update first & second derivatives of the potential \bar{U} 
+% (cf Koon et al. 2006)
+%--------------------------------------------------------------------------
 d1_ub = d1_u_barre(mu,y(1),y(2),y(3));
 d2_ub = d2_u_barre(mu,y(1),y(2),y(3));
 

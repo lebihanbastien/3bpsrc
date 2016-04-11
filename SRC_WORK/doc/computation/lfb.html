@@ -1,0 +1,479 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of lfb</title>
+  <meta name="keywords" content="lfb">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">computation</a> &gt; lfb.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for computation&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>lfb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ output, isSolution ] = lfb(manifold_branch_stable, cr3bp,  earth, moon, user, params,  cst,  varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ lfb(manifold_branch_stable, cr3bp,  earth, moon, user, params,  cst,  varargin)
+
+ lfb computes an LEO-to-EML2 Halo transfer via a differential correction procedure on the 
+ distance to the desired LEO altitude. The procedure makes use of the
+ interior manifold to flyby the Moon.
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%
+% Init
+Solution is false by default</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="flight_path_angle.html" class="code" title="function fpa = flight_path_angle(yvc, center)">flight_path_angle</a>	-------------------------------------------------------------------------%</li><li><a href="matrixToVector.html" class="code" title="function y = matrixToVector(y, M, nr, nc, shift)">matrixToVector</a>	-------------------------------------------------------------------------%</li><li><a href="vectorToMatrix.html" class="code" title="function M = vectorToMatrix(y, nr, nc, shift)">vectorToMatrix</a>	-------------------------------------------------------------------------%</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)</a></li><li><a href="#_sub2" class="code">function argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% lfb(manifold_branch_stable, cr3bp,  earth, moon, user, params,  cst,  varargin)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% lfb computes an LEO-to-EML2 Halo transfer via a differential correction procedure on the</span>
+0005 <span class="comment">% distance to the desired LEO altitude. The procedure makes use of the</span>
+0006 <span class="comment">% interior manifold to flyby the Moon.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% Author: BLB</span>
+0009 <span class="comment">% Version: 1.0</span>
+0010 <span class="comment">% Year: 2015</span>
+0011 <span class="comment">%-------------------------------------------------------------------------%</span>
+0012 <a name="_sub0" href="#_subfunctions" class="code">function [ output, isSolution ] = lfb(manifold_branch_stable, cr3bp,  earth, moon, user, params,  cst,  varargin)</a>
+0013 <span class="comment">%% Init</span>
+0014 <span class="comment">%Solution is false by default</span>
+0015 isSolution = false;
+0016 
+0017 <span class="comment">%Arbitrary large tspan used for integration between the Moon</span>
+0018 <span class="comment">%neighborhood and the Earth</span>
+0019 tspan = [0 -20];
+0020 
+0021 <span class="comment">%Maximum iterations in the Differential Correction scheme</span>
+0022 iterMax = 50;
+0023 
+0024 <span class="comment">%% Completing the plot (Include the LEO)</span>
+0025 
+0026 <span class="keyword">if</span>(params.plot.XY == cst.TRUE)
+0027     Rm1 = cr3bp.m1.Req/cr3bp.L;
+0028     VTheta = 0:0.01:2*pi;
+0029     X_LEO = -cr3bp.mu + (Rm1+ user.hLEOa) *cos(VTheta);
+0030     Y_LEO =      0    + (Rm1+ user.hLEOa) *sin(VTheta);
+0031     figure(1)
+0032     hold on;
+0033     plot(X_LEO*cr3bp.L, Y_LEO*cr3bp.L,<span class="string">':k'</span>);
+0034 <span class="keyword">end</span>
+0035 
+0036 <span class="comment">%% Recovery of information at the insertion point</span>
+0037 
+0038 <span class="comment">%Last position &amp; velocity on the manifold</span>
+0039 output.flyby.ystate = manifold_branch_stable.yv';
+0040 
+0041 <span class="comment">%Last position &amp; velocity on the manifold in yvcm(1:6)</span>
+0042 output.flyby.ystatem = (1:42)';
+0043 output.flyby.ystatem(1:6) =  output.flyby.ystate;
+0044 
+0045 <span class="comment">%Inline identity matrix in yvcm(7:42)</span>
+0046 output.flyby.ystatem = <a href="matrixToVector.html" class="code" title="function y = matrixToVector(y, M, nr, nc, shift)">matrixToVector</a>(output.flyby.ystatem, cst.orbit.STM0, 6, 6, 6);
+0047 
+0048 <span class="comment">%Initial velocity</span>
+0049 vminit = output.flyby.ystate(4:6);
+0050 
+0051 <span class="comment">%Lunar Flight Path Angle (in radians)</span>
+0052 output.flyby.lunarFlightPathAngle = <a href="flight_path_angle.html" class="code" title="function fpa = flight_path_angle(yvc, center)">flight_path_angle</a>(output.flyby.ystate, moon.position);
+0053 
+0054 <span class="comment">%Distance to the center of the Moon</span>
+0055 output.flyby.distanceToMoon = norm(moon.position' - output.flyby.ystate(1:3));
+0056 
+0057 
+0058 <span class="comment">%% Correction scheme</span>
+0059 
+0060 <span class="comment">%--------------------------------------------------</span>
+0061 <span class="comment">%Checking for collision with the Moon's surface prior to computation</span>
+0062 <span class="comment">%--------------------------------------------------</span>
+0063 <span class="keyword">if</span>(output.flyby.distanceToMoon &gt; cr3bp.m2.Rm/cr3bp.L)
+0064     <span class="comment">%--------------------------------------------------</span>
+0065     <span class="comment">% First guess</span>
+0066     <span class="comment">%--------------------------------------------------</span>
+0067     <span class="keyword">if</span>(size(varargin) == 0)
+0068         disp(<span class="string">'lfb. No first guess was provided by the user. A rough grid search is performed.'</span>);
+0069         scalDV = <a href="#_sub2" class="code" title="subfunction argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)">argMinE1</a>(earth, tspan, output, cr3bp, user, params, cst); <span class="comment">%rough grid search</span>
+0070         <span class="keyword">if</span>(user.flyby.tangentManeuver) <span class="comment">%if tangency is forced, fminunc is used. otherwise, to much chance of failure.</span>
+0071             disp(<span class="string">'lfb. Since the tangency is forced at injection point, '</span>);
+0072             disp(<span class="string">'the first guess is refined with fminunc to increase the chance of success.'</span>);
+0073             OptOptions = optimoptions(<span class="string">'fminunc'</span>, <span class="string">'TolFun'</span>, 1e-12, <span class="string">'TolX'</span>, 1e-8);
+0074             scalDV = fminunc(@(deltaV) <a href="#_sub1" class="code" title="subfunction [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)">absE1</a>(deltaV, earth, tspan, output, cr3bp, user, params, cst), scalDV, OptOptions);
+0075         <span class="keyword">end</span>
+0076         disp([<span class="string">'lfb. Flyby maneuver scale factor = '</span>, num2str(scalDV)]);
+0077         output.flyby.deltaV = output.flyby.ystatem(4:6) * scalDV;                <span class="comment">% forced tengency</span>
+0078     <span class="keyword">else</span>
+0079         disp(<span class="string">'lfb. A first guess was provided by the user.'</span>);
+0080         output.flyby.deltaV = varargin{1};
+0081     <span class="keyword">end</span>
+0082     
+0083     
+0084     <span class="comment">%Correction is set</span>
+0085     <span class="keyword">for</span> i = 1 : 3
+0086         output.flyby.ystatem(i+3) =  output.flyby.ystatem(i+3) + output.flyby.deltaV(i);
+0087     <span class="keyword">end</span>
+0088     
+0089     
+0090     <span class="comment">%--------------------------------------------------</span>
+0091     <span class="comment">% Heuristic preprocessing to make sure that we get away from the Moon (NEEDS IMPROVEMENT!)</span>
+0092     <span class="comment">%--------------------------------------------------</span>
+0093     iter = 0;
+0094     <span class="keyword">while</span>(iter &lt; iterMax)
+0095         <span class="comment">%Concatenation of the id matrix</span>
+0096         output.flyby.ystatem = <a href="matrixToVector.html" class="code" title="function y = matrixToVector(y, M, nr, nc, shift)">matrixToVector</a>(output.flyby.ystatem, cst.orbit.STM0, 6, 6, 6);
+0097         
+0098         <span class="comment">%Integration until a null terrestrial flight path angle is</span>
+0099         <span class="comment">%reached</span>
+0100         <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0101             <span class="comment">%-----------------------------</span>
+0102             <span class="comment">% If MATLAB routines only</span>
+0103             <span class="comment">%-----------------------------</span>
+0104             [~, yarc, tearc, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
+0105         <span class="keyword">else</span>
+0106             <span class="comment">%-----------------------------</span>
+0107             <span class="comment">% If MEX routines are allowed</span>
+0108             <span class="comment">%-----------------------------</span>
+0109             [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+0110         <span class="keyword">end</span>
+0111         
+0112         <span class="comment">%Plot approximations</span>
+0113         <span class="keyword">if</span>(user.showSteps)
+0114             figure(1)
+0115             hold on
+0116             plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , <span class="string">'r'</span>, <span class="string">'LineSmoothing'</span>,<span class="string">'on'</span>);
+0117         <span class="keyword">end</span>
+0118         
+0119         <span class="keyword">if</span>(isempty(yearc))  <span class="comment">%no solution, we return</span>
+0120             disp(<span class="string">'lfb. No solution has emerged from preprocessing. return.'</span>);
+0121             <span class="keyword">return</span>;
+0122         <span class="keyword">end</span>
+0123         
+0124         <span class="comment">%Quit loop if the moon's neighborhood has been left</span>
+0125         output.flyby.distanceToMoon = norm(moon.position' - yearc(1:3)');
+0126         <span class="keyword">if</span>(output.flyby.distanceToMoon &gt; 0.1)
+0127             <span class="keyword">break</span>;
+0128         <span class="keyword">end</span>
+0129         
+0130         <span class="comment">%Otherwise, little arbitrary &quot;push&quot;</span>
+0131         <span class="keyword">if</span>(user.flyby.tangentManeuver)
+0132             output.flyby.ystatem(4:6) =  output.flyby.ystatem(4:6) * (1 + 10^(-2));  <span class="comment">% forced tengency</span>
+0133         <span class="keyword">else</span>
+0134             output.flyby.ystatem(4) =  output.flyby.ystatem(4) * (1 + 10^(-2));      <span class="comment">% along the x axis (arbitrary!)</span>
+0135         <span class="keyword">end</span>
+0136         
+0137         <span class="comment">%Update iter</span>
+0138         iter = iter +1;
+0139         
+0140     <span class="keyword">end</span>
+0141     
+0142     <span class="comment">%--------------------------------------------------</span>
+0143     <span class="comment">% Differential correction process</span>
+0144     <span class="comment">%--------------------------------------------------</span>
+0145     iter = 0;
+0146     <span class="keyword">while</span>(iter &lt; iterMax)
+0147         <span class="comment">%-------------------------------------------------</span>
+0148         <span class="comment">% Computing the current error &amp; correction</span>
+0149         <span class="comment">%-------------------------------------------------</span>
+0150         <span class="comment">%Integration until a null terrestrial flight path angle is reached</span>
+0151         <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0152             <span class="comment">%-----------------------------</span>
+0153             <span class="comment">% If MATLAB routines only</span>
+0154             <span class="comment">%-----------------------------</span>
+0155             [~, yarc, tearc, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
+0156         <span class="keyword">else</span>
+0157             <span class="comment">%-----------------------------</span>
+0158             <span class="comment">% If MEX routines are allowed</span>
+0159             <span class="comment">%-----------------------------</span>
+0160             [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+0161         <span class="keyword">end</span>
+0162         
+0163         <span class="keyword">if</span>(~isempty(yearc)) <span class="comment">%if the event has occured</span>
+0164         <span class="comment">%Plot succesive steps</span>
+0165         <span class="keyword">if</span>(user.showSteps)
+0166             figure(1)
+0167             hold on
+0168             plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , <span class="string">'b'</span>, <span class="string">'LineSmoothing'</span>,<span class="string">'on'</span>);
+0169         <span class="keyword">end</span>
+0170         
+0171         <span class="comment">%Final position</span>
+0172         output.comp.ef = yearc(1:3)';
+0173         <span class="comment">%Final position wrt Earth</span>
+0174         output.comp.ertf = output.comp.ef + [cr3bp.mu ; 0 ; 0];
+0175         <span class="comment">%Final velocity</span>
+0176         output.comp.vf = yearc(4:6)';
+0177         <span class="comment">%Final velocity wrt Earth</span>
+0178         output.comp.vrtf = output.comp.vf;
+0179         <span class="comment">%Final position</span>
+0180         output.leo.ystate = yearc(1:6)';
+0181         
+0182         <span class="comment">%Final STM</span>
+0183         STMf = <a href="vectorToMatrix.html" class="code" title="function M = vectorToMatrix(y, nr, nc, shift)">vectorToMatrix</a>(yearc, 6, 6, 6);
+0184         
+0185         <span class="comment">%Correction matrix</span>
+0186         Mcorr = zeros(2,6);
+0187         Mcorr(1,1:3) = + output.comp.ertf(1:3) / norm(output.comp.ertf);
+0188         Mcorr(2,1:3) = - output.comp.vrtf(1:3);
+0189         Mcorr(2,4:6) = - output.comp.ertf(1:3);
+0190         
+0191         <span class="comment">%Matrix to inverse</span>
+0192         Merror = zeros(6,4);
+0193         <span class="keyword">for</span> i = 1 : 6
+0194             <span class="keyword">for</span> j = 1 : 3
+0195                 Merror(i,j) = STMf(i,j+3);
+0196             <span class="keyword">end</span>
+0197         <span class="keyword">end</span>
+0198         
+0199         <span class="comment">%Derivation of yearc</span>
+0200         efd = cr3bp_derivatives_6(0, yearc, cr3bp.mu);
+0201         
+0202         <span class="keyword">for</span> i = 1 : 6
+0203             Merror(i,4) = efd(i);
+0204         <span class="keyword">end</span>
+0205         
+0206         <span class="comment">%Error matrix</span>
+0207         Merror_c = Mcorr * Merror;
+0208         
+0209         <span class="comment">%Error E1</span>
+0210         E1 = norm(output.comp.ertf) - cr3bp.m1.Rm/cr3bp.L - user.hLEOa;
+0211         
+0212         
+0213         <span class="comment">%-------------------------------------------------</span>
+0214         <span class="comment">% Check if breaking condition is obtained</span>
+0215         <span class="comment">%-------------------------------------------------</span>
+0216         <span class="keyword">if</span>(abs(E1) &lt; params.diff_corr.precision)
+0217             disp(<span class="string">'lfb. A LEO solution has been found.'</span>);
+0218             isSolution = true;
+0219             <span class="keyword">break</span>;
+0220         <span class="keyword">end</span>
+0221         
+0222         <span class="comment">%-------------------------------------------------</span>
+0223         <span class="comment">% Update initial state</span>
+0224         <span class="comment">%-------------------------------------------------</span>
+0225         <span class="comment">%Error vector</span>
+0226         vec_error = - [E1 ; 0];
+0227         
+0228         <span class="comment">%Correction to be made on output.flyby.deltaV</span>
+0229         delta_correction = Merror_c' * ( (Merror_c * Merror_c') \ vec_error);
+0230         
+0231         <span class="keyword">if</span>(user.flyby.tangentManeuver)
+0232             <span class="comment">%Forcing the tangency of the maneuver</span>
+0233             [~, position_max] = max(delta_correction(1:3));
+0234             
+0235             <span class="keyword">switch</span>(position_max)
+0236                 <span class="keyword">case</span> 1
+0237                     delta_correction(2) = delta_correction(1) * output.flyby.ystatem(5)/output.flyby.ystatem(4);
+0238                     delta_correction(3) = delta_correction(1) * output.flyby.ystatem(6)/output.flyby.ystatem(4);
+0239                 <span class="keyword">case</span> 2
+0240                     delta_correction(1) = delta_correction(2) * output.flyby.ystatem(4)/output.flyby.ystatem(5);
+0241                     delta_correction(3) = delta_correction(2) * output.flyby.ystatem(6)/output.flyby.ystatem(5);
+0242                 <span class="keyword">case</span> 3
+0243                     delta_correction(1) = delta_correction(3) * output.flyby.ystatem(4)/output.flyby.ystatem(6);
+0244                     delta_correction(2) = delta_correction(3) * output.flyby.ystatem(5)/output.flyby.ystatem(6);
+0245             <span class="keyword">end</span>
+0246         <span class="keyword">end</span>
+0247         
+0248         <span class="comment">%Updating the velocity</span>
+0249         <span class="keyword">for</span> i = 1 : 3
+0250             output.flyby.ystatem(i+3) =  output.flyby.ystatem(i+3) + delta_correction(i);
+0251         <span class="keyword">end</span>
+0252         
+0253         <span class="comment">%Update the iterator</span>
+0254         iter = iter + 1;
+0255         
+0256         <span class="keyword">else</span>  <span class="comment">%no event, we return</span>
+0257             disp(<span class="string">'lfb. Tangency at the Earth is not obtained. return.'</span>);
+0258             isSolution = false;
+0259             <span class="keyword">return</span>;
+0260         <span class="keyword">end</span>
+0261     <span class="keyword">end</span>
+0262     
+0263     <span class="keyword">if</span>(~isSolution)  <span class="comment">%no solution, we return</span>
+0264         disp(<span class="string">'lfb. No solution has emerged from diff corr. return.'</span>);
+0265         <span class="keyword">return</span>;
+0266     <span class="keyword">end</span>
+0267         
+0268 
+0269     <span class="comment">%Flyby maneuver</span>
+0270     <span class="comment">%--------------------</span>
+0271     <span class="comment">%final velocity @ flyby maneuver</span>
+0272     vmfinal = output.flyby.ystatem(4:6);
+0273     <span class="comment">%output.flyby.deltaV (may be used to initialize the first guess for the next point</span>
+0274     <span class="comment">%on the orbit</span>
+0275     output.flyby.deltaV = vmfinal - vminit;
+0276     <span class="comment">%output.flyby.deltaV [km/s]</span>
+0277     output.flyby.deltaV_dim = cr3bp.L/cr3bp.T*2*pi*norm(output.flyby.deltaV);
+0278     
+0279     
+0280     <span class="keyword">if</span>(abs(output.flyby.deltaV_dim) &gt; 1) <span class="comment">%Maneuver greater than 1 km/s</span>
+0281             disp(<span class="string">'lfb. The Flyby maneuver is greater than 1 km/s. The solution is discarded'</span>);
+0282             isSolution = false;
+0283     <span class="keyword">end</span>
+0284     
+0285     <span class="comment">%LEO maneuver</span>
+0286     <span class="comment">%--------------------</span>
+0287     <span class="comment">% Approximate velocity on LEO in sideral frame (centered on the Earth)</span>
+0288     vLEO_sid = sqrt((1-cr3bp.mu)/(cr3bp.m1.Rm/cr3bp.L + user.hLEOa));
+0289     <span class="comment">%Final velocity in sideral frame</span>
+0290     vf_sid = sqrt( norm(output.comp.vf)^2 + (output.comp.ef(1) + cr3bp.mu)^2 + output.comp.ef(2)^2 + 2*output.comp.vf(2)*(output.comp.ef(1) + cr3bp.mu) - 2 * output.comp.vf(1) * output.comp.ef(2));
+0291     <span class="comment">% LEO deltaV in sideral frame</span>
+0292     deltaVT_sid = sqrt(vLEO_sid^2 + norm(vf_sid)^2 - 2*vLEO_sid*norm(vf_sid));
+0293     <span class="comment">% LEO deltaV  in synodical frame (equal to deltaV_sid because the DV are equal in both frames).</span>
+0294     output.leo.deltaVT = deltaVT_sid;
+0295     <span class="comment">%output.leo.deltaVT [km/s]</span>
+0296     output.leo.deltaVT_dim = cr3bp.L/cr3bp.T*2*pi*output.leo.deltaVT;
+0297     
+0298     <span class="comment">%Total maneuver</span>
+0299     <span class="comment">%--------------------</span>
+0300     <span class="comment">%deltaVTot [adim]</span>
+0301     output.deltaV = output.leo.deltaVT + norm(output.flyby.deltaV);
+0302     <span class="comment">%deltaVTot [km/s]</span>
+0303     output.deltaV_dim = output.leo.deltaVT_dim + output.flyby.deltaV_dim;
+0304     
+0305     <span class="comment">%Miscellaneous parameters (formulas to be checked)</span>
+0306     <span class="comment">%--------------------</span>
+0307     <span class="comment">%Velocity angle @ first lunar flyby</span>
+0308     output.flyby.lfbva = asin(norm(cross(vmfinal,vminit))/(norm(vmfinal)* norm(vminit))) * 180/pi;
+0309     
+0310     <span class="comment">%Inclination with respect to Earth-Moon plan @ LEO</span>
+0311     output.leo.inclination = atan(output.comp.ef(3)/sqrt((output.comp.ef(1)-cr3bp.mu)^2 + output.comp.ef(2)^2))*180/pi;
+0312     
+0313     <span class="comment">%Duration of the transfer</span>
+0314     output.Ttot = abs(manifold_branch_stable.termination_time + tearc);
+0315     output.Ttot_dim = output.Ttot* cr3bp.T/(2*pi) * 1 / (24*3600);
+0316     
+0317     <span class="comment">%Final plot</span>
+0318     <span class="comment">%--------------------</span>
+0319     strLEO   = num2str(user.hLEO);
+0320     strDVTot = num2str(output.deltaV_dim);
+0321     strDVM   =  num2str(output.flyby.deltaV_dim);
+0322     strDVT   =  num2str(output.leo.deltaVT_dim);
+0323     strTtot  = num2str(output.Ttot_dim);
+0324     
+0325     strTitle1 = [<span class="string">'Earth-to-Halo transfer from h_{LEO} = '</span>, strLEO, <span class="string">' km'</span>];
+0326     strTitle2 = [<span class="string">' Total DV: '</span>, strDVTot, <span class="string">' km/s'</span>];
+0327     strTitle3 = [<span class="string">' DV1 (LEO): '</span>, strDVT, <span class="string">' km/s'</span>];
+0328     strTitle4 = [<span class="string">' DV2 (Flyby): '</span>, strDVM, <span class="string">' km/s'</span>];
+0329     strTitle5 = [<span class="string">' Transfer time: '</span>, strTtot, <span class="string">' days'</span>];
+0330     
+0331     <span class="keyword">if</span>(params.plot.XY == cst.TRUE &amp;&amp; isSolution)
+0332         figure(1)
+0333         hold on
+0334         plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , <span class="string">'m'</span>, <span class="string">'LineSmoothing'</span>,<span class="string">'on'</span>);
+0335         title({strTitle1, strTitle2, strTitle3, strTitle4, strTitle5});
+0336     <span class="keyword">end</span>
+0337     
+0338     <span class="keyword">if</span>(params.plot.TD == cst.TRUE &amp;&amp; isSolution)
+0339         figure(4)
+0340         hold on
+0341         plot3(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L, yarc(:,3)*cr3bp.L , <span class="string">'m'</span>, <span class="string">'LineSmoothing'</span>,<span class="string">'on'</span>);
+0342         title({strTitle1, strTitle2, strTitle3, strTitle4, strTitle5});
+0343     <span class="keyword">end</span>
+0344     
+0345     
+0346 <span class="keyword">else</span>
+0347     <span class="keyword">if</span>(params.plot.XY == cst.TRUE)
+0348         figure(1)
+0349         hold on
+0350         title(<span class="string">'Collision with the moon during flyby!'</span>);
+0351     <span class="keyword">end</span>
+0352 <span class="keyword">end</span>
+0353 
+0354 
+0355 
+0356 
+0357 <span class="keyword">end</span>
+0358 
+0359 
+0360 <span class="comment">% Gives the absolute norm of the error E1 (error wrt desired LEO altitude) for a flyby maneuver of</span>
+0361 <span class="comment">% the following type : DV = deltaV * output.flyby.ystatem(4:6)</span>
+0362 <a name="_sub1" href="#_subfunctions" class="code">function [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)</a>
+0363 
+0364 <span class="comment">%Correction is set</span>
+0365 <span class="keyword">for</span> i = 4 : 6
+0366     output.flyby.ystatem(i) =  output.flyby.ystatem(i) + output.flyby.ystatem(i)*deltaV;
+0367 <span class="keyword">end</span>
+0368 
+0369 <span class="comment">%Integration until a null terrestrial flight path angle is</span>
+0370 <span class="comment">%reached</span>
+0371 <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0372     <span class="comment">%-----------------------------</span>
+0373     <span class="comment">% If MATLAB routines only</span>
+0374     <span class="comment">%-----------------------------</span>
+0375     [~, ~, ~, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), tspan, output.flyby.ystatem(1:6), earth.options);
+0376 <span class="keyword">else</span>
+0377     <span class="comment">%-----------------------------</span>
+0378     <span class="comment">% If MEX routines are allowed</span>
+0379     <span class="comment">%-----------------------------</span>
+0380     [~, yearc, ~, ~] = ode78_cr3bp_event(0.0, tspan(2), output.flyby.ystatem(1:6), 6, cr3bp.mu, earth.event);
+0381 <span class="keyword">end</span>
+0382         
+0383 <span class="comment">% figure(1)</span>
+0384 <span class="comment">% hold on</span>
+0385 <span class="comment">% plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , 'm', 'LineSmoothing','on');</span>
+0386 <span class="comment">% plot(yarc(end,1)*cr3bp.L ,yarc(end,2)*cr3bp.L , 'ko', 'LineSmoothing','on');</span>
+0387 
+0388 
+0389 <span class="comment">%If a solution has been found, compute the error</span>
+0390 <span class="keyword">if</span>(~isempty(yearc))        
+0391     <span class="comment">%Final position</span>
+0392     output.comp.ef = yearc(1:3)';
+0393     <span class="comment">%Final position wrt Earth</span>
+0394     output.comp.ertf = output.comp.ef + [cr3bp.mu ; 0 ; 0];
+0395 
+0396     <span class="comment">%Error E1</span>
+0397     E1 = norm(output.comp.ertf) - cr3bp.m1.Rm/cr3bp.L - user.hLEOa;
+0398 
+0399     <span class="comment">%Norm of error</span>
+0400     <a href="#_sub1" class="code" title="subfunction [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)">absE1</a> = abs(E1);
+0401 <span class="keyword">else</span>
+0402     <a href="#_sub1" class="code" title="subfunction [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)">absE1</a> = inf; <span class="comment">%infinity is output</span>
+0403 <span class="keyword">end</span>
+0404 
+0405 <span class="keyword">end</span>
+0406 
+0407 <span class="comment">% Gives the minimum argument deltaV on a rough grid for min{E1(deltaV)}</span>
+0408 <a name="_sub2" href="#_subfunctions" class="code">function argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)</a>
+0409     <a href="#_sub2" class="code" title="subfunction argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)">argMinE1</a> = 0.0;
+0410     MinE1 = <a href="#_sub1" class="code" title="subfunction [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)">absE1</a>(<a href="#_sub2" class="code" title="subfunction argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)">argMinE1</a>, earth, tspan, output, cr3bp, user, params, cst);
+0411     <span class="keyword">for</span> di = 0.1:0.1:0.5
+0412         E1 = <a href="#_sub1" class="code" title="subfunction [absE1] = absE1(deltaV, earth, tspan, output, cr3bp, user, params, cst)">absE1</a>(di, earth, tspan, output, cr3bp, user, params, cst);
+0413         <span class="keyword">if</span>(E1 &lt; MinE1)
+0414            <a href="#_sub2" class="code" title="subfunction argMinE1 = argMinE1(earth, tspan, output, cr3bp, user, params, cst)">argMinE1</a> = di;
+0415            MinE1 = E1;
+0416         <span class="keyword">end</span>
+0417     <span class="keyword">end</span>
+0418 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

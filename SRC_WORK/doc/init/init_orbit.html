@@ -1,0 +1,210 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_orbit</title>
+  <meta name="keywords" content="init_orbit">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">init</a> &gt; init_orbit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for init&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>init_orbit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ init_orbit(cr3bp, li, type, Afdim, family, cst).
+
+ Initializes an orbit of type: Halo, vertical lyapunov, or planar lyapunov
+-------------------------------------------------------------------------%
+ Inputs:
+ 
+ 1. cr3bp the structure containing the parent CR3BP
+ 2. li the structure containing the parent libration point.
+ 3. type the orbit type: either Halo, vertical lyapunov, planar lyapunov
+ 4. family: the orbit family: either NORTHERN or SOUTHER for halo and
+    vertical lyapunov orbits. Always PLANAR for planar lyapunov orbits. 
+    Note that the family is forced to PLANAR for planar lyapunov orbits,
+    regardless of the input.
+ 5. Afdim: the size of the orbit (in km). Equal to the vertical extension
+    Azdim in the case of halo and vertical lyapunov orbits; equal to the
+    planar extension Axdim in the case of a planar lyapunov orbit.
+ 6. cst the structure containing the numerical constants
+
+ Outputs:
+
+ 1. orbit the structure orbit, with the following fields:
+           - orbit.cr3bp       |
+           - orbit.li          |
+           - orbit.type        |
+           - orbit.Azdim       |   for Halo/Vertical lyapunov
+           - orbit.Az          |
+           - orbit.family      |
+           - orbit.m           |
+           - orbit.dm          |
+           - orbit.status      |
+    and  
+           - orbit.cr3bp       |
+           - orbit.li          |
+           - orbit.type        |
+           - orbit.Axdim       |   for Planar lyapunov
+           - orbit.Ax          |
+           - orbit.family      |
+           - orbit.status      |   
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% init_orbit(cr3bp, li, type, Afdim, family, cst).</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Initializes an orbit of type: Halo, vertical lyapunov, or planar lyapunov</span>
+0005 <span class="comment">%-------------------------------------------------------------------------%</span>
+0006 <span class="comment">% Inputs:</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% 1. cr3bp the structure containing the parent CR3BP</span>
+0009 <span class="comment">% 2. li the structure containing the parent libration point.</span>
+0010 <span class="comment">% 3. type the orbit type: either Halo, vertical lyapunov, planar lyapunov</span>
+0011 <span class="comment">% 4. family: the orbit family: either NORTHERN or SOUTHER for halo and</span>
+0012 <span class="comment">%    vertical lyapunov orbits. Always PLANAR for planar lyapunov orbits.</span>
+0013 <span class="comment">%    Note that the family is forced to PLANAR for planar lyapunov orbits,</span>
+0014 <span class="comment">%    regardless of the input.</span>
+0015 <span class="comment">% 5. Afdim: the size of the orbit (in km). Equal to the vertical extension</span>
+0016 <span class="comment">%    Azdim in the case of halo and vertical lyapunov orbits; equal to the</span>
+0017 <span class="comment">%    planar extension Axdim in the case of a planar lyapunov orbit.</span>
+0018 <span class="comment">% 6. cst the structure containing the numerical constants</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Outputs:</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% 1. orbit the structure orbit, with the following fields:</span>
+0023 <span class="comment">%           - orbit.cr3bp       |</span>
+0024 <span class="comment">%           - orbit.li          |</span>
+0025 <span class="comment">%           - orbit.type        |</span>
+0026 <span class="comment">%           - orbit.Azdim       |   for Halo/Vertical lyapunov</span>
+0027 <span class="comment">%           - orbit.Az          |</span>
+0028 <span class="comment">%           - orbit.family      |</span>
+0029 <span class="comment">%           - orbit.m           |</span>
+0030 <span class="comment">%           - orbit.dm          |</span>
+0031 <span class="comment">%           - orbit.status      |</span>
+0032 <span class="comment">%    and</span>
+0033 <span class="comment">%           - orbit.cr3bp       |</span>
+0034 <span class="comment">%           - orbit.li          |</span>
+0035 <span class="comment">%           - orbit.type        |</span>
+0036 <span class="comment">%           - orbit.Axdim       |   for Planar lyapunov</span>
+0037 <span class="comment">%           - orbit.Ax          |</span>
+0038 <span class="comment">%           - orbit.family      |</span>
+0039 <span class="comment">%           - orbit.status      |</span>
+0040 <span class="comment">%</span>
+0041 <span class="comment">% Author: BLB</span>
+0042 <span class="comment">% Version: 1.0</span>
+0043 <span class="comment">% Year: 2015</span>
+0044 <span class="comment">%-------------------------------------------------------------------------%</span>
+0045 <a name="_sub0" href="#_subfunctions" class="code">function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)</a>
+0046 
+0047 <span class="comment">%CR3BP</span>
+0048 orbit.cr3bp = cr3bp;
+0049 
+0050 <span class="comment">%Li</span>
+0051 orbit.li = li;
+0052 
+0053 <span class="comment">%Type</span>
+0054 orbit.type  = type;
+0055 
+0056 <span class="comment">%Family</span>
+0057 <span class="keyword">switch</span>(type)
+0058     <span class="keyword">case</span> {cst.orbit.type.HALO, cst.orbit.type.VLYAP}
+0059         orbit.family = family;
+0060     <span class="keyword">case</span> cst.orbit.type.PLYAP
+0061         <span class="comment">%family forced to PLANAR, regardless of the input</span>
+0062         orbit.family = cst.orbit.family.PLANAR; 
+0063 <span class="keyword">end</span>
+0064 
+0065 
+0066 <span class="comment">%Class</span>
+0067 <span class="keyword">switch</span>(family)
+0068     <span class="keyword">case</span> cst.orbit.family.NORTHERN
+0069         orbit.m = 1;
+0070     <span class="keyword">case</span> cst.orbit.family.SOUTHERN
+0071         orbit.m = 3;
+0072     <span class="keyword">otherwise</span>
+0073         <span class="comment">%Class does not exist for planar orbits, NaN by default</span>
+0074         orbit.m = 0;
+0075 <span class="keyword">end</span>
+0076 
+0077 <span class="comment">%dm parameters (see Richardson)</span>
+0078 <span class="keyword">switch</span>(li.number)
+0079     <span class="keyword">case</span> 1
+0080         orbit.dm = 2-orbit.m;
+0081     <span class="keyword">case</span> 2
+0082         <span class="comment">%BEWARE: Northern and Southern classes</span>
+0083         <span class="comment">%are opposite to Class I and Class II</span>
+0084         <span class="comment">%formulation (see Richardson 1980)</span>
+0085         orbit.dm = orbit.m-2;
+0086     <span class="keyword">case</span> 3
+0087         orbit.dm = 2-orbit.m;
+0088     <span class="keyword">otherwise</span>
+0089         orbit.dm = 0;  <span class="comment">%NO dm if Li.number!=1,2,3</span>
+0090 <span class="keyword">end</span>
+0091 
+0092 
+0093 <span class="comment">%Extension</span>
+0094 <span class="keyword">switch</span>(type)
+0095     <span class="keyword">case</span> {cst.orbit.type.HALO, cst.orbit.type.VLYAP}
+0096         <span class="comment">%--------------</span>
+0097         <span class="comment">%Afdim = Azdim</span>
+0098         <span class="comment">%--------------</span>
+0099         orbit.Azdim = Afdim;
+0100         orbit.Az = Afdim/cr3bp.L;
+0101         <span class="comment">%Az estimate</span>
+0102         orbit.Azdim_estimate = Afdim;
+0103         orbit.Az_estimate = Afdim/cr3bp.L;
+0104 
+0105     <span class="keyword">case</span> cst.orbit.type.PLYAP
+0106         <span class="comment">%--------------</span>
+0107         <span class="comment">%Afdim = Axdim</span>
+0108         <span class="comment">%--------------</span>
+0109         <span class="comment">%Ax</span>
+0110         orbit.Axdim = Afdim;
+0111         orbit.Ax = Afdim/cr3bp.L;
+0112         <span class="comment">%Ax estimate</span>
+0113         orbit.Axdim_estimate = Afdim;
+0114         orbit.Ax_estimate = Afdim/cr3bp.L;
+0115 <span class="keyword">end</span>
+0116 
+0117 <span class="comment">%Status</span>
+0118 orbit.status = cst.orbit.EMPTY;
+0119 
+0120 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

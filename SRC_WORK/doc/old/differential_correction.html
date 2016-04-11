@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of differential_correction</title>
+  <meta name="keywords" content="differential_correction">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; differential_correction.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>differential_correction
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = differential_correction(yv0, cr3bp , orbit, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+Differential correction for halo orbit computation
+--------------------------------------------------------------------------
+Iteration counts</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%--------------------------------------------------------------------------</span>
+0002 <span class="comment">%Differential correction for halo orbit computation</span>
+0003 <span class="comment">%--------------------------------------------------------------------------</span>
+0004 <a name="_sub0" href="#_subfunctions" class="code">function orbit = differential_correction(yv0, cr3bp , orbit, params, cst)</a>
+0005 <span class="comment">%Iteration counts</span>
+0006 iter = 0;
+0007 <span class="keyword">while</span>(true)
+0008     iter = iter+1;
+0009     
+0010     <span class="comment">%----------------------------------------------------------------------</span>
+0011     <span class="comment">% Integration stops @y=0</span>
+0012     <span class="comment">%----------------------------------------------------------------------</span>
+0013     options = odeset(<span class="string">'Events'</span>,@odezero_y,<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0014     
+0015     <span class="comment">% Integration</span>
+0016     [~,yv,te,ve,~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 10],yv0,options);
+0017     
+0018     <span class="comment">%----------------------------------------------------------------------</span>
+0019     <span class="comment">% Plotting (potentially)</span>
+0020     <span class="comment">%----------------------------------------------------------------------</span>
+0021     <span class="keyword">if</span>(params.plot.diff_corr == 1) <span class="comment">%plotting</span>
+0022         
+0023         figure(1)
+0024         <span class="keyword">if</span>(iter==1)
+0025             plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), <span class="string">'g'</span>);
+0026         <span class="keyword">else</span>
+0027             plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), <span class="string">'r'</span>);
+0028         <span class="keyword">end</span>
+0029         hold on
+0030         xlabel(<span class="string">'X (x 10^3 km)'</span>)
+0031         ylabel(<span class="string">'Y (x 10^3 km)'</span>)
+0032         axis equal
+0033         grid on
+0034         title(<span class="string">'Halo orbit in X-Y plane'</span>);
+0035         
+0036     <span class="keyword">elseif</span>(params.plot.diff_corr==2 &amp;&amp; iter==1) <span class="comment">%only first iter</span>
+0037         
+0038         figure(1)
+0039         plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), <span class="string">'r'</span>);
+0040         hold on
+0041         xlabel(<span class="string">'X (x 10^3 km)'</span>)
+0042         ylabel(<span class="string">'Y (x 10^3 km)'</span>)
+0043         axis equal
+0044         grid on
+0045         title(<span class="string">'Halo orbit in X-Y plane'</span>);      
+0046     <span class="keyword">end</span>
+0047     
+0048     <span class="comment">%----------------------------------------------------------------------</span>
+0049     <span class="comment">% Correction</span>
+0050     <span class="comment">%----------------------------------------------------------------------</span>
+0051     
+0052     <span class="comment">% If corr_type == cst.corr.Z0_FIXED:</span>
+0053     <span class="comment">%                      Af                         ppf           Bf</span>
+0054     <span class="comment">% [dxfpoint]  = ( [Phif41  Phif45] - 1/ypoint * [xpp] * [Phi21   Phi25] ) * [   dx0  ]</span>
+0055     <span class="comment">% [dzfpoint]      [Phif61  Phif65]              [zpp]                       [dy0point]</span>
+0056     <span class="comment">%</span>
+0057     
+0058     <span class="comment">% If corr_type == cst.corr.X0_FIXED:</span>
+0059     <span class="comment">%                      Af                         ppf           Bf</span>
+0060     <span class="comment">% [dxfpoint]  = ( [Phif43  Phif45] - 1/ypoint * [xpp] * [Phi23   Phi25] ) * [   dz0  ]</span>
+0061     <span class="comment">% [dzfpoint]      [Phif63  Phif65]              [zpp]                       [dy0point]</span>
+0062     <span class="comment">%</span>
+0063     
+0064     <span class="comment">%Af and Bf</span>
+0065     Af = zeros(2);
+0066     Bf = (1:2);
+0067     <span class="keyword">if</span>(params.diff_corr.type == cst.corr.Z0_FIXED)
+0068         Af(1,1) = ve(6+19); <span class="comment">%Phif41</span>
+0069         Af(1,2) = ve(6+23); <span class="comment">%Phif45</span>
+0070         Af(2,1) = ve(6+31); <span class="comment">%Phif61</span>
+0071         Af(2,2) = ve(6+35); <span class="comment">%Phif65</span>
+0072         
+0073         Bf(1) = ve(6+7);    <span class="comment">%Phif21</span>
+0074         Bf(2) = ve(6+11);   <span class="comment">%Phif25</span>
+0075     <span class="keyword">else</span>
+0076         Af(1,1) = ve(6+21); <span class="comment">%Phif43</span>
+0077         Af(1,2) = ve(6+23); <span class="comment">%Phif45</span>
+0078         Af(2,1) = ve(6+33); <span class="comment">%Phif63</span>
+0079         Af(2,2) = ve(6+35); <span class="comment">%Phif65</span>
+0080         
+0081         Bf(1) = ve(6+9);    <span class="comment">%Phif23</span>
+0082         Bf(2) = ve(6+11);   <span class="comment">%Phif25</span>
+0083     <span class="keyword">end</span>
+0084     
+0085   
+0086     <span class="comment">%State subvector</span>
+0087     y_state = (1:6)';
+0088     <span class="keyword">for</span> i = 1 : 6
+0089         y_state(i) = ve(i);
+0090     <span class="keyword">end</span>
+0091     
+0092     <span class="comment">%Derivative of y_state @ y=0 in y_state_p</span>
+0093     y_state_p = cr3bp_derivatives_6(te, y_state, cr3bp.mu);
+0094        
+0095     <span class="comment">%ppf vector</span>
+0096     ppf = (1:2)';
+0097     ppf(1) = y_state_p(4)/y_state(5);  <span class="comment">%xfpp</span>
+0098     ppf(2) = y_state_p(6)/y_state(5);  <span class="comment">%zfpp</span>
+0099     
+0100     
+0101     <span class="comment">%New Af</span>
+0102     Af = Af - ppf*Bf;
+0103      
+0104     <span class="comment">%Inversion of the error</span>
+0105     dyf = [-y_state(4) ; -y_state(6)];  <span class="comment">% = [- xfpoint ; -zfpoint]</span>
+0106     
+0107     <span class="comment">%Stops if precision is good enough</span>
+0108     <span class="keyword">if</span>(abs(dyf(1)) &lt; params.diff_corr.precision &amp;&amp;  abs(dyf(2)) &lt; params.diff_corr.precision);
+0109         orbit.T12 = te; <span class="comment">%1/2 period</span>
+0110         orbit.T = 2*te; <span class="comment">%period</span>
+0111         <span class="keyword">break</span>;
+0112     <span class="keyword">end</span>
+0113     
+0114     
+0115     <span class="keyword">if</span>(iter &gt; 50)
+0116         disp(<span class="string">'WARNING: maximum iterations reached in differential_correction'</span>);
+0117         <span class="keyword">break</span>;
+0118     <span class="keyword">end</span>
+0119     
+0120     <span class="comment">%Sinon, calcul de dx0</span>
+0121     dy0 = Af \ dyf;
+0122     
+0123     <span class="comment">%Updating initial state</span>
+0124     <span class="keyword">if</span>(params.diff_corr.type == cst.corr.Z0_FIXED)
+0125         yv0(1) = yv0(1) + dy0(1);
+0126         yv0(5) = yv0(5) + dy0(2);  
+0127     <span class="keyword">else</span>
+0128         yv0(3) = yv0(3) + dy0(1);
+0129         yv0(5) = yv0(5) + dy0(2);
+0130     <span class="keyword">end</span>
+0131    
+0132 <span class="keyword">end</span>
+0133 
+0134 <span class="comment">%Orbit update</span>
+0135 orbit.y0 = yv0;
+0136 <span class="keyword">end</span>
+0137</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

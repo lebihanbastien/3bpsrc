@@ -1,18 +1,23 @@
+function orbit = diff_corr_2D(v0, cr3bp , orbit, params, cst)
+% DIFF_CORR_2D Differential correction to compute 2D planar lyapunov 
+% periodic orbits of the CRTBP, symmetric with respect to the xz-plane.
+%
+% This routines is basically equivalent to DIFF_CORR_3D_BB but is
+% restricted to the xy planar motion. The user is referred to the 3D
+% routine for details.
+%
+% See also DIFF_CORR_3D_BB
+%
+% BLB 2016.
+
 %--------------------------------------------------------------------------
-%Differential correction for planar periodic orbit computation
-%Suitable for e.g. planar lyapunov orbits
-%--------------------------------------------------------------------------
-% @param yv0 the approximated initial conditions
-% @param cr3bp the structure containing the parent CR3BP
-% @param orbit the structure containing the parent orbit
-% @param params the structure containing the comptuation parameters
-% @param cst the structure containing the numerical constants
-% @return the udpated structure orbit
-function orbit = diff_corr_2D(yv0, cr3bp , orbit, params, cst)
 %Iteration counts
+%--------------------------------------------------------------------------
 iter = 0;
 
-%Event structure
+%--------------------------------------------------------------------------
+%Type of event: reaching the y = 0 plane
+%--------------------------------------------------------------------------
 val_par = init_event(cst.manifold.event.type.Y_SECTION,...
                      0.0,...
                      cst.manifold.event.isterminal.YES,...
@@ -21,66 +26,47 @@ val_par = init_event(cst.manifold.event.type.Y_SECTION,...
                      cst);
                  
 %Options for Matlab integration
-options = odeset('Events',@odezero_y,'Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);          
+options = odeset('Events',@odezero_y,'Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);          
 
-%Diff corr loop
+%--------------------------------------------------------------------------
+% Differential correction loop
+%--------------------------------------------------------------------------
 while(true)
     iter = iter+1;
     
+    if(iter > 50)
+        disp('WARNING: maximum iterations reached in differential_correction');
+        break;
+    end
+     
     %----------------------------------------------------------------------
-    % Integration stops @y=0
+    % Integration stops at y=0
     %----------------------------------------------------------------------
     if(params.computation.type == cst.computation.MATLAB)
         %-----------------------------
         % If MATLAB routines only
         %-----------------------------
-        disp('here');
-        [~,yv,te,ve,~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 10],yv0,options);
+        [~,yv,te,ve,~] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 10],v0,options);
     else
         %-----------------------------
         % If MEX routines are allowed
         %-----------------------------
-        if(params.plot.diff_corr == 1)
-            [te, ve, ~, yv] = ode78_cr3bp_event(0.0, 10, yv0, 42, cr3bp.mu, val_par);
+        if(params.plot.diff_corr)
+            [te, ve, ~, yv] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
         else
-            [te, ve] = ode78_cr3bp_event(0.0, 10, yv0, 42, cr3bp.mu, val_par);
+            [te, ve] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
         end
         
     end
     
-
     %----------------------------------------------------------------------
-    % Plotting (potentially)
+    %Update the final state: FX = [vy]
     %----------------------------------------------------------------------
-    if(params.plot.diff_corr == 1) %plotting
-        
-        figure(1)
-        if(iter==1)
-            plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), 'g');
-        else
-            plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), 'r');
-        end
-        hold on
-        xlabel('X (x 10^3 km)')
-        ylabel('Y (x 10^3 km)')
-        axis equal
-        grid on
-        title('Halo orbit in X-Y plane');
-        
-    elseif(params.plot.diff_corr==2 && iter==1) %only first iter
-        
-        figure(1)
-        plot(yv(:,1)*cr3bp.L*10^(-3),yv(:,2)*cr3bp.L*10^(-3), 'r');
-        hold on
-        xlabel('X (x 10^3 km)')
-        ylabel('Y (x 10^3 km)')
-        axis equal
-        grid on
-        title('Halo orbit in X-Y plane');      
-    end
+    FXr = ve(4);
     
+   
     %----------------------------------------------------------------------
-    % Correction
+    % Compute the first order correction with Newton's method
     %----------------------------------------------------------------------
     % If corr_type == cst.corr.Z0_FIXED:
     %                      Af                         ppf           Bf
@@ -97,49 +83,55 @@ while(true)
     %Af and Bf
     Af = ve(6+23); %Phif45
     Bf = ve(6+11); %Phif25
-
     
-    %State subvector
-    y_state = (1:6)';
-    for i = 1 : 6
-        y_state(i) = ve(i);
-    end
-    
-    %Derivative of y_state @ y=0 in y_state_p
-    y_state_p = cr3bp_derivatives_6(te, y_state, cr3bp.mu);
+    %Derivative of ve at y=0 (t = te)
+    vep = cr3bp_derivatives_6(te, ve, cr3bp.mu);
        
     %ppf vector
-    ppf = y_state_p(4)/y_state(5);  %xfpp
+    ppf = vep(4)/ve(5);  %xfpp
 
     %New Af
     Af = Af - ppf*Bf;
      
-    %Inversion of the error
-    dyf = -y_state(4);
-    
     %Stops if precision is good enough
-    if(abs(dyf(1)) < params.diff_corr.precision);
-        orbit.T12 = te; %1/2 period
-        orbit.T   = 2*te; %period
+    if(norm(FXr) < params.diff_corr.precision);
         break;
     end
     
+    %----------------------------------------------------------------------
+    % The first order correction is computed as dX0 = inv(Af)*FXr
+    %----------------------------------------------------------------------
+    dX0 = FXr/Af;
     
-    if(iter > 50)
-        disp('WARNING: maximum iterations reached in differential_correction');
-        break;
-    end
-    
-    %Sinon, calcul de dx0
-    dy0 = dyf/Af;
-    
+    %----------------------------------------------------------------------
     %Updating initial state
-    yv0(5) = yv0(5) + dy0;  
-   
+    %----------------------------------------------------------------------
+    v0(5) = v0(5) - dX0;  
+    
+    %----------------------------------------------------------------------
+    % Plotting (potentially)
+    %----------------------------------------------------------------------
+    if(params.plot.diff_corr)
+        plotDiffCorr(yv, cr3bp, iter);
+    end   
    
 end
 
 %Orbit update
-orbit.y0 = yv0;
+orbit.y0 = v0;
+orbit.T12 = te; %1/2 period
+orbit.T   = 2*te; %period
 end
 
+%--------------------------------------------------------------------------
+% Plotting the iterations
+%--------------------------------------------------------------------------
+function [] = plotDiffCorr(yv, cr3bp, iter)
+    figure(1)
+    hold on
+    if(iter==1)
+        plot(yv(:,1)*cr3bp.L,yv(:,2)*cr3bp.L, 'g');
+    else
+        plot(yv(:,1)*cr3bp.L,yv(:,2)*cr3bp.L, 'r');
+    end
+end

@@ -1,12 +1,10 @@
 %--------------------------------------------------------------------------
-% Example n°1: this matlab file makes use of the richardson third order
-% approximation to build:
+% This matlab file allows to build:
 % - an EML2 planar lyapunov orbit (~90 000 km of radius)
 % - an EML2 halo orbit (~90 000km of vertical extension)
 % - an EML2 vertical lyapunov orbit (~90 000km of vertical extension)
 %
-% Author: BLB
-% Year: 2016
+% BLB 2016
 %--------------------------------------------------------------------------
 
 %% Initialization: reboot, addpath, constants, default parameters. See init.m
@@ -28,11 +26,6 @@ init;
 %default.plot.XZ        = true; %plot also the results in X-Z plane
 %default.plot.YZ        = true; %plot also the results in Y-Z plane
 %default.plot.diff_corr = true; %plot the differential correction steps
-default.plot.firstPrimDisp   = cst.FALSE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
-default.plot.allLibPoints    = cst.FALSE;  %are all libration points displayed?
-default.plot.names           = cst.TRUE;   %are the names displayed?
-default.plot.tdAxes          = cst.FALSE;  %are the pretty 3D axes displayed?
-default.plot.bigPrimFac      = 3.0;        %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
 % 4. See parameters_default_init.m to see other options
 %--------------------------------------------------------------------------

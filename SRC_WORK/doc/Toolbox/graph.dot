@@ -1,0 +1,24 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  SpiralOrbit -> arc;
+  SpiralOrbit -> arrow3;
+  SpiralOrbit -> exportFig;
+  SpiralOrbit -> rotation;
+  arc -> arc;
+  arrow3 -> rotation;
+  exemplePlot -> exportFig;
+  exemplePlot -> mouseMove;
+  exemplePlot -> prepareFig;
+  rotateSurf -> rotation;
+
+  SpiralOrbit [URL="SpiralOrbit.html"];
+  arc [URL="arc.html"];
+  arrow3 [URL="arrow3.html"];
+  exemplePlot [URL="exemplePlot.html"];
+  exportFig [URL="exportFig.html"];
+  mouseMove [URL="mouseMove.html"];
+  plusToAll [URL="plusToAll.html"];
+  prepareFig [URL="prepareFig.html"];
+  rotateSurf [URL="rotateSurf.html"];
+  rotation [URL="rotation.html"];
+}

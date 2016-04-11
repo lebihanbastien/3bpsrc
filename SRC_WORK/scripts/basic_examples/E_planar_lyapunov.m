@@ -1,6 +1,5 @@
 %--------------------------------------------------------------------------
-% Example n°5: this matlab file makes use of the richardson third order
-% approximation to build an EML2 planar lyapunov orbit.
+% This matlab file allows to build an EML2 planar lyapunov orbit.
 % Then, its exterior stable and unstable manifolds are computed
 % and integrated up to given termination conditions:
 % - The stable manifold is stopped at a given angle with respect to the

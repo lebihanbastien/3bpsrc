@@ -1,11 +1,13 @@
-%-------------------------------------------------------------------------%
-%   Set the vector y(shift+1:end) in the nrxnc matrix M
-%
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
 function M = vectorToMatrix(y, nr, nc, shift)
+% VECTORTOMATRIX custom routine to set a vector into a matrix with a given
+% shift.
+%
+% VECTORTOMATRIX(Y, M, NR, NC, SHIFT) puts the vector Y(SHIFT+1:end) in the
+% NR x NC matrix M.
+%
+% See also MATRIXTOVECTOR
+%
+% BLB 2015
 
 M = eye(nr, nc);
 for i = 1 : nr

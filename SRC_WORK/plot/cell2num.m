@@ -6,6 +6,8 @@ function [outputmat]=cell2num(inputcell)
 % Output matrix will have the same dimensions as the input cell array
 % Non-numeric cell contest will become NaN outputs in outputmat
 % This function only works for 1-2 dimensional cell arrays
+%
+% Darren (No BSD License).
 
 if ~iscell(inputcell), error('Input cell array is not.'); end
 

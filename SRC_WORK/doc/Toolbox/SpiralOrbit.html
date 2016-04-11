@@ -1,0 +1,241 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of SpiralOrbit</title>
+  <meta name="keywords" content="SpiralOrbit">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">Toolbox</a> &gt; SpiralOrbit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for Toolbox&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>SpiralOrbit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="arc.html" class="code" title="function [arc,data,ind1,ind2] = arc(centre,r,vect1,vect2,depass)">arc</a>	</li><li><a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>	</li><li><a href="exportFig.html" class="code" title="function exportFig(f,nom,type)">exportFig</a>	Fonction pour sauvegarder vos figure en PDF.</li><li><a href="rotation.html" class="code" title="function XYZrot = rotation(XYZ,P)">rotation</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 close all
+0003 clc
+0004 
+0005 addpath Utilities/
+0006 
+0007 f = figure(<span class="string">'Color'</span>,[1 1 1]);
+0008 set(gcf,<span class="string">'units'</span>,<span class="string">'centimeters'</span>,<span class="string">'position'</span>,[10 10 10 8])
+0009 
+0010 <span class="comment">% view:</span>
+0011 a = 0;
+0012 b = -30;
+0013 h = -30;
+0014 
+0015 <span class="comment">% ------- DEBUT DU GLOBE ------------------------------</span>
+0016 
+0017 r = .9;
+0018 Nlo = 8;
+0019 Nla = 11;
+0020 xc = [];
+0021 yc = [];
+0022 zc = [];
+0023 <span class="keyword">for</span> lo = ((0:360/Nlo:359.999)-h)/180*pi;
+0024     t=(0:1:360)'/180*pi;
+0025     
+0026     auxX = r*cos(t);
+0027     auxZ = r*sin(t);
+0028     auxY = r*zeros(size(t));
+0029     
+0030     auxXYZ = [auxX auxY auxZ];
+0031     <span class="keyword">for</span> ind = 1:size(auxXYZ,1)
+0032         auxXYZ(ind,:) = (vrrotvec2mat([0 0 1 lo])*auxXYZ(ind,:)')';
+0033     <span class="keyword">end</span>
+0034     xc = [xc; NaN; auxXYZ(:,1)];
+0035     yc = [yc; NaN; auxXYZ(:,2)];
+0036     zc = [zc; NaN; auxXYZ(:,3)];
+0037 <span class="keyword">end</span>
+0038 <span class="keyword">for</span> la = (-90:180/(Nla-1):90)/180*pi
+0039     auxX = r*cos(la)*sin(t);
+0040     auxY = r*cos(la)*cos(t);
+0041     auxZ = r*sin(la)*ones(size(t));
+0042     
+0043     xc = [xc; NaN; auxX];
+0044     yc = [yc; NaN; auxY];
+0045     zc = [zc; NaN; auxZ];
+0046 <span class="keyword">end</span>
+0047 
+0048 XYZc = <a href="rotation.html" class="code" title="function XYZrot = rotation(XYZ,P)">rotation</a>([xc yc zc],vrrotvec2mat([0 0 1 -b/180*pi]));
+0049 cercles = plot3(XYZc(:,1),XYZc(:,2),XYZc(:,3),<span class="string">'k'</span>);
+0050 cercles.Color = 0*[1 1 1];
+0051 cercles.LineWidth = .3;
+0052 hold on
+0053 axis equal
+0054 
+0055 tcont=(0:.2:360)'/180*pi;
+0056 auxX = r*sin(tcont);
+0057 auxY = 0*tcont+0.01;
+0058 auxZ = r*cos(tcont);
+0059 auxXYZ = [auxX auxY auxZ];
+0060 <span class="keyword">for</span> ind = 1:size(auxXYZ,1)
+0061     auxXYZ(ind,:) = (vrrotvec2mat([(vrrotvec2mat([0 0 1 a/180*pi])*[1 0 0]')' -b/180*pi])*vrrotvec2mat([0 0 1 a/180*pi])*auxXYZ(ind,:)')';
+0062 <span class="keyword">end</span>
+0063 xc = auxXYZ(:,1);
+0064 yc = auxXYZ(:,2);
+0065 zc = auxXYZ(:,3);
+0066 cont = fill3(xc,yc,zc,<span class="string">'White'</span>);
+0067 cont.LineWidth = 1;
+0068 cont.EdgeColor = <span class="string">'k'</span>;
+0069 
+0070 
+0071 
+0072 auxX = r*sin(t);
+0073 auxY = r*cos(t);
+0074 auxZ = r*zeros(size(t));
+0075 auxXYZ = [auxX auxY auxZ];
+0076 xc = auxXYZ(:,1);
+0077 yc = auxXYZ(:,2);
+0078 zc = auxXYZ(:,3);
+0079 equat = plot3(xc,yc,zc);
+0080 equat.LineWidth = 1;
+0081 equat.Color = <span class="string">'k'</span>;
+0082 
+0083 load coast
+0084 lat = lat/180*pi;
+0085 long = -(long-h)/180*pi;
+0086 x = r*cos(lat).*sin(long);
+0087 y = r*cos(lat).*cos(long);
+0088 z = r*sin(lat);
+0089 cote = plot3(x,y,z);
+0090 cote.Color = 0*[1 1 1];
+0091 cote.LineWidth = .5;
+0092 
+0093 
+0094 view(a,b)
+0095 
+0096 
+0097 <span class="comment">%--------------- Orbite -----------------------</span>
+0098 
+0099 t = (0:1:2.75*360)'/180*pi;
+0100 r0 = 1.2;
+0101 rho = r0.*(exp(0.5*t/(2*pi)));
+0102 
+0103 dt = 0;
+0104 XYZorb = [rho.*cos(t-dt) rho.*sin(t-dt) 0*t];
+0105 
+0106 i1 = 10;
+0107 i2 = -20;
+0108 XYZorb = <a href="rotation.html" class="code" title="function XYZrot = rotation(XYZ,P)">rotation</a>(XYZorb,vrrotvec2mat([1 0 0 -b/180*pi])*vrrotvec2mat([1 0 0 90/180*pi]));
+0109 
+0110 orbite = plot3(XYZorb(:,1),XYZorb(:,2),XYZorb(:,3));
+0111 orbite.Color = <span class="string">'k'</span>;
+0112 
+0113 
+0114 
+0115 <span class="comment">%--------------- Vecteurs -----------------------</span>
+0116 npt = 441;
+0117 pt = XYZorb(npt,:);
+0118 pt0 = XYZorb(1,:);
+0119 
+0120 xyz = [0 0 0;pt];
+0121 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(xyz(1,:),xyz(2,:),<span class="string">'k'</span>,1.5,.2,.3);
+0122 ptT1 = pt;
+0123 
+0124 xyz = [0 0 0;pt0];
+0125 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(xyz(1,:),xyz(2,:),<span class="string">'k'</span>,1.5,.2,.3);
+0126 
+0127 xyz = [pt0*1.05;1.4*pt0];
+0128 Vx1 = plot3(xyz(:,1),xyz(:,2),xyz(:,3));
+0129 Vx1.Color = <span class="string">'k'</span>;
+0130 Vx1.LineStyle = <span class="string">'--'</span>;
+0131 Vx1.LineWidth = 1;
+0132 [arc0,data,~,ind2] = <a href="arc.html" class="code" title="function [arc,data,ind1,ind2] = arc(centre,r,vect1,vect2,depass)">arc</a>([0 0 0],1.6,pt0,pt,0);
+0133 arc0.Color = <span class="string">'k'</span>;
+0134 arc0.LineStyle = <span class="string">'-'</span>;
+0135 ptaf = 1.6*pt/norm(pt);
+0136 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(data(ind2-1,:),data(ind2,:),<span class="string">'k'</span>,1,.15,.3);
+0137 
+0138 aux = 4*(XYZorb(npt+1,:)-XYZorb(npt-1,:))/norm(XYZorb(npt+1,:)-XYZorb(npt-1,:));
+0139 xyz = [pt;pt+aux];
+0140 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(xyz(1,:),xyz(2,:),<span class="string">'k'</span>,1.5,.2,.3);
+0141 ptT2 = pt+aux;
+0142 xyz = [pt;pt+aux*0.4];
+0143 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(xyz(1,:),xyz(2,:),<span class="string">'k'</span>,1.5,.2,.3);
+0144 ptT3 = pt+aux*0.4;
+0145 
+0146 aux = cross(cross(pt,aux),pt);
+0147 aux = 3*aux/norm(aux);
+0148 xyz = [pt;pt+aux];
+0149 [ligne, pointe] = <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(xyz(1,:),xyz(2,:),<span class="string">'k'</span>,1,.2,.3);
+0150 ligne.LineStyle = <span class="string">'--'</span>;
+0151 ptT4 = pt+aux;
+0152 
+0153 [<a href="arc.html" class="code" title="function [arc,data,ind1,ind2] = arc(centre,r,vect1,vect2,depass)">arc</a>,data,ind1,ind2] = <a href="arc.html" class="code" title="function [arc,data,ind1,ind2] = arc(centre,r,vect1,vect2,depass)">arc</a>(pt,2,ptT2-pt,ptT4-pt,8);
+0154 ind1=ind1-1;
+0155 ind2=ind2+1;
+0156 arc.Color = <span class="string">'k'</span>;
+0157 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(data(ind1-1,:),data(ind1,:),<span class="string">'k'</span>,1,.15,.3);
+0158 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(data(ind2,:),data(ind2-1,:),<span class="string">'k'</span>,1,.15,.3);
+0159 ptT5 = data(ind1,:);
+0160 
+0161 
+0162 npt = 600;
+0163 <a href="arrow3.html" class="code" title="function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)">arrow3</a>(XYZorb(npt-1,:),XYZorb(npt,:),<span class="string">'k'</span>,1.5,.2,.3);
+0164 pto = XYZorb(npt,:);
+0165 
+0166 
+0167 text(ptT1(1)-.35,ptT1(2),ptT1(3)-0.15,<span class="string">'$\mathbf{r}$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0168 text(pt0(1)-.1,pt0(2),pt0(3)-0.25,<span class="string">'$\mathbf{r}_0$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0169 text(ptT2(1),ptT2(2),ptT2(3)+.25,<span class="string">'$\mathbf{v}$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0170 text(ptT3(1)+.15,ptT3(2),ptT3(3)+.2,<span class="string">'$\mathbf{F}_{C_{th}}$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0171 text(ptT4(1),ptT4(2),ptT4(3)-.35,<span class="string">'$\hat{\mathbf{x}}_O$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0172 text(ptT5(1)+.05,ptT5(2),ptT5(3)-.45,<span class="string">'$\varphi$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0173 text(ptaf(1)+.3,ptaf(2),ptaf(3)+.11,<span class="string">'$\nu$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0174 text(pto(1)-1.2,pto(2),pto(3)+.1,<span class="string">'orbit'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0175 
+0176 grid off
+0177 axis off
+0178 
+0179 <span class="comment">%</span>
+0180 zoom(1.5)
+0181 ax = gca;
+0182 ax.Position = ax.Position+[0 -.15 0 0];
+0183 
+0184 
+0185 <span class="comment">% grid on</span>
+0186 <span class="comment">% axis on</span>
+0187 <span class="comment">% xlabel('x')</span>
+0188 <span class="comment">% ylabel('y')</span>
+0189 <span class="comment">% zlabel('z')</span>
+0190 
+0191 
+0192 <span class="comment">%%</span>
+0193 
+0194 <a href="exportFig.html" class="code" title="function exportFig(f,nom,type)">exportFig</a>(f,<span class="string">'Spiral_orbit'</span>)</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

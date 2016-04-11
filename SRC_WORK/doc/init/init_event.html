@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_event</title>
+  <meta name="keywords" content="init_event">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">init</a> &gt; init_event.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for init&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>init_event
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ event ] = init_event(type, value, isterminal, direction, center, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ Initializes an event structure, with the following structure:
+
+   1. event.type:  the type of event (X_SECTION, ANGLE_SECTION...)
+   2. event.value: the associated value (example: X0 for the plane X = X0)
+   3. event.isterminal: if true, the integration stops at the first event
+   (depecrated if the MEX functions are used)
+   4. event.dim:  equal to 1 for X_SECTION, 2 for Y_SECTION, etc.
+   5. event.direction: directions of crossing considered.
+   6. event.center: center for angle computation, if the event is an angle
+   section.
+   7. event.max_events: with MEX functions, any given maximum number of
+   events can be used to terminate the integration. This field is used in
+   place of event.isterminal to check wether the integration must be
+   stopped.
+       
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% Initializes an event structure, with the following structure:</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%   1. event.type:  the type of event (X_SECTION, ANGLE_SECTION...)</span>
+0005 <span class="comment">%   2. event.value: the associated value (example: X0 for the plane X = X0)</span>
+0006 <span class="comment">%   3. event.isterminal: if true, the integration stops at the first event</span>
+0007 <span class="comment">%   (depecrated if the MEX functions are used)</span>
+0008 <span class="comment">%   4. event.dim:  equal to 1 for X_SECTION, 2 for Y_SECTION, etc.</span>
+0009 <span class="comment">%   5. event.direction: directions of crossing considered.</span>
+0010 <span class="comment">%   6. event.center: center for angle computation, if the event is an angle</span>
+0011 <span class="comment">%   section.</span>
+0012 <span class="comment">%   7. event.max_events: with MEX functions, any given maximum number of</span>
+0013 <span class="comment">%   events can be used to terminate the integration. This field is used in</span>
+0014 <span class="comment">%   place of event.isterminal to check wether the integration must be</span>
+0015 <span class="comment">%   stopped.</span>
+0016 <span class="comment">%</span>
+0017 <span class="comment">% Author: BLB</span>
+0018 <span class="comment">% Version: 1.0</span>
+0019 <span class="comment">% Year: 2015</span>
+0020 <span class="comment">%-------------------------------------------------------------------------%</span>
+0021 <a name="_sub0" href="#_subfunctions" class="code">function [ event ] = init_event(type, value, isterminal, direction, center, cst)</a>
+0022 
+0023 <span class="comment">%Event type during integration</span>
+0024 event.type = type;
+0025 <span class="comment">%Definition parameter for the event plane</span>
+0026 event.value = value;
+0027 <span class="comment">%Is the event terminal?</span>
+0028 event.isterminal = isterminal;
+0029 <span class="comment">%Dimension: dim = 1 for x, dim = 2 for y, dim = 0 if there is no event set</span>
+0030 <span class="keyword">switch</span>(event.type)
+0031     <span class="keyword">case</span> cst.manifold.event.type.X_SECTION
+0032         event.dim = 1;
+0033     <span class="keyword">case</span> cst.manifold.event.type.Y_SECTION
+0034         event.dim = 2;
+0035     <span class="keyword">case</span> cst.manifold.event.type.Z_SECTION
+0036         event.dim = 3;
+0037     <span class="keyword">otherwise</span>
+0038         event.dim = 1; <span class="comment">%by default, to avoid any error in mex files.</span>
+0039 
+0040 <span class="keyword">end</span>
+0041 
+0042 <span class="comment">%Decreasing (-1), increasing (1) or all (0) zeros;</span>
+0043 event.direction = direction;
+0044 <span class="comment">%Center (if the event is an angle event e.g. for lunar flyby detection).</span>
+0045 event.center = center;
+0046 <span class="comment">%maximum number of events (only for mex integration)</span>
+0047 event.max_events = 1;
+0048 <span class="keyword">end</span>
+0049</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

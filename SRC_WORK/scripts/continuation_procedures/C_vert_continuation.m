@@ -1,24 +1,14 @@
 %--------------------------------------------------------------------------
 % Continuation example n°3: Continuation procedure to produce a discrete set within 
-% the family of northern orbits of EML2
-% WARNING: very sensitive, works only for small Az amplitudes (contrary to
-% planar lyapunov case). Complete continuations are more complex than that
+% the family of vertical lyapunov orbits of EML2
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
+% BLB 2015
 %--------------------------------------------------------------------------
 %% Initialization: reboot, addpath, constants, default parameters. See init.m
 init;
 
 %% Inner changes from default parameters
-default.plot.orbit           = false;     %do not plot orbit
 default.plot.XY              = false;     %plot also the results in X-Z plane
-default.plot.firstPrimDisp   = cst.TRUE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
-default.plot.allLibPoints    = cst.TRUE;  %are all libration points displayed?
-default.plot.names           = cst.TRUE;  %are the names displayed?
-default.plot.tdAxes          = cst.TRUE;  %are the pretty 3D axes displayed?
-default.plot.bigPrimFac      = 3.0;       %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
 % 4. See parameters_default_init.m to see other options
 %--------------------------------------------------------------------------
@@ -38,19 +28,12 @@ orbit_2 = orbit_computation(cr3bp, orbit_2, default, cst);
 %% Continuation
 %Waitbar
 h = waitbar(0,'Computation in progress...');
-
 %Loop
-maxIter = 500;
+maxIter = 30;
 for i = 1:maxIter
     yv = orbit_2.y0 + (orbit_2.y0 - orbit_1.y0);
     orbit_1 = orbit_2;
-    if(mod(i,20) ==0)
-        default.plot.orbit = true;
-        orbit_2 = orbit_refinement(cr3bp, orbit_2, default, yv, cst);
-        default.plot.orbit = false;
-    else
-        orbit_2 = orbit_refinement(cr3bp, orbit_2, default, yv, cst);
-    end
+    orbit_2 = orbit_refinement(cr3bp, orbit_2, default, yv, cst);
     waitbar(i / maxIter);
 end
 close(h)

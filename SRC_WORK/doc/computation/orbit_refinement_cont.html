@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of orbit_refinement_cont</title>
+  <meta name="keywords" content="orbit_refinement_cont">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">computation</a> &gt; orbit_refinement_cont.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for computation&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>orbit_refinement_cont
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = orbit_refinement_cont(cr3bp, orbit, params, cst, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ orbit_refinement(cr3bp, orbit, params, cst)
+
+ Computation of the initial conditions orbit.y0 and various orbital
+ parameters from a given guess yv_guess
+
+ The routine makes use of a differential corrector adapted to three types
+ of orbits: orbit, planar lyapunov and vertical lyapunov. As for all
+ differential correctors, the convergence strongly depends on the quality
+ of the supplied first guess.
+-------------------------------------------------------------------------%
+ Inputs:
+ 1. cr3bp the structure containing the parent CR3BP
+ 2. orbit the structure containing the orbit to update
+ 3. params the structure containing the computation parameters
+ 4. yv_guess the initial guess
+ 5. cst the structure containing the numerical constants
+
+ Outputs:
+ 1. the udpated structure orbit
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="matrixToVector.html" class="code" title="function y = matrixToVector(y, M, nr, nc, shift)">matrixToVector</a>	-------------------------------------------------------------------------%</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% orbit_refinement(cr3bp, orbit, params, cst)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Computation of the initial conditions orbit.y0 and various orbital</span>
+0005 <span class="comment">% parameters from a given guess yv_guess</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% The routine makes use of a differential corrector adapted to three types</span>
+0008 <span class="comment">% of orbits: orbit, planar lyapunov and vertical lyapunov. As for all</span>
+0009 <span class="comment">% differential correctors, the convergence strongly depends on the quality</span>
+0010 <span class="comment">% of the supplied first guess.</span>
+0011 <span class="comment">%-------------------------------------------------------------------------%</span>
+0012 <span class="comment">% Inputs:</span>
+0013 <span class="comment">% 1. cr3bp the structure containing the parent CR3BP</span>
+0014 <span class="comment">% 2. orbit the structure containing the orbit to update</span>
+0015 <span class="comment">% 3. params the structure containing the computation parameters</span>
+0016 <span class="comment">% 4. yv_guess the initial guess</span>
+0017 <span class="comment">% 5. cst the structure containing the numerical constants</span>
+0018 <span class="comment">%</span>
+0019 <span class="comment">% Outputs:</span>
+0020 <span class="comment">% 1. the udpated structure orbit</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% Author: BLB</span>
+0023 <span class="comment">% Version: 1.0</span>
+0024 <span class="comment">% Year: 2015</span>
+0025 <span class="comment">%-------------------------------------------------------------------------%</span>
+0026 <a name="_sub0" href="#_subfunctions" class="code">function orbit = orbit_refinement_cont(cr3bp, orbit, params, cst, varargin)</a>
+0027 
+0028 <span class="comment">%----------------------------------------------------------------------</span>
+0029 <span class="comment">% Updating the state along the current tangent to the free-variables</span>
+0030 <span class="comment">% vector family:</span>
+0031 <span class="comment">%   X0^(n+1) = X0^n + ds * DX0^n</span>
+0032 <span class="comment">% with  - X0^n:   the converged solution of the previous step.</span>
+0033 <span class="comment">%       - DX0^n:  the null vector of the Jacobian associated to X0^n</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% Here, recall that X0 = [x0 z0 vy0 T12]^T,</span>
+0036 <span class="comment">% with vy0 = dot(y0), T12 = half period</span>
+0037 <span class="comment">%----------------------------------------------------------------------</span>
+0038 yv0    = orbit.y0;
+0039 yv0(1) = orbit.y0(1) + orbit.cont.ds*orbit.cont.nv(1);
+0040 yv0(3) = orbit.y0(3) + orbit.cont.ds*orbit.cont.nv(2);
+0041 yv0(5) = orbit.y0(5) + orbit.cont.ds*orbit.cont.nv(3);
+0042 T12    = orbit.T12   + orbit.cont.ds*orbit.cont.nv(4);
+0043 
+0044 <span class="comment">%-------------------------------------------------------------------------%</span>
+0045 <span class="comment">% Initial vector is concatenated with the STM matrix (Identity matrix)</span>
+0046 <span class="comment">% (just in case it has not been done before).</span>
+0047 <span class="comment">%-------------------------------------------------------------------------%</span>
+0048 yv0 = <a href="matrixToVector.html" class="code" title="function y = matrixToVector(y, M, nr, nc, shift)">matrixToVector</a>(yv0, cst.orbit.STM0, 6, 6, 6);
+0049 
+0050 <span class="comment">%-------------------------------------------------------------------------%</span>
+0051 <span class="comment">% Differential correction with pseudo-arclength constraint.</span>
+0052 <span class="comment">%-------------------------------------------------------------------------%</span>
+0053 orbit = diff_corr_3D_cont(yv0, T12, cr3bp, orbit, params, cst);
+0054 
+0055 <span class="comment">%-------------------------------------------------------------------------%</span>
+0056 <span class="comment">% Plotting (potentially)</span>
+0057 <span class="comment">%-------------------------------------------------------------------------%</span>
+0058 <span class="keyword">if</span>(params.plot.orbit == 1)
+0059     <span class="comment">%-------------------------------------</span>
+0060     <span class="comment">%Integration over one orbit</span>
+0061     <span class="comment">%-------------------------------------</span>
+0062     <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0063         options = odeset(<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0064         [~,yv] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),[0 orbit.T],orbit.y0(1:6), options);
+0065     <span class="keyword">else</span>
+0066         [~, ~, ~, yv] = ode78_cr3bp(0.0, orbit.T, orbit.y0(1:6), 6, cr3bp.mu);
+0067     <span class="keyword">end</span>
+0068     <span class="comment">%-------------------------------------</span>
+0069     <span class="comment">% Plot</span>
+0070     <span class="comment">%-------------------------------------</span>
+0071     orbit_plot(yv, orbit, params, cst);
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

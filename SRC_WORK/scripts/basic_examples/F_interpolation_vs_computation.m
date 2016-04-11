@@ -45,36 +45,53 @@
 init;
 
 %% Inner changes from default parameters
-
-% 1. Decomment the next line to use only MATLAB routines (very slow!)
-%--------------------------------------------------------------------------
-%default.computation.type = cst.computation.MATLAB;  
+default.plot.orbit = false; % Plotting is at the end so that the CPU time 
+                            % used for the plots is not taken into account 
+                            % in the above computations
 
 %% User data
-user.Az = 15000; %Az in [km]
+user.Az = 30000; %Az in [km]
 
 %% Structures init
 %Environment
 cr3bp = init_CR3BP('EARTH', 'MOON', default);
-
-%Orbits
-halo_L2 = init_orbit(cr3bp, cr3bp.l2,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst);
-halo_L1 = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst);              
-
-
-%% Orbit computation with interpolation
-tic;
-halo_L2 = halo_orbit_interpolation(cr3bp, halo_L2, halo_init_EML2, default, cst);
-halo_L1 = halo_orbit_interpolation(cr3bp, halo_L1, halo_init_EML1, default, cst);
-T = toc;
-fprintf('End of interpolation in %5.5f s\n', T);
-
+             
 %% Orbit computation with third order approximation
+
+%Init
+hl2_comp = init_orbit(cr3bp, cr3bp.l2,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst);
+hl1_comp = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst);    
+
 tic;
-halo_L2 = orbit_computation(cr3bp, halo_L2, default, cst);
-halo_L1 = orbit_computation(cr3bp, halo_L1, default, cst);
+hl2_comp = orbit_computation(cr3bp, hl2_comp, default, cst);
+hl1_comp = orbit_computation(cr3bp, hl1_comp, default, cst);
 T = toc;
-fprintf('End of computation in %5.5f s\n', T);
+
+% Conclusion
+fprintf('End of computation via ORBIT_COMPUTATION in %5.5f s\n', T);
+fprintf('EML1: Desired Az was %5.2fkm, actual is %5.2fkm \n', hl1_comp.Azdim_estimate, hl1_comp.Azdim);
+fprintf('EML2: Desired Az was %5.2fkm, actual is %5.2fkm \n', hl2_comp.Azdim_estimate, hl2_comp.Azdim);
+%% Orbit computation with interpolation
+
+%Init
+hl2_int = init_orbit(cr3bp, cr3bp.l2,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst);
+hl1_int = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, user.Az, cst); 
+
+tic;
+hl2_int = halo_orbit_interpolation(cr3bp, hl2_int, halo_init_EML2, default, cst);
+hl1_int = halo_orbit_interpolation(cr3bp, hl1_int, halo_init_EML1, default, cst);
+T = toc;
+
+% Conclusion
+fprintf('End of computation via HALO_ORBIT_INTERPOLATION in %5.5f s\n', T);
+fprintf('EML1: Desired Az was %5.2fkm, actual is %5.2fkm \n', hl1_int.Azdim_estimate, hl1_int.Azdim);
+fprintf('EML2: Desired Az was %5.2fkm, actual is %5.2fkm \n', hl2_int.Azdim_estimate, hl2_int.Azdim);
+
+%% Plotting is at the end so that the CPU time used for the plots is not taken into account in the above computations
+orbit_plot(hl2_comp, default, rgb('dark red'));
+orbit_plot(hl1_comp, default, rgb('dark red'));
+orbit_plot(hl2_int, default, rgb('dark green'));
+orbit_plot(hl1_int, default, rgb('dark green'));
 
 %% Change the orientation of the 3D plot, if it exists
 if(any(findall(0,'Type','Figure')==4))

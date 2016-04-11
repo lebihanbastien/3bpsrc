@@ -65,7 +65,31 @@ void TFCtoTF(const cdouble s1[6], double si[6]);
 //From Normalized-Centered coordinates to system coordinates
 void NCtoSYS(double t, const double yNC[], double yEM[], void *params_void);
 
+//-----------------------------------------------------------------------------
+// COC: NC <--> EM
+//-----------------------------------------------------------------------------
+/**
+ *  \brief COC: from Normalized-Centered coordinates to Earth-Moon coordinates
+ **/
+void NCtoEM(double t, const double yNC[], double yEM[], QBCP_L *qbp);
 
+/**
+ *  \brief COC: from Earth-Moon coordinates to Normalized-Centered coordinates
+ **/
+void EMtoNC(double t, const double yEM[], double yNC[], QBCP_L *qbp);
+
+//-----------------------------------------------------------------------------
+// COC: NC <--> SEM
+//-----------------------------------------------------------------------------
+/**
+ *  \brief COC: from Sun-Earth-Moon coordinates to Normalized-Centered coordinates
+ **/
+void SEMtoNC(double t, const double ySEM[], double yNC[], QBCP_L *qbp);
+
+/**
+ *  \brief COC: from Normalized-Centered coordinates to Sun-Earth-Moon coordinates
+ **/
+void NCtoSEM(double t, const double yNC[], double ySEM[], QBCP_L *qbp);
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 //
@@ -248,4 +272,22 @@ double evaluateOdd(double t, double omega,  int order, double *coef, double *sR)
  *  \brief Evaluate the sum \f$ \sum_{k = 0}^N  k \omega coef(k) cos(k \omega t)  \f$.
  */
 double evaluateOddDerivative(double t, double omega,  int order, double *coef, double *cR);
+
+//-----------------------------------------------------------------------------
+// Evaluate the QBTBP
+//-----------------------------------------------------------------------------
+/**
+ *  \brief Evaluate z(t), with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evz(Ofsc& zr, double t, double n, double ni, double ai);
+
+/**
+ *  \brief Evaluate dz(t)/dt, with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evzdot(Ofsc& zr, Ofsc& ztdot, double t, double n, double ni, double ai);
+
+/**
+ *  \brief Evaluate d2z(t)/dt2, with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evzddot(Ofsc& zr, Ofsc& ztdot, Ofsc& ztddot, double t, double n, double ni, double ai);
 #endif // PMCOC_H_INCLUDED

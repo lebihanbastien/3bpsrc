@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of data_reading_plotting</title>
+  <meta name="keywords" content="data_reading_plotting">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">data</a> &gt; data_reading_plotting.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for data&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>data_reading_plotting
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+ This matlab file reads the data in txt format and outputs them in matlab
+ format. Additionnal plots are produced to check the monotony of the Az =
+ f(x0) function.
+ RM: the data files contain the NORTHERN family.
+
+ Author: BLB
+ Version: 1.0
+ Year: 2014
+--------------------------------------------------------------------------
+ Add subfolder to the path</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%--------------------------------------------------------------------------</span>
+0002 <span class="comment">% This matlab file reads the data in txt format and outputs them in matlab</span>
+0003 <span class="comment">% format. Additionnal plots are produced to check the monotony of the Az =</span>
+0004 <span class="comment">% f(x0) function.</span>
+0005 <span class="comment">% RM: the data files contain the NORTHERN family.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Author: BLB</span>
+0008 <span class="comment">% Version: 1.0</span>
+0009 <span class="comment">% Year: 2014</span>
+0010 <span class="comment">%--------------------------------------------------------------------------</span>
+0011 <span class="comment">% Add subfolder to the path</span>
+0012 addpath(<span class="string">'./data'</span>);
+0013 addpath(<span class="string">'./computation'</span>);
+0014 addpath(<span class="string">'./init'</span>);
+0015 
+0016 <span class="comment">%% Constants init</span>
+0017 cst = constants_init();
+0018 
+0019 <span class="comment">%% Parameters init (to default values, see values within routine)</span>
+0020 default = parameters_default_init(cst);
+0021 
+0022 <span class="comment">%% Structures init</span>
+0023 <span class="comment">%Environment</span>
+0024 cr3bp = init_CR3BP(<span class="string">'EARTH'</span>, <span class="string">'MOON'</span>, default);
+0025 
+0026 <span class="comment">%% FILE reading (L2)</span>
+0027 fileID = fopen(<span class="string">'halo_init_matrix_EML2.txt'</span>,<span class="string">'r'</span>);
+0028 C_data1 = textscan(fileID,<span class="string">'%f %f %f %f %f %f %f'</span>,<span class="string">'CollectOutput'</span>,1);
+0029 fclose(fileID);
+0030 halo_init_EML2.matrix = C_data1{1};
+0031 halo_init_EML2.Azlimit = 0.19953;  <span class="comment">%ensure monotony of Az = f(x0) and good interpolation</span>
+0032 
+0033 <span class="comment">%Append jacobi vector</span>
+0034 <span class="keyword">for</span> i=1:size(halo_init_EML2.matrix,1)
+0035    halo_init_EML2.matrix(i,8) = jacobi(halo_init_EML2.matrix(i,1:6), cr3bp.mu);
+0036 <span class="keyword">end</span>
+0037 <span class="comment">% Limits to ensure good interpolation</span>
+0038 halo_init_EML2.Cjaclimit(1) = 3.0320;
+0039 halo_init_EML2.Cjaclimit(2) = 3.1641;
+0040 
+0041 <span class="comment">% Save</span>
+0042 save halo_init_matrix_EML2 halo_init_EML2
+0043 
+0044 <span class="comment">%% FILE reading (L1)</span>
+0045 fileID = fopen(<span class="string">'halo_init_matrix_EML1.txt'</span>,<span class="string">'r'</span>);
+0046 C_data1 = textscan(fileID,<span class="string">'%f %f %f %f %f %f %f'</span>,<span class="string">'CollectOutput'</span>,1);
+0047 fclose(fileID);
+0048 halo_init_EML1.matrix = C_data1{1};
+0049 halo_init_EML1.Azlimit = 0.32983;  <span class="comment">%ensure monotony of Az = f(x0) and good interpolation</span>
+0050 
+0051 <span class="comment">%Append jacobi vector</span>
+0052 <span class="keyword">for</span> i=1:size(halo_init_EML1.matrix,1)
+0053    halo_init_EML1.matrix(i,8) = jacobi(halo_init_EML1.matrix(i,1:6), cr3bp.mu);
+0054 <span class="keyword">end</span>
+0055 <span class="comment">% Limits to ensure good interpolation</span>
+0056 halo_init_EML1.Cjaclimit(1) = 2.9213;
+0057 halo_init_EML1.Cjaclimit(2) = 3.1862;
+0058 
+0059 
+0060 save halo_init_matrix_EML1 halo_init_EML1
+0061 
+0062 <span class="comment">%% Plot (L2)</span>
+0063 figure;
+0064 hold on;
+0065 grid on;
+0066 title(<span class="string">'Initial condition for halo orbit computation @EML2: Az as a function of x0'</span>, <span class="string">'FontSize'</span>, 20);
+0067 xlabel(<span class="string">'x0 [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0068 ylabel(<span class="string">'Az [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0069 plot(halo_init_EML2.matrix(:,1), halo_init_EML2.matrix(:,7), <span class="string">'LineWidth'</span>, 3);
+0070 set(gca,  <span class="string">'FontSize'</span>, 20);
+0071 
+0072 
+0073 figure;
+0074 hold on;
+0075 grid on;
+0076 title(<span class="string">'Jacobi constant as a function of x0 @EML2'</span>, <span class="string">'FontSize'</span>, 20);
+0077 ylabel(<span class="string">'Jacobi [-]'</span>, <span class="string">'FontSize'</span>, 20);
+0078 xlabel(<span class="string">'x0 [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0079 plot(halo_init_EML2.matrix(:,1), halo_init_EML2.matrix(:,8), <span class="string">'LineWidth'</span>, 3);
+0080 set(gca,  <span class="string">'FontSize'</span>, 20);
+0081 <span class="comment">%% Plot (L1)</span>
+0082 figure;
+0083 hold on;
+0084 grid on;
+0085 title(<span class="string">'Initial condition for halo orbit computation @EML1: Az as a function of x0'</span>, <span class="string">'FontSize'</span>, 20);
+0086 xlabel(<span class="string">'x0 [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0087 ylabel(<span class="string">'Az [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0088 plot(halo_init_EML1.matrix(:,1), halo_init_EML1.matrix(:,7), <span class="string">'LineWidth'</span>, 3);
+0089 set(gca,  <span class="string">'FontSize'</span>, 20);
+0090 
+0091 figure;
+0092 hold on;
+0093 grid on;
+0094 title(<span class="string">'Jacobi constant as a function of x0 @EML1'</span>, <span class="string">'FontSize'</span>, 20);
+0095 ylabel(<span class="string">'Jacobi [-]'</span>, <span class="string">'FontSize'</span>, 20);
+0096 xlabel(<span class="string">'x0 [km]'</span>, <span class="string">'FontSize'</span>, 20);
+0097 plot(halo_init_EML1.matrix(:,1), halo_init_EML1.matrix(:,8), <span class="string">'LineWidth'</span>, 3);
+0098 set(gca,  <span class="string">'FontSize'</span>, 20);</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

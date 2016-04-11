@@ -1,0 +1,132 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_manifold_branch_event</title>
+  <meta name="keywords" content="init_manifold_branch_event">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">init</a> &gt; init_manifold_branch_event.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for init&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>init_manifold_branch_event
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [ manifold_branch ] = init_manifold_branch_event(stability, way, varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ init_manifold_branch_event(stability, way, varargin)
+
+ Initializes a manifold branch (with event) prior to real computation.
+ See within code for inputs details.
+       
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% init_manifold_branch_event(stability, way, varargin)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Initializes a manifold branch (with event) prior to real computation.</span>
+0005 <span class="comment">% See within code for inputs details.</span>
+0006 <span class="comment">%</span>
+0007 <span class="comment">% Author: BLB</span>
+0008 <span class="comment">% Version: 1.0</span>
+0009 <span class="comment">% Year: 2015</span>
+0010 <span class="comment">%-------------------------------------------------------------------------%</span>
+0011 <a name="_sub0" href="#_subfunctions" class="code">function [ manifold_branch ] = init_manifold_branch_event(stability, way, varargin)</a>
+0012 
+0013 <span class="keyword">if</span>(nargin == 3)
+0014     <span class="comment">%----------------------------------------------</span>
+0015     <span class="comment">%if nargin == 3 we have the following inputs in varargin:</span>
+0016     <span class="comment">% 1. event</span>
+0017     <span class="comment">%----------------------------------------------</span>
+0018     <span class="comment">%Stability (stable or unstable)</span>
+0019     manifold_branch.stability = stability;
+0020     <span class="comment">%Exterior or interior</span>
+0021     manifold_branch.way = way;
+0022     <span class="comment">%Event during integration</span>
+0023     manifold_branch.event = varargin{1};
+0024     
+0025 <span class="keyword">elseif</span>(nargin == 8)
+0026     <span class="comment">%----------------------------------------------</span>
+0027     <span class="comment">% if nargin == 8 we have the following inputs in varargin, in this order:</span>
+0028     <span class="comment">% 1. event_type</span>
+0029     <span class="comment">% 2. event_value</span>
+0030     <span class="comment">% 3. event_isterminal</span>
+0031     <span class="comment">% 4. event_direction</span>
+0032     <span class="comment">% 5. event_center</span>
+0033     <span class="comment">% 6. cst</span>
+0034     <span class="comment">%----------------------------------------------</span>
+0035     cst = varargin{6};
+0036     <span class="comment">%Stability (stable or unstable)</span>
+0037     manifold_branch.stability = stability;
+0038     <span class="comment">%Exterior or interior</span>
+0039     manifold_branch.way = way;
+0040     <span class="comment">%Event type during integration</span>
+0041     manifold_branch.event.type = varargin{1};
+0042     <span class="comment">%Definition parameter for the event plane</span>
+0043     manifold_branch.event.value = varargin{2};
+0044     <span class="comment">%Is the event terminal?</span>
+0045     manifold_branch.event.isterminal = varargin{3};
+0046     <span class="comment">%Dimension: dim = 1 for x, dim = 2 for y, dim = 0 if there is no event set</span>
+0047     <span class="keyword">switch</span>(varargin{1})
+0048         <span class="keyword">case</span> cst.manifold.event.type.X_SECTION
+0049             manifold_branch.event.dim = 1;
+0050         <span class="keyword">case</span> cst.manifold.event.type.Y_SECTION
+0051             manifold_branch.event.dim = 2;
+0052         <span class="keyword">case</span> cst.manifold.event.type.Z_SECTION
+0053             manifold_branch.event.dim = 3;
+0054         <span class="keyword">case</span> cst.manifold.event.type.FREE
+0055             manifold_branch.event.dim = 0;
+0056         <span class="keyword">otherwise</span> 
+0057             manifold_branch.event.dim = 0;
+0058     <span class="keyword">end</span>
+0059    
+0060     <span class="comment">%Decreasing (-1), increasing (1) or all (0) zeros;</span>
+0061     manifold_branch.event.direction = varargin{4};
+0062     
+0063     <span class="comment">%Center (if the event is an angle event e.g. for lunar flyby detection).</span>
+0064     manifold_branch.event.center = varargin{5};
+0065     
+0066     <span class="comment">%MAx events: one by default</span>
+0067     manifold_branch.event.max_events = 1;
+0068 <span class="keyword">else</span>
+0069     error(<span class="string">'wrong number of arguments'</span>);
+0070 <span class="keyword">end</span>
+0071 
+0072 <span class="keyword">end</span>
+0073 
+0074 
+0075 
+0076</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

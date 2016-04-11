@@ -1,0 +1,250 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of manifold_branch_computation</title>
+  <meta name="keywords" content="manifold_branch_computation">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">computation</a> &gt; manifold_branch_computation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for computation&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>manifold_branch_computation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function manifold_branch = manifold_branch_computation(cr3bp, orbit, manifold_branch, theta, t, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ manifold_branch_computation(cr3bp, orbit, manifold_branch, theta, t, params, cst)
+
+ Updates a manifold branch
+
+ WARNING: the orbit structure should be properly computed prior to the use
+ of this routine.
+-------------------------------------------------------------------------%
+ Inputs:
+
+ 1. cr3bp the current three-body problem
+ 2. orbit the current orbit
+ 3. manifold_branch the branch to be updated
+ 4. theta the position of departure on the orbit. Should be taken
+ in [0 1]. 
+ 5. t the maximum integration time
+ 6. params user parameters
+ 7. cst numerical constants
+
+ Outputs:
+
+ 1. manifold_branch the updated manifold_branch
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function distSP = distanceToPrim(yv, orbit)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% manifold_branch_computation(cr3bp, orbit, manifold_branch, theta, t, params, cst)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Updates a manifold branch</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% WARNING: the orbit structure should be properly computed prior to the use</span>
+0007 <span class="comment">% of this routine.</span>
+0008 <span class="comment">%-------------------------------------------------------------------------%</span>
+0009 <span class="comment">% Inputs:</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% 1. cr3bp the current three-body problem</span>
+0012 <span class="comment">% 2. orbit the current orbit</span>
+0013 <span class="comment">% 3. manifold_branch the branch to be updated</span>
+0014 <span class="comment">% 4. theta the position of departure on the orbit. Should be taken</span>
+0015 <span class="comment">% in [0 1].</span>
+0016 <span class="comment">% 5. t the maximum integration time</span>
+0017 <span class="comment">% 6. params user parameters</span>
+0018 <span class="comment">% 7. cst numerical constants</span>
+0019 <span class="comment">%</span>
+0020 <span class="comment">% Outputs:</span>
+0021 <span class="comment">%</span>
+0022 <span class="comment">% 1. manifold_branch the updated manifold_branch</span>
+0023 <span class="comment">%</span>
+0024 <span class="comment">% Author: BLB</span>
+0025 <span class="comment">% Version: 1.0</span>
+0026 <span class="comment">% Year: 2015</span>
+0027 <span class="comment">%-------------------------------------------------------------------------%</span>
+0028 <a name="_sub0" href="#_subfunctions" class="code">function manifold_branch = manifold_branch_computation(cr3bp, orbit, manifold_branch, theta, t, params, cst)</a>
+0029 
+0030 <span class="comment">%-------------------------------------------------------------------------%</span>
+0031 <span class="comment">%Integration until theta is reached</span>
+0032 <span class="comment">%-------------------------------------------------------------------------%</span>
+0033 <span class="keyword">if</span>(theta &gt; 0)
+0034     <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0035         <span class="comment">%-----------------------------</span>
+0036         <span class="comment">% If MATLAB routines only</span>
+0037         <span class="comment">%-----------------------------</span>
+0038         options = odeset(<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0039         [~,yvv] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T*theta],orbit.y0,options);
+0040         yv = yvv(<span class="keyword">end</span>,:);
+0041     <span class="keyword">else</span>
+0042         <span class="comment">%-----------------------------</span>
+0043         <span class="comment">% If MEX routines are allowed</span>
+0044         <span class="comment">%-----------------------------</span>
+0045         [~, yv] = ode78_cr3bp(0.0, orbit.T*theta, orbit.y0, 42, cr3bp.mu);
+0046     <span class="keyword">end</span>
+0047 <span class="keyword">else</span>
+0048     yv = orbit.y0';
+0049 <span class="keyword">end</span>
+0050 
+0051 <span class="comment">%-------------------------------------------------------------------------%</span>
+0052 <span class="comment">% Current STM</span>
+0053 <span class="comment">%-------------------------------------------------------------------------%</span>
+0054 STM = eye(6);
+0055 <span class="keyword">for</span> i = 1 : 6
+0056     <span class="keyword">for</span> j = 1 : 6
+0057         m = 6*(i-1) + j;
+0058         STM(i,j) = yv(m+6);
+0059     <span class="keyword">end</span>
+0060 <span class="keyword">end</span>
+0061 
+0062 <span class="comment">%-------------------------------------------------------------------------%</span>
+0063 <span class="comment">% New vectors and initial state</span>
+0064 <span class="comment">%-------------------------------------------------------------------------%</span>
+0065 <span class="keyword">if</span>(manifold_branch.stability == cst.manifold.STABLE)
+0066     vecp = STM*orbit.stable_direction;<span class="comment">%New vector</span>
+0067     vecp_norm = vecp/norm(vecp);    
+0068 <span class="keyword">else</span>
+0069     vecp = STM*orbit.unstable_direction;<span class="comment">%New vector</span>
+0070     vecp_norm = vecp/norm(vecp);
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%Initial state</span>
+0074 xs01 = (1:6)';
+0075 <span class="keyword">for</span> i = 1 : 6
+0076     xs01(i) = yv(<span class="keyword">end</span>,i) + vecp_norm(1)*manifold_branch.way*cr3bp.d_man*vecp_norm(i);
+0077 <span class="keyword">end</span>
+0078  
+0079 
+0080 <span class="comment">%-------------------------------------------------------------------------%</span>
+0081 <span class="comment">%Integration</span>
+0082 <span class="comment">%-------------------------------------------------------------------------%</span>
+0083 <span class="comment">% Backwards or forward integration</span>
+0084 <span class="keyword">if</span>(manifold_branch.stability == 1)
+0085     tspan = [0 -t];
+0086 <span class="keyword">else</span>
+0087     tspan = [0 t];
+0088 <span class="keyword">end</span>
+0089 
+0090 <span class="comment">%-------------------------------------------------------------------------%</span>
+0091 <span class="comment">% Termination?</span>
+0092 <span class="comment">%-------------------------------------------------------------------------%</span>
+0093 <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0094     <span class="comment">%-----------------------------</span>
+0095     <span class="comment">% If MATLAB routines only</span>
+0096     <span class="comment">%-----------------------------</span>
+0097     <span class="keyword">switch</span>(manifold_branch.event.type)
+0098         <span class="keyword">case</span> cst.manifold.event.type.FREE
+0099             options = odeset(<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0100             [t,yv] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+0101             te = t(end);
+0102             yve = yv(<span class="keyword">end</span>, :);  
+0103         <span class="keyword">case</span> cst.manifold.event.type.ANGLE_SECTION
+0104             options = odeset(<span class="string">'Event'</span>,@(t,y)odezero_angle(t,y,manifold_branch.event), <span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0105             [t,yv,te,yve] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+0106             <span class="comment">%If no event</span>
+0107             <span class="keyword">if</span>(isempty(te))
+0108                te = t(end);
+0109                yve = yv(<span class="keyword">end</span>, :);
+0110             <span class="keyword">end</span>
+0111         <span class="keyword">otherwise</span>
+0112             options = odeset(<span class="string">'Event'</span>,@(t,y)odezero_plane(t,y,manifold_branch.event), <span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0113             [t,yv,te,yve] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+0114             <span class="comment">%If no event</span>
+0115             <span class="keyword">if</span>(isempty(te))
+0116                te = t(end);
+0117                yve = yv(<span class="keyword">end</span>, :);
+0118             <span class="keyword">end</span>
+0119     <span class="keyword">end</span>
+0120 <span class="keyword">else</span>
+0121     <span class="comment">%-----------------------------</span>
+0122     <span class="comment">% If MEX routines are allowed</span>
+0123     <span class="comment">%-----------------------------</span>
+0124     <span class="keyword">switch</span>(manifold_branch.event.type)
+0125         <span class="keyword">case</span> cst.manifold.event.type.FREE
+0126             [te, yve, t, yv] = ode78_cr3bp(0.0, tspan(2), xs01, 6, cr3bp.mu);
+0127         <span class="keyword">otherwise</span>
+0128             [te, yve, t, yv] = ode78_cr3bp_event(0.0, tspan(2), xs01, 6, cr3bp.mu, manifold_branch.event);
+0129     <span class="keyword">end</span>
+0130 <span class="keyword">end</span>
+0131     
+0132 
+0133 <span class="comment">%-------------------------------------------------------------------------%</span>
+0134 <span class="comment">% Compute min distance with the smallest prim</span>
+0135 <span class="comment">%-------------------------------------------------------------------------%</span>
+0136 distSP = <a href="#_sub1" class="code" title="subfunction distSP = distanceToPrim(yv, orbit)">distanceToPrim</a>(yv(1,:), orbit);
+0137 Rm2 = cr3bp.m2.Req/cr3bp.L;
+0138 <span class="keyword">for</span> i = 2:size(yv,1)
+0139     <span class="keyword">if</span>(distSP &gt; <a href="#_sub1" class="code" title="subfunction distSP = distanceToPrim(yv, orbit)">distanceToPrim</a>(yv(i,:), orbit))
+0140        distSP =  <a href="#_sub1" class="code" title="subfunction distSP = distanceToPrim(yv, orbit)">distanceToPrim</a>(yv(i,:), orbit);
+0141     <span class="keyword">end</span>
+0142     <span class="keyword">if</span>(<a href="#_sub1" class="code" title="subfunction distSP = distanceToPrim(yv, orbit)">distanceToPrim</a>(yv(i,:), orbit) &lt; Rm2)
+0143         disp(<span class="string">'Intersection with the smallest primary'</span>);
+0144         yv = yv(1:i,:);
+0145         yve = yv(i,:);
+0146         te = t(i);
+0147         <span class="keyword">break</span>;
+0148         
+0149     <span class="keyword">end</span>
+0150 <span class="keyword">end</span>
+0151 
+0152 
+0153 <span class="comment">%-------------------------------------------------------------------------%</span>
+0154 <span class="comment">% Output</span>
+0155 <span class="comment">%-------------------------------------------------------------------------%</span>
+0156 manifold_branch.termination_time = te;
+0157 manifold_branch.yv = yve;
+0158 
+0159 <span class="comment">%-------------------------------------------------------------------------%</span>
+0160 <span class="comment">% Plotting (potentially)</span>
+0161 <span class="comment">%-------------------------------------------------------------------------%</span>
+0162 <span class="keyword">if</span>(params.plot.manifold_branch == cst.TRUE)
+0163     manifold_plot(yv, orbit, manifold_branch, params, cst);
+0164 <span class="keyword">end</span>
+0165 
+0166 
+0167 <span class="keyword">end</span>
+0168 
+0169 <span class="comment">%-------------------------------------------------------------------------%</span>
+0170 <span class="comment">% Distance to the smallest primary</span>
+0171 <span class="comment">%-------------------------------------------------------------------------%</span>
+0172 <a name="_sub1" href="#_subfunctions" class="code">function distSP = distanceToPrim(yv, orbit)</a>
+0173     distSP =  sqrt((yv(1) - 1 + orbit.cr3bp.mu)^2 + yv(2)^2 + yv(3)^2);
+0174 <span class="keyword">end</span>
+0175</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

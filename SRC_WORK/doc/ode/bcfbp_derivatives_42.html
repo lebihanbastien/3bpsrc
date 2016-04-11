@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of bcfbp_derivatives_42</title>
+  <meta name="keywords" content="bcfbp_derivatives_42">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">ode</a> &gt; bcfbp_derivatives_42.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for ode&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>bcfbp_derivatives_42
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function out = bcfbp_derivatives_42(t,y,mu, omega0) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ Bicircular Four-Body Problem:
+     Equations of motion for the 6-dimension state + 6*6 State
+     Transisition Matrix in ode45 format.
+       
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+
+ @TODO: Outsource the hard coded values of ms, as, omegaS
+-------------------------------------------------------------------------%
+ y = (x y z xp yp zp STM)</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function xout = d1_u_b4(mu, ms, as, x,y,z, theta)</a></li><li><a href="#_sub2" class="code">function xout = d2_u_b4(mu, ms, as, x,y,z, theta)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% Bicircular Four-Body Problem:</span>
+0003 <span class="comment">%     Equations of motion for the 6-dimension state + 6*6 State</span>
+0004 <span class="comment">%     Transisition Matrix in ode45 format.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Author: BLB</span>
+0007 <span class="comment">% Version: 1.0</span>
+0008 <span class="comment">% Year: 2015</span>
+0009 <span class="comment">%</span>
+0010 <span class="comment">% @TODO: Outsource the hard coded values of ms, as, omegaS</span>
+0011 <span class="comment">%-------------------------------------------------------------------------%</span>
+0012 <span class="comment">% y = (x y z xp yp zp STM)</span>
+0013 <a name="_sub0" href="#_subfunctions" class="code">function out = bcfbp_derivatives_42(t,y,mu, omega0)</a>
+0014 
+0015 ms = 328900.54; 
+0016 as = 388.81114;
+0017 omegaS = -0.925195985520347;
+0018 
+0019 <span class="comment">%Output declaration</span>
+0020 out = (1:42)';
+0021 
+0022 <span class="comment">%-------------------------------------------------------------------------------</span>
+0023 <span class="comment">% Update first derivatives of the potential \bar{U} (cf Koon et al. 2006)</span>
+0024 <span class="comment">%-------------------------------------------------------------------------------</span>
+0025 d1_ub = <a href="#_sub1" class="code" title="subfunction xout = d1_u_b4(mu, ms, as, x,y,z, theta)">d1_u_b4</a>(mu, ms, as, y(1),y(2),y(3), omega0+omegaS*t);
+0026 d2_ub = <a href="#_sub2" class="code" title="subfunction xout = d2_u_b4(mu, ms, as, x,y,z, theta)">d2_u_b4</a>(mu, ms, as, y(1),y(2),y(3), omega0+omegaS*t);
+0027 
+0028 <span class="comment">%--------------------------------------------------------------------------</span>
+0029 <span class="comment">%Phase space derivatives</span>
+0030 <span class="comment">%--------------------------------------------------------------------------</span>
+0031 out(1) = y(4);
+0032 out(2) = y(5);
+0033 out(3) = y(6);
+0034 out(4) = d1_ub(1) + 2*y(5);
+0035 out(5) = d1_ub(2) - 2*y(4);
+0036 out(6) = d1_ub(3);
+0037 
+0038 <span class="comment">%--------------------------------------------------------------------------</span>
+0039 <span class="comment">% STM derivatives</span>
+0040 <span class="comment">%--------------------------------------------------------------------------</span>
+0041 <span class="comment">%STM is updated</span>
+0042 Phi = eye(6);
+0043 <span class="keyword">for</span> i = 1 : 6
+0044     <span class="keyword">for</span> j = 1 : 6
+0045         m = 6*(i-1) + j;
+0046         Phi(i,j) = y(6+m);
+0047     <span class="keyword">end</span>
+0048 <span class="keyword">end</span>
+0049 
+0050 <span class="comment">% Omega 3*3</span>
+0051 Omega = zeros(3);
+0052 Omega(1,2) = 1;
+0053 Omega(2,1) = -1;
+0054 
+0055 <span class="comment">%Matrices triviales</span>
+0056 I3 = eye(3);
+0057 Z3 = zeros(3);
+0058 
+0059 <span class="comment">%Super matrix Df(x) (6*6)</span>
+0060 Df = [Z3 I3 ; d2_ub 2*Omega];
+0061 
+0062 <span class="comment">%Derivative</span>
+0063 d_Phi = Df * Phi;
+0064 
+0065 <span class="comment">%Storage in output</span>
+0066 <span class="keyword">for</span> i = 1 : 6
+0067     <span class="keyword">for</span> j = 1 : 6
+0068         m = 6*(i-1) + j;
+0069         out(6+m) = d_Phi(i,j);
+0070     <span class="keyword">end</span>
+0071 <span class="keyword">end</span>
+0072 
+0073 
+0074 
+0075 <span class="keyword">end</span>
+0076 
+0077 <span class="comment">%-------------------------------------------------------------------------%</span>
+0078 <span class="comment">% First derivatives of the energy potential</span>
+0079 <span class="comment">%-------------------------------------------------------------------------%</span>
+0080 <a name="_sub1" href="#_subfunctions" class="code">function xout = d1_u_b4(mu, ms, as, x,y,z, theta)</a>
+0081 r1 = sqrt((x+mu)^2 + y^2 + z^2);
+0082 r2 = sqrt((x-1+mu)^2 + y^2 + z^2);
+0083 rs = sqrt((x-as*cos(theta))^2 + (y-as*sin(theta))^2 + z^2);
+0084 xout(1) = x - (1-mu)/r1^3*(x+mu) - mu/r2^3*(x-1+mu) - ms/rs^3*(x-as*cos(theta)) - ms/as^2*cos(theta);
+0085 xout(2) = y - (1-mu)/r1^3*y      - mu/r2^3*y        - ms/rs^3*(y-as*sin(theta)) - ms/as^2*sin(theta);
+0086 xout(3) =   - (1-mu)/r1^3*z      - mu/r2^3*z        - ms/rs^3*z;
+0087 <span class="keyword">end</span>
+0088 
+0089 <span class="comment">%-------------------------------------------------------------------------%</span>
+0090 <span class="comment">% Seconde derivatives of the energy potential</span>
+0091 <span class="comment">%-------------------------------------------------------------------------%</span>
+0092 <a name="_sub2" href="#_subfunctions" class="code">function xout = d2_u_b4(mu, ms, as, x,y,z, theta)</a>
+0093 
+0094 xout(1,1) = (mu - 1)/((mu + x)^2 + y^2 + z^2)^(3/2) - ms/((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(3/2) - mu/((mu + x - 1)^2 + y^2 + z^2)^(3/2) + (3*ms*(2*x - 2*as*cos(theta))^2)/(4*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) + (3*mu*(2*mu + 2*x - 2)^2)/(4*((mu + x - 1)^2 + y^2 + z^2)^(5/2)) - (3*(2*mu + 2*x)^2*(mu - 1))/(4*((mu + x)^2 + y^2 + z^2)^(5/2)) + 1;
+0095 xout(1,2) = (3*mu*y*(2*mu + 2*x - 2))/(2*((mu + x - 1)^2 + y^2 + z^2)^(5/2)) - (3*y*(2*mu + 2*x)*(mu - 1))/(2*((mu + x)^2 + y^2 + z^2)^(5/2)) + (3*ms*(2*x - 2*as*cos(theta))*(2*y - 2*as*sin(theta)))/(4*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2));
+0096 xout(1,3) = (3*ms*z*(2*x - 2*as*cos(theta)))/(2*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) + (3*mu*z*(2*mu + 2*x - 2))/(2*((mu + x - 1)^2 + y^2 + z^2)^(5/2)) - (3*z*(2*mu + 2*x)*(mu - 1))/(2*((mu + x)^2 + y^2 + z^2)^(5/2));
+0097 
+0098 xout(2,1) = (3*mu*y*(2*mu + 2*x - 2))/(2*((mu + x - 1)^2 + y^2 + z^2)^(5/2)) - (3*y*(2*mu + 2*x)*(mu - 1))/(2*((mu + x)^2 + y^2 + z^2)^(5/2)) + (3*ms*(2*x - 2*as*cos(theta))*(2*y - 2*as*sin(theta)))/(4*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2));
+0099 xout(2,2) = (mu - 1)/((mu + x)^2 + y^2 + z^2)^(3/2) - ms/((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(3/2) - mu/((mu + x - 1)^2 + y^2 + z^2)^(3/2) - (3*y^2*(mu - 1))/((mu + x)^2 + y^2 + z^2)^(5/2) + (3*ms*(2*y - 2*as*sin(theta))^2)/(4*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) + (3*mu*y^2)/((mu + x - 1)^2 + y^2 + z^2)^(5/2) + 1;
+0100 xout(2,3) = (3*ms*z*(2*y - 2*as*sin(theta)))/(2*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) - (3*y*z*(mu - 1))/((mu + x)^2 + y^2 + z^2)^(5/2) + (3*mu*y*z)/((mu + x - 1)^2 + y^2 + z^2)^(5/2);
+0101 
+0102 xout(3,1) = (3*ms*z*(2*x - 2*as*cos(theta)))/(2*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) + (3*mu*z*(2*mu + 2*x - 2))/(2*((mu + x - 1)^2 + y^2 + z^2)^(5/2)) - (3*z*(2*mu + 2*x)*(mu - 1))/(2*((mu + x)^2 + y^2 + z^2)^(5/2));
+0103 xout(3,2) = (3*ms*z*(2*y - 2*as*sin(theta)))/(2*((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2)) - (3*y*z*(mu - 1))/((mu + x)^2 + y^2 + z^2)^(5/2) + (3*mu*y*z)/((mu + x - 1)^2 + y^2 + z^2)^(5/2);
+0104 xout(3,3) = (mu - 1)/((mu + x)^2 + y^2 + z^2)^(3/2) - ms/((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(3/2) - mu/((mu + x - 1)^2 + y^2 + z^2)^(3/2) - (3*z^2*(mu - 1))/((mu + x)^2 + y^2 + z^2)^(5/2) + (3*mu*z^2)/((mu + x - 1)^2 + y^2 + z^2)^(5/2) + (3*ms*z^2)/((x - as*cos(theta))^2 + z^2 + (y - as*sin(theta))^2)^(5/2);
+0105 
+0106 <span class="keyword">end</span>
+0107 
+0108</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

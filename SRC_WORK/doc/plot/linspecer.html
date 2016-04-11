@@ -1,0 +1,292 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of linspecer</title>
+  <meta name="keywords" content="linspecer">
+  <meta name="description" content="function lineStyles = linspecer(N)">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">plot</a> &gt; linspecer.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for plot&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>linspecer
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function lineStyles = linspecer(N)</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function lineStyles=linspecer(N,varargin) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> function lineStyles = linspecer(N)
+ This function creates an Nx3 array of N [R B G] colors
+ These can be used to plot lots of lines with distinguishable and nice
+ looking colors.
+ 
+ lineStyles = linspecer(N);  makes N colors for you to use: lineStyles(ii,:)
+ 
+ colormap(linspecer); set your colormap to have easily distinguishable 
+                      colors and a pleasing aesthetic
+ 
+ lineStyles = linspecer(N,'qualitative'); forces the colors to all be distinguishable (up to 12)
+ lineStyles = linspecer(N,'sequential'); forces the colors to vary along a spectrum 
+ 
+ % Examples demonstrating the colors.
+ 
+ LINE COLORS
+ N=6;
+ X = linspace(0,pi*3,1000); 
+ Y = bsxfun(@(x,n)sin(x+2*n*pi/N), X.', 1:N); 
+ C = linspecer(N);
+ axes('NextPlot','replacechildren', 'ColorOrder',C);
+ plot(X,Y,'linewidth',5)
+ ylim([-1.1 1.1]);
+ 
+ SIMPLER LINE COLOR EXAMPLE
+ N = 6; X = linspace(0,pi*3,1000);
+ C = linspecer(N)
+ hold off;
+ for ii=1:N
+     Y = sin(X+2*ii*pi/N);
+     plot(X,Y,'color',C(ii,:),'linewidth',3);
+     hold on;
+ end
+ 
+ COLORMAP EXAMPLE
+ A = rand(15);
+ figure; imagesc(A); % default colormap
+ figure; imagesc(A); colormap(linspecer); % linspecer colormap
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ by Jonathan Lansey, March 2009-2013 � Lansey at gmail.com               %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ 
+% credits and where the function came from
+ The colors are largely taken from:
+ http://colorbrewer2.org and Cynthia Brewer, Mark Harrower and The Pennsylvania State University
+ 
+ 
+ She studied this from a phsychometric perspective and crafted the colors
+ beautifully.
+ 
+ I made choices from the many there to decide the nicest once for plotting
+ lines in Matlab. I also made a small change to one of the colors I
+ thought was a bit too bright. In addition some interpolation is going on
+ for the sequential line styles.
+ 
+ 
+%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="linspecer.html" class="code" title="function lineStyles=linspecer(N,varargin)">linspecer</a>	function lineStyles = linspecer(N)</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="linspecer.html" class="code" title="function lineStyles=linspecer(N,varargin)">linspecer</a>	function lineStyles = linspecer(N)</li></ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function varIn = colorBrew2mat(varIn)</a></li><li><a href="#_sub2" class="code">function varIn = brighten(varIn,varargin)</a></li><li><a href="#_sub3" class="code">function varIn = dim(varIn,f)</a></li><li><a href="#_sub4" class="code">function vOut = cmap2linspecer(vIn)</a></li><li><a href="#_sub5" class="code">function cmap = colorm(varargin)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">% function lineStyles = linspecer(N)</span>
+0002 <span class="comment">% This function creates an Nx3 array of N [R B G] colors</span>
+0003 <span class="comment">% These can be used to plot lots of lines with distinguishable and nice</span>
+0004 <span class="comment">% looking colors.</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% lineStyles = linspecer(N);  makes N colors for you to use: lineStyles(ii,:)</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% colormap(linspecer); set your colormap to have easily distinguishable</span>
+0009 <span class="comment">%                      colors and a pleasing aesthetic</span>
+0010 <span class="comment">%</span>
+0011 <span class="comment">% lineStyles = linspecer(N,'qualitative'); forces the colors to all be distinguishable (up to 12)</span>
+0012 <span class="comment">% lineStyles = linspecer(N,'sequential'); forces the colors to vary along a spectrum</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% % Examples demonstrating the colors.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% LINE COLORS</span>
+0017 <span class="comment">% N=6;</span>
+0018 <span class="comment">% X = linspace(0,pi*3,1000);</span>
+0019 <span class="comment">% Y = bsxfun(@(x,n)sin(x+2*n*pi/N), X.', 1:N);</span>
+0020 <span class="comment">% C = linspecer(N);</span>
+0021 <span class="comment">% axes('NextPlot','replacechildren', 'ColorOrder',C);</span>
+0022 <span class="comment">% plot(X,Y,'linewidth',5)</span>
+0023 <span class="comment">% ylim([-1.1 1.1]);</span>
+0024 <span class="comment">%</span>
+0025 <span class="comment">% SIMPLER LINE COLOR EXAMPLE</span>
+0026 <span class="comment">% N = 6; X = linspace(0,pi*3,1000);</span>
+0027 <span class="comment">% C = linspecer(N)</span>
+0028 <span class="comment">% hold off;</span>
+0029 <span class="comment">% for ii=1:N</span>
+0030 <span class="comment">%     Y = sin(X+2*ii*pi/N);</span>
+0031 <span class="comment">%     plot(X,Y,'color',C(ii,:),'linewidth',3);</span>
+0032 <span class="comment">%     hold on;</span>
+0033 <span class="comment">% end</span>
+0034 <span class="comment">%</span>
+0035 <span class="comment">% COLORMAP EXAMPLE</span>
+0036 <span class="comment">% A = rand(15);</span>
+0037 <span class="comment">% figure; imagesc(A); % default colormap</span>
+0038 <span class="comment">% figure; imagesc(A); colormap(linspecer); % linspecer colormap</span>
+0039 <span class="comment">%</span>
+0040 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0041 <span class="comment">% by Jonathan Lansey, March 2009-2013 � Lansey at gmail.com               %</span>
+0042 <span class="comment">%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</span>
+0043 <span class="comment">%</span>
+0044 <span class="comment">%% credits and where the function came from</span>
+0045 <span class="comment">% The colors are largely taken from:</span>
+0046 <span class="comment">% http://colorbrewer2.org and Cynthia Brewer, Mark Harrower and The Pennsylvania State University</span>
+0047 <span class="comment">%</span>
+0048 <span class="comment">%</span>
+0049 <span class="comment">% She studied this from a phsychometric perspective and crafted the colors</span>
+0050 <span class="comment">% beautifully.</span>
+0051 <span class="comment">%</span>
+0052 <span class="comment">% I made choices from the many there to decide the nicest once for plotting</span>
+0053 <span class="comment">% lines in Matlab. I also made a small change to one of the colors I</span>
+0054 <span class="comment">% thought was a bit too bright. In addition some interpolation is going on</span>
+0055 <span class="comment">% for the sequential line styles.</span>
+0056 <span class="comment">%</span>
+0057 <span class="comment">%</span>
+0058 <span class="comment">%%</span>
+0059 
+0060 <a name="_sub0" href="#_subfunctions" class="code">function lineStyles=linspecer(N,varargin)</a>
+0061 
+0062 <span class="keyword">if</span> nargin==0 <span class="comment">% return a colormap</span>
+0063     lineStyles = <a href="linspecer.html" class="code" title="function lineStyles=linspecer(N,varargin)">linspecer</a>(64);
+0064 <span class="comment">%     temp = [temp{:}];</span>
+0065 <span class="comment">%     lineStyles = reshape(temp,3,255)';</span>
+0066     <span class="keyword">return</span>;
+0067 <span class="keyword">end</span>
+0068 
+0069 <span class="keyword">if</span> N&lt;=0 <span class="comment">% its empty, nothing else to do here</span>
+0070     lineStyles=[];
+0071     <span class="keyword">return</span>;
+0072 <span class="keyword">end</span>
+0073 
+0074 <span class="comment">% interperet varagin</span>
+0075 qualFlag = 0;
+0076 
+0077 <span class="keyword">if</span> ~isempty(varargin)&gt;0 <span class="comment">% you set a parameter?</span>
+0078     <span class="keyword">switch</span> lower(varargin{1})
+0079         <span class="keyword">case</span> {<span class="string">'qualitative'</span>,<span class="string">'qua'</span>}
+0080             <span class="keyword">if</span> N&gt;12 <span class="comment">% go home, you just can't get this.</span>
+0081                 warning(<span class="string">'qualitiative is not possible for greater than 12 items, please reconsider'</span>);
+0082             <span class="keyword">else</span>
+0083                 <span class="keyword">if</span> N&gt;9
+0084                     warning([<span class="string">'Default may be nicer for '</span> num2str(N) <span class="string">' for clearer colors use: whitebg(''black''); '</span>]);
+0085                 <span class="keyword">end</span>
+0086             <span class="keyword">end</span>
+0087             qualFlag = 1;
+0088         <span class="keyword">case</span> {<span class="string">'sequential'</span>,<span class="string">'seq'</span>}
+0089             lineStyles = <a href="#_sub5" class="code" title="subfunction cmap = colorm(varargin)">colorm</a>(N);
+0090             <span class="keyword">return</span>;
+0091         <span class="keyword">otherwise</span>
+0092             warning([<span class="string">'parameter '''</span> varargin{1} <span class="string">''' not recognized'</span>]);
+0093     <span class="keyword">end</span>
+0094 <span class="keyword">end</span>      
+0095       
+0096 <span class="comment">% predefine some colormaps</span>
+0097   set3 = <a href="#_sub1" class="code" title="subfunction varIn = colorBrew2mat(varIn)">colorBrew2mat</a>({[141, 211, 199];[ 255, 237, 111];[ 190, 186, 218];[ 251, 128, 114];[ 128, 177, 211];[ 253, 180, 98];[ 179, 222, 105];[ 188, 128, 189];[ 217, 217, 217];[ 204, 235, 197];[ 252, 205, 229];[ 255, 255, 179]}');
+0098 set1JL = <a href="#_sub2" class="code" title="subfunction varIn = brighten(varIn,varargin) ">brighten</a>(<a href="#_sub1" class="code" title="subfunction varIn = colorBrew2mat(varIn)">colorBrew2mat</a>({[228, 26, 28];[ 55, 126, 184];[ 77, 175, 74];[ 255, 127, 0];[ 255, 237, 111]*.95;[ 166, 86, 40];[ 247, 129, 191];[ 153, 153, 153];[ 152, 78, 163]}'));
+0099 set1 = <a href="#_sub2" class="code" title="subfunction varIn = brighten(varIn,varargin) ">brighten</a>(<a href="#_sub1" class="code" title="subfunction varIn = colorBrew2mat(varIn)">colorBrew2mat</a>({[ 55, 126, 184]*.95;[228, 26, 28];[ 77, 175, 74];[ 255, 127, 0];[ 152, 78, 163]}),.8);
+0100 
+0101 set3 = <a href="#_sub3" class="code" title="subfunction varIn = dim(varIn,f)">dim</a>(set3,.93);
+0102 
+0103 <span class="keyword">switch</span> N
+0104     <span class="keyword">case</span> 1
+0105         lineStyles = { [  55, 126, 184]/255};
+0106     <span class="keyword">case</span> {2, 3, 4, 5 }
+0107         lineStyles = set1(1:N);
+0108     <span class="keyword">case</span> {6 , 7, 8, 9}
+0109         lineStyles = set1JL(1:N)';
+0110     <span class="keyword">case</span> {10, 11, 12}
+0111         <span class="keyword">if</span> qualFlag <span class="comment">% force qualitative graphs</span>
+0112             lineStyles = set3(1:N)';
+0113         <span class="keyword">else</span> <span class="comment">% 10 is a good number to start with the sequential ones.</span>
+0114             lineStyles = <a href="#_sub4" class="code" title="subfunction vOut = cmap2linspecer(vIn) ">cmap2linspecer</a>(<a href="#_sub5" class="code" title="subfunction cmap = colorm(varargin)">colorm</a>(N));
+0115         <span class="keyword">end</span>
+0116 <span class="keyword">otherwise</span> <span class="comment">% any old case where I need a quick job done.</span>
+0117     lineStyles = <a href="#_sub4" class="code" title="subfunction vOut = cmap2linspecer(vIn) ">cmap2linspecer</a>(<a href="#_sub5" class="code" title="subfunction cmap = colorm(varargin)">colorm</a>(N));
+0118 <span class="keyword">end</span>
+0119 lineStyles = cell2mat(lineStyles);
+0120 <span class="keyword">end</span>
+0121 
+0122 <span class="comment">% extra functions</span>
+0123 <a name="_sub1" href="#_subfunctions" class="code">function varIn = colorBrew2mat(varIn)</a>
+0124 <span class="keyword">for</span> ii=1:length(varIn) <span class="comment">% just divide by 255</span>
+0125     varIn{ii}=varIn{ii}/255;
+0126 <span class="keyword">end</span>        
+0127 <span class="keyword">end</span>
+0128 
+0129 <a name="_sub2" href="#_subfunctions" class="code">function varIn = brighten(varIn,varargin) </a><span class="comment">% increase the brightness</span>
+0130 
+0131 <span class="keyword">if</span> isempty(varargin),
+0132     frac = .9; 
+0133 <span class="keyword">else</span>
+0134     frac = varargin{1}; 
+0135 <span class="keyword">end</span>
+0136 
+0137 <span class="keyword">for</span> ii=1:length(varIn)
+0138     varIn{ii}=varIn{ii}*frac+(1-frac);
+0139 <span class="keyword">end</span>        
+0140 <span class="keyword">end</span>
+0141 
+0142 <a name="_sub3" href="#_subfunctions" class="code">function varIn = dim(varIn,f)</a>
+0143     <span class="keyword">for</span> ii=1:length(varIn)
+0144         varIn{ii} = f*varIn{ii};
+0145     <span class="keyword">end</span>
+0146 <span class="keyword">end</span>
+0147 
+0148 <a name="_sub4" href="#_subfunctions" class="code">function vOut = cmap2linspecer(vIn) </a><span class="comment">% changes the format from a double array to a cell array with the right format</span>
+0149 vOut = cell(size(vIn,1),1);
+0150 <span class="keyword">for</span> ii=1:size(vIn,1)
+0151     vOut{ii} = vIn(ii,:);
+0152 <span class="keyword">end</span>
+0153 <span class="keyword">end</span>
+0154 <span class="comment">%%</span>
+0155 <span class="comment">% colorm returns a colormap which is really good for creating informative</span>
+0156 <span class="comment">% heatmap style figures.</span>
+0157 <span class="comment">% No particular color stands out and it doesn't do too badly for colorblind people either.</span>
+0158 <span class="comment">% It works by interpolating the data from the</span>
+0159 <span class="comment">% 'spectral' setting on http://colorbrewer2.org/ set to 11 colors</span>
+0160 <span class="comment">% It is modified a little to make the brightest yellow a little less bright.</span>
+0161 <a name="_sub5" href="#_subfunctions" class="code">function cmap = colorm(varargin)</a>
+0162 n = 100;
+0163 <span class="keyword">if</span> ~isempty(varargin)
+0164     n = varargin{1};
+0165 <span class="keyword">end</span>
+0166 
+0167 <span class="keyword">if</span> n==1
+0168     cmap =  [0.2005    0.5593    0.7380];
+0169     <span class="keyword">return</span>;
+0170 <span class="keyword">end</span>
+0171 <span class="keyword">if</span> n==2
+0172      cmap =  [0.2005    0.5593    0.7380;
+0173               0.9684    0.4799    0.2723];
+0174           <span class="keyword">return</span>;
+0175 <span class="keyword">end</span>
+0176 
+0177 frac=.95; <span class="comment">% Slight modification from colorbrewer here to make the yellows in the center just a bit darker</span>
+0178 cmapp = [158, 1, 66; 213, 62, 79; 244, 109, 67; 253, 174, 97; 254, 224, 139; 255*frac, 255*frac, 191*frac; 230, 245, 152; 171, 221, 164; 102, 194, 165; 50, 136, 189; 94, 79, 162];
+0179 x = linspace(1,n,size(cmapp,1));
+0180 xi = 1:n;
+0181 cmap = zeros(n,3);
+0182 <span class="keyword">for</span> ii=1:3
+0183     cmap(:,ii) = pchip(x,cmapp(:,ii),xi);
+0184 <span class="keyword">end</span>
+0185 cmap = flipud(cmap/255);
+0186 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

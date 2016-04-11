@@ -1,4 +1,5 @@
 function RGB = rgb( index_or_name )
+% RGB defined hard-coded colors in MATLAB RGB format.
 
 colors= {
 0    0    0    'black';

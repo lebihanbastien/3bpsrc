@@ -1,0 +1,7 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  third_order_orbit -> richardson_coefficients;
+
+  richardson_coefficients [URL="richardson_coefficients.html"];
+  third_order_orbit [URL="third_order_orbit.html"];
+}

@@ -192,7 +192,7 @@ int gslc_proj_step(SingleOrbit &orbit,
         if(*ePm > 1e-6)
         {
             cout << "Warning: Reset n° " << *nreset << ". ePm = " << *ePm << endl;
-            return -1;
+            return -2;
         }
 
         //-----------------
@@ -256,7 +256,7 @@ int trajectory_integration_grid(SingleOrbit &orbit, double t0, double tf, double
     double ti;
 
     //Change sign of step if necessary
-    if((tf <0 && orbit.driver->h>0) || (tf >0 && orbit.driver->h<0)) orbit.driver->h *= -1;
+    if((tf < t0 && orbit.driver->h>0) || (tf > t0 && orbit.driver->h<0)) orbit.driver->h *= -1;
 
     //------------------------------------------
     //Evolving yv(t) up to tf
@@ -272,7 +272,7 @@ int trajectory_integration_grid(SingleOrbit &orbit, double t0, double tf, double
         //Loop
         do
         {
-            ti = t0 + (double) nt *tf/N;
+            ti = t0 + (double) nt *(tf-t0)/N;
             status = gslc_proj_evolve(orbit, yv, &t, t0, ti, &ePm, &nreset, isResetOn);
 
             for(int k = 0; k < 6; k++) yNCE[k][nt] = yv[k];
@@ -283,7 +283,8 @@ int trajectory_integration_grid(SingleOrbit &orbit, double t0, double tf, double
         }
         while((nt<=N) && (status == 0) && (orbit.tproj > orbit.tprojmin));
 
-        if (status != 0)
+        //If a new reset is necessary
+        if (status == -2 && isResetOn)
         {
             cout << "Warning in trajectory_integration_grid: the interval of projection has to be reduced: ";
             cout << setprecision(3) << "orbit.tproj : " << orbit.tproj << " -> ";
@@ -301,6 +302,80 @@ int trajectory_integration_grid(SingleOrbit &orbit, double t0, double tf, double
     }
 
     return 0;
+}
+
+
+/**
+ *   \brief Integrates a given trajectory up to tf, on a variable grid of maximum size N. Return the last position that is filled on the grid.
+ **/
+int trajectory_integration_variable_grid(SingleOrbit &orbit, double t0, double tf, double **yNCE, double *tNCE, int N, int isResetOn)
+{
+    //------------------------------------------
+    //Initialization
+    //------------------------------------------
+    int status;            //current status
+    double yv[6], t;       //current state and time
+
+    //Projection tools
+    double ePm;
+    int nreset, nt;
+
+    //Change sign of step if necessary
+    if((tf < t0 && orbit.driver->h>0) || (tf > t0 && orbit.driver->h<0)) orbit.driver->h *= -1;
+
+    //------------------------------------------
+    //Evolving yv(t) up to tf
+    //------------------------------------------
+    do
+    {
+        //Reset ode structure.
+        reset_ode_structure(orbit.driver);
+
+        //Init the state & time
+        for(int i = 0; i < 6; i++) yv[i] = orbit.z0[i];
+        t = t0;
+        nt = 1;
+        nreset = 1;
+
+        //First step
+        for(int k = 0; k < 6; k++) yNCE[k][0] = orbit.z0[k];
+        tNCE[0] = t0;
+
+        //Loop
+        do
+        {
+            status = gslc_proj_step(orbit, yv, &t, t0, tf, &ePm, &nreset, isResetOn);
+            for(int k = 0; k < 6; k++) yNCE[k][nt] = yv[k];
+            tNCE[nt] = t;
+            //Advance one step
+            nt++;
+        }
+        while((t < tf) && (nt <= N) && (status == 0) && (orbit.tproj > orbit.tprojmin));
+
+        if (status == -2 && isResetOn)
+        {
+            cout << "Warning in trajectory_integration_variable_grid: the interval of projection has to be reduced: ";
+            cout << setprecision(3) << "orbit.tproj : " << orbit.tproj << " -> ";
+            orbit.tproj *= 0.5;
+            cout << orbit.tproj << setprecision(15) << endl;
+        }
+
+        if(nt == N)
+        {
+            cout << "Warning in trajectory_integration_variable_grid: the final time was not reached because the maximum number of points is reached." << endl;
+
+        }
+
+    }
+    while(status!= 0 && orbit.tproj > orbit.tprojmin);
+
+    if(orbit.tproj < orbit.tprojmin)
+    {
+        cout << "Error in trajectory_integration_grid: the interval of projection is too small." << endl;
+        return -1;
+    }
+
+    return nt-1;
 }
 
 

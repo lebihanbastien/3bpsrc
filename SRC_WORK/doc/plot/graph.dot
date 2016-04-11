@@ -1,0 +1,25 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  arrow3 -> rotation;
+  initplot2D -> rgb;
+  initplot3D -> arrow3;
+  initplot3D -> rgb;
+  linspecer -> linspecer;
+  manifold_plot -> initplot2D;
+  manifold_plot -> initplot3D;
+  manifold_plot -> rgb;
+  orbit_plot -> initplot2D;
+  orbit_plot -> initplot3D;
+  orbit_plot -> rgb;
+  rgb -> cell2num;
+
+  arrow3 [URL="arrow3.html"];
+  cell2num [URL="cell2num.html"];
+  initplot2D [URL="initplot2D.html"];
+  initplot3D [URL="initplot3D.html"];
+  linspecer [URL="linspecer.html"];
+  manifold_plot [URL="manifold_plot.html"];
+  orbit_plot [URL="orbit_plot.html"];
+  rgb [URL="rgb.html"];
+  rotation [URL="rotation.html"];
+}

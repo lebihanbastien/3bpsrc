@@ -1,0 +1,141 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of rgb</title>
+  <meta name="keywords" content="rgb">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">plot</a> &gt; rgb.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for plot&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>rgb
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function RGB = rgb( index_or_name ) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="cell2num.html" class="code" title="function [outputmat]=cell2num(inputcell)">cell2num</a>	Function to convert an all numeric cell array to a double precision array</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="initplot2D.html" class="code" title="function [] = initplot2D(index, cr3bp, params, li, ip, jp)">initplot2D</a>	--------------------------------------------------------------------------</li><li><a href="initplot3D.html" class="code" title="function [] = initplot3D(index, cr3bp, params)">initplot3D</a>	--------------------------------------------------------------------------</li><li><a href="manifold_plot.html" class="code" title="function [] = manifold_plot(yv, orbit, manifold_branch, params, cst)">manifold_plot</a>	--------------------------------------------------------------------------</li><li><a href="orbit_plot.html" class="code" title="function [] = orbit_plot(yv, orbit, params, cst)">orbit_plot</a>	--------------------------------------------------------------------------</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function RGB = rgb( index_or_name )</a>
+0002 
+0003 colors= {
+0004 0    0    0    <span class="string">'black'</span>;
+0005 0.6  0    0    <span class="string">'dark red'</span>;
+0006 0.25 0.25 0.9  <span class="string">'cobalt blue'</span>;
+0007 0    0.5  0    <span class="string">'dark green'</span>;
+0008 1    0.6  0    <span class="string">'orange'</span>;
+0009 0.3  0.8  0    <span class="string">'avocado'</span>;
+0010 0    1    1    <span class="string">'cyan'</span>;
+0011 1    0    0    <span class="string">'red'</span>;
+0012 1    0.2  0.2  <span class="string">'light red'</span>;
+0013 0.5  0.5  1    <span class="string">'light blue'</span>;
+0014 0    1    0    <span class="string">'light green'</span>;
+0015 0.8  0.5  0    <span class="string">'brown'</span>;
+0016 0.5  0.5  0.5  <span class="string">'dark gray'</span>;
+0017 1    1    0.6  <span class="string">'cream'</span>;
+0018 0    0.6  0.3  <span class="string">'super green'</span>;
+0019 1    0.5  0.5  <span class="string">'peach'</span>;
+0020 1    1    0    <span class="string">'yellow'</span>;
+0021 0    0    0.8  <span class="string">'dark blue'</span>;
+0022 0.8  0.8  0.8  <span class="string">'gray'</span>;
+0023 0.5  0    0.9  <span class="string">'purple'</span>;
+0024 0.3  0.8  0    <span class="string">'avocado'</span>;
+0025 1    0.5  1    <span class="string">'magenta'</span>;
+0026 0    0.8  0.8  <span class="string">'aqua'</span>;
+0027 0.9  0.75 0    <span class="string">'gold'</span>;
+0028 1    1    1    <span class="string">'white'</span>;
+0029 };
+0030 
+0031 <span class="comment">% Extract names from rightmost column of colors cell array:</span>
+0032 names= colors(:,4);
+0033 
+0034 <span class="comment">% Strip off rightmost column of colors cell array and convert remaining</span>
+0035 <span class="comment">% columns to a matrix:</span>
+0036 RGBs= <a href="cell2num.html" class="code" title="function [outputmat]=cell2num(inputcell)">cell2num</a>(colors(:,1:3));
+0037 
+0038 
+0039 <span class="comment">% Section 2: Convert index_or_name to an RGB triple.</span>
+0040 
+0041 <span class="keyword">if</span> nargin ~= 1
+0042    error(<span class="string">'This function must be called with exactly one argument.'</span>);
+0043 <span class="keyword">end</span>
+0044 
+0045 <span class="keyword">if</span> isnumeric(index_or_name)
+0046    index= index_or_name;
+0047 
+0048 
+0049    <span class="keyword">if</span> length(index)==3 &amp; all(index&gt;=0)
+0050 
+0051       <span class="comment">% If contents of index_or_name are an RGB triple with elements in</span>
+0052       <span class="comment">% [0,1], return them as output without modification:</span>
+0053 
+0054       <span class="keyword">if</span> all(index&lt;=1)
+0055          RGB= index;
+0056          <span class="keyword">return</span>
+0057       <span class="keyword">end</span>
+0058 
+0059       <span class="comment">% If contents of index_or_name are an RGB triple with elements in</span>
+0060       <span class="comment">% [0,255], scale by 1/255 and return as output:</span>
+0061 
+0062       <span class="keyword">if</span> all(index&lt;=255)
+0063          RGB= index/255;
+0064          <span class="keyword">return</span>
+0065       <span class="keyword">end</span>
+0066 
+0067    <span class="keyword">end</span>
+0068 
+0069    <span class="keyword">if</span> length(index) &gt; 1
+0070       error(<span class="string">'When calling with a color index, specify a single number.'</span>);
+0071    <span class="keyword">end</span>
+0072    <span class="keyword">if</span> ismember(index,1:21)
+0073       RGB= RGBs(index,:);
+0074       <span class="keyword">return</span>
+0075    <span class="keyword">end</span>
+0076    error(<span class="string">'A color index must be a whole number between 1 and 21.'</span>);
+0077 <span class="keyword">end</span>
+0078 
+0079 <span class="keyword">if</span> isa(index_or_name,<span class="string">'char'</span>)
+0080    index = find(strcmp(names, index_or_name));
+0081    <span class="keyword">if</span> ~isempty(index)
+0082       RGB= RGBs(index,:);
+0083    <span class="keyword">else</span>
+0084       fprintf(2, [<span class="string">'Warning: Unknown color name &quot;%s&quot;.  '</span> <span class="keyword">...</span>
+0085         <span class="string">'Substituting black.\n'</span>], index_or_name);
+0086       RGB= [0 0 0];
+0087    <span class="keyword">end</span>
+0088    <span class="keyword">return</span>
+0089 <span class="keyword">end</span>
+0090 
+0091 error(<span class="string">'Input argument has unexpected data type.'</span>);
+0092 
+0093 <span class="keyword">end</span>
+0094</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

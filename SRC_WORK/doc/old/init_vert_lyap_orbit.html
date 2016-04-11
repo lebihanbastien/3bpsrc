@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_vert_lyap_orbit</title>
+  <meta name="keywords" content="init_vert_lyap_orbit">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; init_vert_lyap_orbit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>init_vert_lyap_orbit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = init_vert_lyap_orbit(cr3bp, li, family, Azdim, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ Initializes a halo orbit by its vertical extension Az
+-------------------------------------------------------------------------%
+ @return the structure orbit</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% Initializes a halo orbit by its vertical extension Az</span>
+0003 <span class="comment">%-------------------------------------------------------------------------%</span>
+0004 <span class="comment">% @return the structure orbit</span>
+0005 <a name="_sub0" href="#_subfunctions" class="code">function orbit = init_vert_lyap_orbit(cr3bp, li, family, Azdim, cst)</a>
+0006 
+0007 <span class="comment">%CR3BP</span>
+0008 orbit.cr3bp = cr3bp;
+0009 
+0010 <span class="comment">%Family</span>
+0011 orbit.family = family;
+0012 
+0013 <span class="comment">%Class</span>
+0014 <span class="keyword">switch</span>(family)
+0015     <span class="keyword">case</span> cst.orbit.family.NORTHERN
+0016         orbit.m = 1;
+0017     <span class="keyword">case</span> cst.orbit.family.SOUTHERN
+0018         orbit.m = 3;
+0019 <span class="keyword">end</span>
+0020 
+0021 <span class="keyword">switch</span> li.number
+0022     <span class="keyword">case</span> 1
+0023         orbit.dm = 2-orbit.m;
+0024     <span class="keyword">case</span> 2
+0025         orbit.dm = orbit.m-2;  <span class="comment">%BEWARE: Northern and Southern classes are opposite to Class I and Class II formulation (see Richardson 1980)</span>
+0026     <span class="keyword">case</span> 3
+0027         orbit.dm = 2-orbit.m;
+0028     <span class="keyword">otherwise</span>
+0029         orbit.dm = 0;  <span class="comment">%NO dm if Li.number!=1,2,3</span>
+0030 <span class="keyword">end</span>
+0031 
+0032 <span class="comment">%Az</span>
+0033 orbit.Azdim = Azdim;
+0034 orbit.Az = Azdim/cr3bp.L;
+0035 <span class="comment">%Az estimate</span>
+0036 orbit.Azdim_estimate = Azdim;
+0037 orbit.Az_estimate = Azdim/cr3bp.L;
+0038 
+0039 <span class="comment">%Li</span>
+0040 orbit.li = li;
+0041 
+0042 <span class="comment">%Status</span>
+0043 orbit.status = cst.orbit.EMPTY;
+0044 
+0045 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

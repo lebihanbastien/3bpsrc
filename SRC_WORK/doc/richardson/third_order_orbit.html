@@ -1,0 +1,166 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of third_order_orbit</title>
+  <meta name="keywords" content="third_order_orbit">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">richardson</a> &gt; third_order_orbit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for richardson&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>third_order_orbit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [yv_li, T_li] =  third_order_orbit(orbit, t, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ third_order_orbit(orbit, t, cst)
+
+   Computes a third-order approximation of initial conditions
+   position+velocity at t = 0, for three types of orbits: halo, planar
+   lyapunov and vertical lyapunov. An approximation of the period of the
+   orbit is also given.
+
+   The orbits must have been properly initialized via the routine
+   init_orbit.
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="richardson_coefficients.html" class="code" title="function [RC] = richardson_coefficients(cr3bp,pointNumber)">richardson_coefficients</a>	--------------------------------------------------------------------------</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function yv_li = richardson_init_cond(Ax_li, Az_li, tau1, dtau1dt, dm, RC)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% third_order_orbit(orbit, t, cst)</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">%   Computes a third-order approximation of initial conditions</span>
+0005 <span class="comment">%   position+velocity at t = 0, for three types of orbits: halo, planar</span>
+0006 <span class="comment">%   lyapunov and vertical lyapunov. An approximation of the period of the</span>
+0007 <span class="comment">%   orbit is also given.</span>
+0008 <span class="comment">%</span>
+0009 <span class="comment">%   The orbits must have been properly initialized via the routine</span>
+0010 <span class="comment">%   init_orbit.</span>
+0011 <span class="comment">%</span>
+0012 <span class="comment">% Author: BLB</span>
+0013 <span class="comment">% Version: 1.0</span>
+0014 <span class="comment">% Year: 2015</span>
+0015 <span class="comment">%-------------------------------------------------------------------------%</span>
+0016 <a name="_sub0" href="#_subfunctions" class="code">function [yv_li, T_li] =  third_order_orbit(orbit, t, cst)</a>
+0017 
+0018 <span class="comment">%--------------------------------------------------------------------------</span>
+0019 <span class="comment">% Init</span>
+0020 <span class="comment">%--------------------------------------------------------------------------</span>
+0021 <span class="comment">%Orbit parameters</span>
+0022 gamma_i = orbit.li.gamma_i;
+0023 mu      = orbit.cr3bp.mu;
+0024 dm      = orbit.dm;
+0025 
+0026 <span class="comment">%Richardson coefficients</span>
+0027 RC = <a href="richardson_coefficients.html" class="code" title="function [RC] = richardson_coefficients(cr3bp,pointNumber)">richardson_coefficients</a>(orbit.cr3bp, orbit.li.number);
+0028 
+0029 <span class="comment">%Phases</span>
+0030 Phi = 0.0; <span class="comment">%arbitrary</span>
+0031 
+0032 <span class="comment">%X and Z-amplitude in Li-frame</span>
+0033 <span class="keyword">switch</span>(orbit.type)
+0034    
+0035     <span class="keyword">case</span> cst.orbit.type.HALO
+0036         Az_li = orbit.Az_estimate/gamma_i;
+0037         Ax_li = sqrt(-(RC.l2*Az_li^2 + RC.Delta)/RC.l1);
+0038         
+0039     <span class="keyword">case</span> cst.orbit.type.PLYAP
+0040         Az_li = 0.0;
+0041         Ax_li = orbit.Ax_estimate/gamma_i;
+0042         
+0043     <span class="keyword">case</span> cst.orbit.type.VLYAP
+0044         Az_li = orbit.Az_estimate/gamma_i;
+0045         Ax_li = 0.0;
+0046 <span class="keyword">end</span>
+0047 
+0048 
+0049 <span class="comment">%nu parameter</span>
+0050 nu = 1+RC.s1*Ax_li^2+RC.s2*Az_li^2;
+0051 
+0052 <span class="comment">%--------------------------------------------------------------------------</span>
+0053 <span class="comment">% Period estimate</span>
+0054 <span class="comment">%--------------------------------------------------------------------------</span>
+0055 T_li = 2*pi/(RC.omega_p*nu);
+0056 
+0057 <span class="comment">%--------------------------------------------------------------------------</span>
+0058 <span class="comment">% State estimate @ t  in the Li-frame</span>
+0059 <span class="comment">%--------------------------------------------------------------------------</span>
+0060 tau1 = RC.omega_p*nu*t + Phi;
+0061 dtau1dt = RC.omega_p*nu;
+0062 
+0063 yv_li = <a href="#_sub1" class="code" title="subfunction yv_li = richardson_init_cond(Ax_li, Az_li, tau1, dtau1dt, dm, RC)">richardson_init_cond</a>(Ax_li, Az_li, tau1, dtau1dt, dm, RC);
+0064 
+0065 <span class="comment">%--------------------------------------------------------------------------</span>
+0066 <span class="comment">% Back into CR3BP frame</span>
+0067 <span class="comment">%--------------------------------------------------------------------------</span>
+0068 <span class="comment">% Special case of the x dimension</span>
+0069 <span class="keyword">switch</span>(orbit.li.number) 
+0070 
+0071     <span class="keyword">case</span> 1
+0072         yv_li(1) = yv_li(1)*gamma_i - mu + 1 - gamma_i;
+0073 
+0074     <span class="keyword">case</span> 2
+0075         yv_li(1) = yv_li(1)*gamma_i - mu + 1 + gamma_i;
+0076 
+0077     <span class="keyword">case</span> 3
+0078         yv_li(1) = yv_li(1)*gamma_i - mu - gamma_i;
+0079 
+0080     <span class="keyword">otherwise</span> <span class="comment">%L2</span>
+0081         yv_li(1) = yv_li(1)*gamma_i - mu + 1 + gamma_i;
+0082 
+0083 <span class="keyword">end</span>
+0084 
+0085 <span class="comment">% Other dimensions</span>
+0086 <span class="keyword">for</span> i = 2:6 
+0087     yv_li(i) = gamma_i*yv_li(i); 
+0088 <span class="keyword">end</span>
+0089         
+0090         
+0091 <span class="keyword">end</span>
+0092 
+0093 
+0094 
+0095 <a name="_sub1" href="#_subfunctions" class="code">function yv_li = richardson_init_cond(Ax_li, Az_li, tau1, dtau1dt, dm, RC) </a>
+0096     yv_li(1) = RC.a21*Ax_li^2 + RC.a22*Az_li^2 - Ax_li*cos(tau1) + (RC.a23*Ax_li^2 - RC.a24*Az_li^2)*cos(2*tau1) + (RC.a31*Ax_li^3 - RC.a32*Ax_li*Az_li^2)*cos(3*tau1);
+0097     yv_li(2) = RC.kappa*Ax_li*sin(tau1) + (RC.b21*Ax_li^2 - RC.b22*Az_li^2)*sin(2*tau1) + (RC.b31*Ax_li^3 - RC.b32*Ax_li*Az_li^2)*sin(3*tau1);
+0098     yv_li(3) = dm*Az_li*cos(tau1) + dm*RC.d21*Ax_li*Az_li*(cos(2*tau1)-3) + dm*(RC.d32*Az_li*Ax_li^2 - RC.d31*Az_li^3)*cos(3*tau1);
+0099 
+0100     yv_li(4) = dtau1dt*( Ax_li*sin(tau1) - 2*(RC.a23*Ax_li^2 - RC.a24*Az_li^2)*sin(2*tau1) -3*(RC.a31*Ax_li^3 - RC.a32*Ax_li*Az_li^2)*sin(3*tau1)  );
+0101     yv_li(5) = dtau1dt*( RC.kappa*Ax_li*cos(tau1) + 2*(RC.b21*Ax_li^2 - RC.b22*Az_li^2)*cos(2*tau1) + 3*(RC.b31*Ax_li^3 - RC.b32*Ax_li*Az_li^2)*cos(3*tau1)   );
+0102     yv_li(6) = dtau1dt*( -dm*Az_li*sin(tau1) -2*dm*RC.d21*Ax_li*Az_li*sin(2*tau1) - 3*dm*(RC.d32*Az_li*Ax_li^2 - RC.d31*Az_li^3)*sin(3*tau1)  );
+0103 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

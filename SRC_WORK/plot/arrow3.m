@@ -1,12 +1,10 @@
-%--------------------------------------------------------------------------
-% 3D arrow.
-% Emilien Fabacher
-% 2015
+function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)
+% ARROW3 3D arrow for 3D MATLAB plots.
+%
+% Emilien Fabacher 2015
 %
 % Log:
 % 03/2016 Minor modifications for Matlab 2013a compatibility
-%--------------------------------------------------------------------------
-function [ligne, pointe]=arrow3(Xi,Xf,col,lw,loF,laF)
 
 N = 20;
 t = (0:30/N:360)'/180*pi;

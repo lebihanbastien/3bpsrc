@@ -1,27 +1,30 @@
-%--------------------------------------------------------------------------
-% richardson_coefficients(cr3bp,pointNumber)
+function [RC] = richardson_coefficients(cr3bp,li)
+% RICHARDSON_COEFFICIENTS computation of the Richardson coefficients for
+% third-order approximation of Halo orbits.
 %
-% Richardson coefficients computation 
-% (see: "Analytic construction of periodic orbits about the collinear points", Richardson 1980)
+% RC = RICHARDSON_COEFFICIENTS(CR3BP, LI) stores in RC the Richardson
+% coefficients for third-order approximation of Halo orbits around the
+% Lagrange point LI of the system CR3BP. List of the coefficients:
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%--------------------------------------------------------------------------
 % a21,a22, a23, a24, b21, b22, d21, a31, a32, b31, b32, d31, d32, s1, s2,
 %  1   2    3    4    5    6    7    8    9    10   11   12   13  14   15
 %
 % l1, l2, lambda, omega_p, omega_v, kappa, d1, d2, c2, c3, c4,
 % 16  17    18     19        20       21   22  23  24  25  26
-%--------------------------------------------------------------------------
-function [RC] = richardson_coefficients(cr3bp,pointNumber)
+%
+% see: "Analytic construction of periodic orbits about the collinear points"
+% <a href="matlab: 
+% web('http://adsabs.harvard.edu/full/1980CeMec..22..241R','-browser')">(link)</a>
+% Richardson 1980
+%
+% BLB 2015
 
 %--------------------------------------------------------------------------
 %Init
 %--------------------------------------------------------------------------
 mu = cr3bp.mu;
 
-switch(pointNumber)
+switch(li)
     
     case 1
         gamma_i = cr3bp.l1.gamma_i;
@@ -39,9 +42,9 @@ end
 
 
 %Cn coefficients for the corresponding li point
-c2 = cn(mu, gamma_i, pointNumber, 2);
-c3 = cn(mu, gamma_i, pointNumber, 3);
-c4 = cn(mu, gamma_i, pointNumber, 4);
+c2 = cn(mu, gamma_i, li, 2);
+c3 = cn(mu, gamma_i, li, 3);
+c4 = cn(mu, gamma_i, li, 4);
 
 RC.c2 = c2;
 RC.c3 = c3;

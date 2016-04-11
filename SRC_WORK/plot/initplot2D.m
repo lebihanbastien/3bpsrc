@@ -1,13 +1,24 @@
-%--------------------------------------------------------------------------
-% Init the 2D plot (primaries...)
-%--------------------------------------------------------------------------
 function [] = initplot2D(index, cr3bp, params, li, ip, jp)
+% INITPLOT2D initializes the 2D plots used throughout the computations.
+%
+% INITPLOT2D(INDEX, CR3BP, PARAMS, LI, IP, JP) initializes a 2D plot
+% associated to the structures CR3BP (system), PARAMS (user-defined
+% parameters), and LI (Lagrange point of reference). INDEX gives the number
+% of the figure. The scalars IP and JP gives the dimensions that will be
+% plotted. Examples: 
+%           - IP = 1 and JP = 2 will initialize an XY plot.
+%           - IP = 2 and JP = 3 will initialize an YZ plot.
+%           - IP = 3 and JP = 1 will initialize an ZX plot.
+%
+% See also INITPLOT3D
+% 
+% BLB 2016
 
 %--------------------------------------------------------------------------
 %Constants
 %--------------------------------------------------------------------------
 %Distance in  10^3 km
-Lf = cr3bp.L*10^(-3);
+Lf = cr3bp.L;
 
 %--------------------------------------------------------------------------
 %Create handle
@@ -20,19 +31,31 @@ hold on
 %--------------------------------------------------------------------------
 axis equal
 grid on
-%Strings
-if(ip == 1 && jp == 2)
-    si = 'X';
-    sj = 'Y';
-elseif(ip == 1 && jp == 3)
-    si = 'X';
-    sj = 'Z';
-elseif(ip == 2 && jp == 3)
-    si = 'Y';
-    sj = 'Z';
+%String (x-axis)
+switch(ip)
+    case 1
+        si = 'X';
+    case 2
+        si = 'Y';
+    case 3
+        si = 'Z';
+    otherwise
+        error('Wrong dimension on the x-axis');
 end
-xlabel(strcat(si, ' (x 10^3 km)'));
-ylabel(strcat(sj, ' (x 10^3 km)'));
+%String (y-axis)
+switch(jp)
+    case 1
+        sj = 'X';
+    case 2
+        sj = 'Y';
+    case 3
+        sj = 'Z';
+    otherwise
+        error('Wrong dimension on the y-axis');
+end
+
+xlabel(strcat(si, ' (km)'));
+ylabel(strcat(sj, ' (km)'));
 title(['Projection in the ', si, sj, '-plane']);
 %Default size
 set(figure(index), 'defaultTextFontSize', 12);
@@ -75,11 +98,5 @@ end
 %----------
 Li = li.position;
 plot(Li(ip)*Lf, Li(jp)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'), 'markers', 2, 'MarkerSize', 2);
-
-%----------
-%Second primary
-%----------
-
-
 
 end

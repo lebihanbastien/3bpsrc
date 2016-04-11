@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of halo_orbit_computation</title>
+  <meta name="keywords" content="halo_orbit_computation">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; halo_orbit_computation.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>halo_orbit_computation
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = halo_orbit_computation(cr3bp, orbit, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ Computation of orbit.y0 and various orbital parameters from a third-order 
+ guess (Richardson, 1980).
+
+ WARNING 2: the use of third-order approximation should be limited to 
+ Az &lt; 30000km
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% Computation of orbit.y0 and various orbital parameters from a third-order</span>
+0003 <span class="comment">% guess (Richardson, 1980).</span>
+0004 <span class="comment">%</span>
+0005 <span class="comment">% WARNING 2: the use of third-order approximation should be limited to</span>
+0006 <span class="comment">% Az &lt; 30000km</span>
+0007 <span class="comment">%-------------------------------------------------------------------------%</span>
+0008 <a name="_sub0" href="#_subfunctions" class="code">function orbit = halo_orbit_computation(cr3bp, orbit, params, cst)</a>
+0009 
+0010 <span class="comment">%-------------------------------------------------------------------------%</span>
+0011 <span class="comment">% Init from third order</span>
+0012 <span class="comment">%-------------------------------------------------------------------------%</span>
+0013 <span class="comment">%Third order approximation</span>
+0014 yv_to =  third_order_orbit(orbit, 0.0, cst);
+0015 
+0016 <span class="comment">% Integration vector</span>
+0017 yv0 = (1:42)';
+0018 
+0019 <span class="comment">% 6-dim state</span>
+0020 <span class="keyword">for</span> k =1:6 
+0021      yv0(k) = yv_to(k);   
+0022 <span class="keyword">end</span>
+0023 
+0024 <span class="comment">% Specific case of the SOUTHERN family</span>
+0025 <span class="keyword">if</span>(strcmp(orbit.family,cst.orbit.family.SOUTHERN))
+0026     yv0(3) = -yv0(3);    
+0027 <span class="keyword">end</span>
+0028 
+0029 <span class="comment">%STM concatenation after the 6-dim state</span>
+0030 <span class="keyword">for</span> i = 1 : 6
+0031     <span class="keyword">for</span> j = 1 : 6
+0032         m = 6*(i-1) + j;
+0033         yv0(m+6) = cst.orbit.STM0(i,j);
+0034     <span class="keyword">end</span>
+0035 <span class="keyword">end</span>
+0036 
+0037 <span class="comment">%First guess (output if no diff correction)</span>
+0038 orbit.y0 = yv0;
+0039 
+0040 <span class="comment">%-------------------------------------------------------------------------%</span>
+0041 <span class="comment">% Differential correction (if needed)</span>
+0042 <span class="comment">%-------------------------------------------------------------------------%</span>
+0043 <span class="keyword">if</span>(orbit.Az_estimate &gt; 0.0520 &amp;&amp; params.diff_corr.type ~= cst.corr.X0_FIXED)
+0044     params.diff_corr.type = cst.corr.X0_FIXED;
+0045     disp(<span class="string">'WARNING: the differential correction type has been changed because the desired Az is big (see params)'</span>);
+0046 <span class="keyword">end</span>
+0047 
+0048 orbit = diff_corr_3D(orbit.y0, cr3bp, orbit, params, cst);
+0049 
+0050 <span class="comment">%-------------------------------------------------------------------------%</span>
+0051 <span class="comment">% Period</span>
+0052 <span class="comment">%-------------------------------------------------------------------------%</span>
+0053 <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0054     <span class="comment">%-----------------------------</span>
+0055     <span class="comment">% If MATLAB routines only</span>
+0056     <span class="comment">%-----------------------------</span>
+0057     options = odeset(<span class="string">'Events'</span>,@odezero_y,<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0058     [~,~,te, yve] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),[0 10],orbit.y0(1:6),options);
+0059 <span class="keyword">else</span>
+0060     <span class="comment">%-----------------------------</span>
+0061     <span class="comment">% If MEX routines are allowed</span>
+0062     <span class="comment">%-----------------------------</span>
+0063     <span class="comment">%Event structure, for y = 0 section</span>
+0064     val_par = init_event(cst.manifold.event.type.Y_SECTION,<span class="keyword">...</span>
+0065                          0.0,<span class="keyword">...</span>
+0066                          cst.manifold.event.isterminal.YES,<span class="keyword">...</span>
+0067                          cst.manifold.event.direction.ALL,<span class="keyword">...</span>
+0068                          cr3bp.m1.pos,<span class="keyword">...</span>
+0069                          cst);
+0070     <span class="comment">%Integration over one 1/2 orbit</span>
+0071     [te, yve] = ode78_cr3bp_event(0.0, 10, orbit.y0(1:6), 6, cr3bp.mu, val_par);
+0072 <span class="keyword">end</span>
+0073 
+0074 orbit.T12 = te; <span class="comment">%1/2 period</span>
+0075 orbit.T = 2*te; <span class="comment">%period</span>
+0076 
+0077 <span class="comment">%-------------------------------------------------------------------------%</span>
+0078 <span class="comment">% True Az</span>
+0079 <span class="comment">%-------------------------------------------------------------------------%</span>
+0080 orbit.Az = max(abs(yve(3)), abs(yv0(3)));
+0081 orbit.Azdim = orbit.Az*cr3bp.L;
+0082 
+0083 <span class="comment">%-------------------------------------------------------------------------%</span>
+0084 <span class="comment">% Energy</span>
+0085 <span class="comment">%-------------------------------------------------------------------------%</span>
+0086 orbit.C = jacobi(orbit.y0, cr3bp.mu);  <span class="comment">%jacobi constant</span>
+0087 orbit.E = -0.5*orbit.C;                <span class="comment">%energy</span>
+0088 
+0089 <span class="comment">%-------------------------------------------------------------------------%</span>
+0090 <span class="comment">% Linear algebra (monodromy matrix, etc)</span>
+0091 <span class="comment">%-------------------------------------------------------------------------%</span>
+0092 <span class="comment">%Integration over one orbit (42 variables: state + STM)</span>
+0093 <span class="keyword">if</span>(params.computation.type == cst.computation.MATLAB)
+0094     <span class="comment">%-----------------------------</span>
+0095     <span class="comment">% If MATLAB routines only</span>
+0096     <span class="comment">%-----------------------------</span>
+0097     options = odeset(<span class="string">'Reltol'</span>, params.ode45.RelTol, <span class="string">'Abstol'</span>, params.ode45.AbsTol);
+0098     [~,yv] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T],orbit.y0, options);
+0099     yf = yv(<span class="keyword">end</span>,:);
+0100 <span class="keyword">else</span>
+0101     <span class="comment">%-----------------------------</span>
+0102     <span class="comment">% If MEX routines are allowed</span>
+0103     <span class="comment">%-----------------------------</span>
+0104     <span class="keyword">if</span>(params.plot.halo_orbit == cst.TRUE)
+0105         [~, yf, ~, yv] = ode78_cr3bp(0.0, orbit.T, orbit.y0, 42, cr3bp.mu);
+0106     <span class="keyword">else</span>
+0107         [~, yf] = ode78_cr3bp(0.0, orbit.T, orbit.y0, 42, cr3bp.mu);
+0108     <span class="keyword">end</span>
+0109 <span class="keyword">end</span>
+0110     
+0111 <span class="comment">%Monodromy matrix</span>
+0112 orbit.monodromy = eye(6);
+0113 <span class="keyword">for</span> i = 1 : 6
+0114     <span class="keyword">for</span> j = 1 : 6
+0115         m = 6*(i-1) + j;
+0116         orbit.monodromy(i,j) = yf(m+6);
+0117     <span class="keyword">end</span>
+0118 <span class="keyword">end</span>
+0119 
+0120 <span class="comment">%Eigen</span>
+0121 [V,E] = eig(orbit.monodromy);
+0122 
+0123 <span class="comment">%Eigenvalures</span>
+0124 <span class="keyword">for</span> i = 1:6
+0125     orbit.eigenvalues(i) = E(i,i);
+0126 <span class="keyword">end</span>
+0127 
+0128 <span class="comment">%Stable and unstable direction (linear approx of the manifolds)</span>
+0129 [~, posEigen] = min(orbit.eigenvalues);
+0130 orbit.stable_direction = V(:,posEigen);
+0131 [~, posEigen] = max(orbit.eigenvalues);
+0132 orbit.unstable_direction = V(:,posEigen);
+0133 
+0134 <span class="comment">%-------------------------------------------------------------------------%</span>
+0135 <span class="comment">% Status</span>
+0136 <span class="comment">%-------------------------------------------------------------------------%</span>
+0137 orbit.status = cst.orbit.REAL;
+0138 
+0139 <span class="comment">%-------------------------------------------------------------------------%</span>
+0140 <span class="comment">% Plotting (potentially)</span>
+0141 <span class="comment">%-------------------------------------------------------------------------%</span>
+0142 <span class="keyword">if</span>(params.plot.halo_orbit == cst.TRUE) <span class="comment">%plotting</span>
+0143   orbit_plot(yv, orbit, params, cst);
+0144 <span class="keyword">end</span>
+0145 
+0146 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

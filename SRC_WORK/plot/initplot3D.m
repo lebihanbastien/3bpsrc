@@ -1,13 +1,21 @@
-%--------------------------------------------------------------------------
-% Init the 3D plot (primaries...)
-%--------------------------------------------------------------------------
 function [] = initplot3D(index, cr3bp, params)
+% INITPLOT3D initializes the 2D plots used throughout the computations.
+%
+% INITPLOT3D(INDEX, CR3BP, PARAMS) initializes a 3D plot
+% associated to the structures CR3BP (system), PARAMS (user-defined
+% parameters). INDEX gives the number of the figure. 
+%
+% By default, the Lagrange points L1 and L2 are plotted on the figure.
+%
+% See also INITPLOT2D
+% 
+% BLB 2016
 
 %--------------------------------------------------------------------------
 %Constants
 %--------------------------------------------------------------------------
-%Distance in  10^3 km
-Lf = cr3bp.L*10^(-3);
+%Distance in  km
+Lf = cr3bp.L;
 
 %--------------------------------------------------------------------------
 %Create handle
@@ -20,9 +28,10 @@ hold on
 %--------------------------------------------------------------------------
 axis equal
 grid on
-xlabel('X (x 10^3 km)')
-ylabel('Y (x 10^3 km)')
-zlabel('Z (x 10^3 km)')
+xlabel('X (x km)')
+ylabel('Y (x km)')
+zlabel('Z (x km)')
+title ('3D plot');
 
 %Default size
 set(figure(index), 'defaultTextFontSize', 12);
@@ -49,14 +58,14 @@ end
 %--------------------------------------------------------------------------
 function [] = sun_earth_system(cr3bp, params)
 
-%Distance in 10^3 km
-Lf = cr3bp.L*10^(-3);
+%Distance in km
+Lf = cr3bp.L;
 
 %----------
 %First primary
 %----------
 if(params.plot.firstPrimDisp)
-    Rm1 = params.plot.bigPrimFac*cr3bp.m1.Req/cr3bp.L;
+    Rm1 = params.plot.bigPrimFac*cr3bp.m1.Req/Lf;
     [X_E3D, Y_E3D, Z_E3D] = sphere;
     X_E3D = -cr3bp.mu  + Rm1*X_E3D;
     Y_E3D = 0          + Rm1*Y_E3D;
@@ -67,7 +76,7 @@ end
 %----------
 %Second primary
 %----------
-Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
+Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/Lf;
 [X_M3D, Y_M3D, Z_M3D] = sphere;
 X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
 Y_M3D = 0           + Rm2*Y_M3D;
@@ -79,7 +88,7 @@ surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [0 0.6  0.9], 'FaceLighting', 'n
 %Longitude shift
 h = 50;
 %Radius of the Earth
-r = (params.plot.bigPrimFac+0.01)*cr3bp.m2.Req*10^(-3);
+r = (params.plot.bigPrimFac+0.01)*cr3bp.m2.Req;
 %Loading continents
 load coast
 lat = lat/180*pi;
@@ -93,9 +102,9 @@ plot3((1-cr3bp.mu)*Lf +x,y,z, 'Color', [0 0 0], 'LineWidth', 1.5);
 
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
-        text(-cr3bp.mu*cr3bp.L*10^(-3), 0,  -500, 'Sun');
+        text(-cr3bp.mu*Lf, 0,  -500, 'Sun');
     end
-    text((1-cr3bp.mu)*cr3bp.L*10^(-3),  0,  -500, 'Earth');
+    text((1-cr3bp.mu)*Lf,  0,  -500, 'Earth');
 end
 
 %----------
@@ -114,44 +123,44 @@ if(params.plot.allLibPoints)
     Li = cr3bp.l1.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 500, 'L_1');
+        text(Li(1)*Lf, 0, 500, 'L_1');
     end
     
     Li = cr3bp.l2.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 500, 'L_2');
+        text(Li(1)*Lf, 0, 500, 'L_2');
     end
     
     Li = cr3bp.l3.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 500, 'L_3');
+        text(Li(1)*Lf, 0, 500, 'L_3');
     end
     
     Li = cr3bp.l4.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), Li(2)*cr3bp.L*10^(-3), 500, 'L_4');
+        text(Li(1)*Lf, Li(2)*Lf, 500, 'L_4');
     end
     
     Li = cr3bp.l5.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), Li(2)*cr3bp.L*10^(-3), 500, 'L_5');
+        text(Li(1)*Lf, Li(2)*Lf, 500, 'L_5');
     end
     
 else
     Li = cr3bp.l1.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 500, 'L_1');
+        text(Li(1)*Lf, 0, 500, 'L_1');
     end
     
     Li = cr3bp.l2.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 500, 'L_2');
+        text(Li(1)*Lf, 0, 500, 'L_2');
     end
 end
 
@@ -171,7 +180,7 @@ end
 function [] = earth_moon_system(cr3bp, params)
 
 %Distance in 10^3 km
-Lf = cr3bp.L*10^(-3);
+Lf = cr3bp.L;
 
 %----------
 %First primary
@@ -189,7 +198,7 @@ if(params.plot.firstPrimDisp)
     %Longitude shift
     h = 50;
     %Radius of the Earth
-    r = (params.plot.bigPrimFac+0.01)*cr3bp.m1.Req*10^(-3);
+    r = (params.plot.bigPrimFac+0.01)*cr3bp.m1.Req;
     %Loading continents
     load coast
     lat = lat/180*pi;
@@ -218,9 +227,9 @@ surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting
 %----------
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
-        text(-cr3bp.mu*cr3bp.L*10^(-3), 0,  -50, 'Earth');
+        text(-cr3bp.mu*cr3bp.L, 0,  -50, 'Earth');
     end
-    text((1-cr3bp.mu)*cr3bp.L*10^(-3), 0, -50, 'Moon');
+    text((1-cr3bp.mu)*cr3bp.L, 0, -50, 'Moon');
 end
 
 %----------
@@ -230,45 +239,45 @@ if(params.plot.allLibPoints)
     Li = cr3bp.l1.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 0.1301*Lf, 'L_1');
+        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_1');
     end
     
     Li = cr3bp.l2.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 0.1301*Lf, 'L_2');
+        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_2');
     end
     
     Li = cr3bp.l3.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 0.0780*Lf, 'L_3');
+        text(Li(1)*cr3bp.L, 0, 0.0780*Lf, 'L_3');
     end
     
     Li = cr3bp.l4.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), Li(2)*cr3bp.L*10^(-3), 0.0780*Lf, 'L_4');
+        text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_4');
     end
     
     
     Li = cr3bp.l5.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), Li(2)*cr3bp.L*10^(-3), 0.0780*Lf, 'L_5');
+        text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_5');
     end
     
 else
     Li = cr3bp.l1.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 0.1301*Lf, 'L_1');
+        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_1');
     end
     
     Li = cr3bp.l2.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L*10^(-3), 0, 0.1301*Lf, 'L_2');
+        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_2');
     end
 end
 

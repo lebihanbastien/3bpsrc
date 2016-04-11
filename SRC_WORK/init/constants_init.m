@@ -1,16 +1,13 @@
-%-------------------------------------------------------------------------%
-% constants_init()
-%
-% Initialisation of various constants for halo orbit computation
-%
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-% @return the structure cst
 function cst = constants_init()
+% CONSTANT_INIT defines various constants (coordinates, environement
+% constants...). 
+% 
+% Should be called priori to any computation.
+%       
+% BLB 2016
+
 %-------------------------------------------------------------------------%
-% Misc
+% Deprecated (true and false are already defined in native MATLAB)
 %-------------------------------------------------------------------------%
 cst.TRUE  = 1;
 cst.FALSE = 0;
@@ -21,6 +18,27 @@ cst.FALSE = 0;
 cst.coord.NC   = 0; % Normalized-Centered coordinates coordinates (x, p) (canonical)
 cst.coord.SYS  = 1; % Three-Body Problem coordinates (x, p) (canonical) with the US convention (the Earth has a negative abscissa)
 cst.coord.VSYS = 2; % Three-Body Problem (EM or SEM) coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
+cst.coord.VSEM = 3; % SEM coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
+
+%-------------------------------------------------------------------------%
+%Type of framework
+%-------------------------------------------------------------------------%
+cst.fwrk.EM  = 0; %Earth-Moon focus
+cst.fwrk.SEM = 1; %Sun-(Earth+Moon) focus
+
+%-------------------------------------------------------------------------%
+%Type of model
+%-------------------------------------------------------------------------%
+cst.model.RTBP = 0; %Restricted Three-Body model
+cst.model.QBCP = 1; %Quasi-Bicircular model
+
+%-------------------------------------------------------------------------%
+%Type of manifold
+%-------------------------------------------------------------------------%
+cst.mantype.MAN_CENTER = 0;
+cst.mantype.MAN_CENTER_S = 1;
+cst.mantype.MAN_CENTER_U = 2;
+cst.mantype.MAN_CENTER_US = 3;
 
 %-------------------------------------------------------------------------%
 % Environment
@@ -55,10 +73,11 @@ cst.orbit.type.VLYAP = 'VERTICAL_LYAPUNOV';
 cst.orbit.type.PLYAP = 'PLANAR_LYAPUNOV';
 
 %-------------------------------------------------------------------------%
-% Type of differential correction
+% Type of differential corrector
 %-------------------------------------------------------------------------%
 cst.corr.X0_FIXED = 1;
 cst.corr.Z0_FIXED = 2;
+cst.corr.MIN_NORM = 3;
 
 %-------------------------------------------------------------------------%
 % Type of plot
@@ -74,7 +93,7 @@ cst.manifold.EXTERIOR = 1;
 cst.manifold.INTERIOR = -1;
 
 % Type
-cst.manifold.STABLE = 1;
+cst.manifold.STABLE   = 1;
 cst.manifold.UNSTABLE = -1;
 
 % Type of termination (by event or freely)

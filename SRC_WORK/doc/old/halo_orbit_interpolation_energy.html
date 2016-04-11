@@ -1,0 +1,148 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of halo_orbit_interpolation_energy</title>
+  <meta name="keywords" content="halo_orbit_interpolation_energy">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; halo_orbit_interpolation_energy.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>halo_orbit_interpolation_energy
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function orbit = halo_orbit_interpolation_energy(cr3bp, orbit, halo_init, params, cst) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ Polynomial interpolation in abacus to recover a good guess of the
+ the initial conditions orbit.y0, given either an energy level orbit.C or
+ an estimate of the vertical extension orbit.Az.
+ The temporary structure fit contains all the elements 
+ for this interpolation.
+
+ WARNING 1: the interpolation alone should give a good enough guess to
+ directly produce a periodic orbit. Hence the differential correction
+ process performed in the routine orbit_refinement should be very fast, or
+ even useless.
+
+ WARNING 2: the interpolation possibilies are limited: see energy bounds
+ in halo_init.
+
+ RM: the data files contain the NORTHERN family.
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%
+-------------------------------------------------------------------------%
+ First guess from abacus
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% Polynomial interpolation in abacus to recover a good guess of the</span>
+0003 <span class="comment">% the initial conditions orbit.y0, given either an energy level orbit.C or</span>
+0004 <span class="comment">% an estimate of the vertical extension orbit.Az.</span>
+0005 <span class="comment">% The temporary structure fit contains all the elements</span>
+0006 <span class="comment">% for this interpolation.</span>
+0007 <span class="comment">%</span>
+0008 <span class="comment">% WARNING 1: the interpolation alone should give a good enough guess to</span>
+0009 <span class="comment">% directly produce a periodic orbit. Hence the differential correction</span>
+0010 <span class="comment">% process performed in the routine orbit_refinement should be very fast, or</span>
+0011 <span class="comment">% even useless.</span>
+0012 <span class="comment">%</span>
+0013 <span class="comment">% WARNING 2: the interpolation possibilies are limited: see energy bounds</span>
+0014 <span class="comment">% in halo_init.</span>
+0015 <span class="comment">%</span>
+0016 <span class="comment">% RM: the data files contain the NORTHERN family.</span>
+0017 <span class="comment">%</span>
+0018 <span class="comment">% Author: BLB</span>
+0019 <span class="comment">% Version: 1.0</span>
+0020 <span class="comment">% Year: 2015</span>
+0021 <span class="comment">%-------------------------------------------------------------------------%</span>
+0022 <a name="_sub0" href="#_subfunctions" class="code">function orbit = halo_orbit_interpolation_energy(cr3bp, orbit, halo_init, params, cst)</a>
+0023 <span class="comment">%-------------------------------------------------------------------------%</span>
+0024 <span class="comment">% First guess from abacus</span>
+0025 <span class="comment">%-------------------------------------------------------------------------%</span>
+0026 <span class="keyword">if</span>(isfield(orbit, <span class="string">'C'</span>)) <span class="comment">%if an energy level is provided</span>
+0027     
+0028     <span class="keyword">if</span>(orbit.C &gt; halo_init.Cjaclimit(1) &amp;&amp; orbit.C &lt; halo_init.Cjaclimit(2))
+0029         fit.half = 2;
+0030         fit.degree = 2*fit.half;
+0031         [~, array_position] = min(abs(halo_init.matrix(:,8) - orbit.C));
+0032         fit.x =  halo_init.matrix(array_position - fit.half: array_position + fit.half,8);
+0033         <span class="keyword">for</span> count =1:6
+0034             fit.y(:,count) =  halo_init.matrix(array_position - fit.half: array_position + fit.half,count);
+0035             <span class="comment">%Fitting for every dimension of the state (6)</span>
+0036             [fit.p, ~, fit.mu] = polyfit(fit.x,fit.y(:,count),fit.degree);
+0037             <span class="comment">%Evaluation</span>
+0038             fit.f(count) = polyval(fit.p,orbit.C,[],fit.mu);
+0039         <span class="keyword">end</span>
+0040     <span class="keyword">else</span>
+0041         disp(<span class="string">'WARNING: the desired jacobi cst is out of bounds in halo_init.matrix'</span>);
+0042     <span class="keyword">end</span>
+0043     
+0044 <span class="keyword">elseif</span>(isfield(orbit, <span class="string">'Az'</span>)) <span class="comment">%if a vertical extension is provided</span>
+0045     
+0046     <span class="keyword">if</span>(orbit.Az &lt; halo_init.Azlimit)
+0047         fit.half = 2;
+0048         fit.degree = 2*fit.half;
+0049         [~, array_position] = min(abs(halo_init.matrix(:,7) - orbit.Az));
+0050         fit.x =  halo_init.matrix(array_position - fit.half: array_position + fit.half,7);
+0051         <span class="keyword">for</span> count =1:6
+0052             fit.y(:,count) =  halo_init.matrix(array_position - fit.half: array_position + fit.half,count);
+0053             <span class="comment">%Fitting for every dimension of the state (6)</span>
+0054             [fit.p, ~, fit.mu] = polyfit(fit.x,fit.y(:,count),fit.degree);
+0055             <span class="comment">%Evaluation</span>
+0056             fit.f(count) = polyval(fit.p,orbit.Az,[],fit.mu);
+0057         <span class="keyword">end</span>
+0058     <span class="keyword">else</span>
+0059         disp(<span class="string">'WARNING: the vertical extension Az is out of range in halo_init.matrix'</span>);
+0060     <span class="keyword">end</span>
+0061     
+0062     
+0063 <span class="keyword">end</span>
+0064 
+0065 <span class="comment">% First guess</span>
+0066 yv0 = fit.f(1:6);   
+0067 
+0068 <span class="comment">% Specific case of the SOUTHERN family</span>
+0069 <span class="keyword">if</span>(strcmp(orbit.family,cst.orbit.family.SOUTHERN))
+0070     yv0(3) = -yv0(3);    
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%-------------------------------------------------------------------------%</span>
+0074 <span class="comment">% Refinement</span>
+0075 <span class="comment">%-------------------------------------------------------------------------%</span>
+0076 orbit = orbit_refinement(cr3bp, orbit, params, yv0, cst);
+0077 
+0078 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -1,17 +1,11 @@
 %--------------------------------------------------------------------------
-% Example n°3: 
+% This matlab file makes of the abacus
+% ./data/halo_init_matrix_EML2.dat to generate an EML2 halo orbit with a
+% prescribed energy (Jacobian constant).
 %
-% 1. Makes of the abacus
-% ./data/halo_init_matrix_EML2.dat to generate an EML2 halo orbit 
-% with a given energy value
+% It does the same for and EML1 orbit of the same energy.
 %
-% 2. Makes of the abacus
-% ./data/halo_init_matrix_EML1.dat to generate an EML1 halo orbit 
-% with the same energy value
-%
-% Author: BLB
-% Version: 1.0
-% Year: 2015
+% BLB 2015
 %--------------------------------------------------------------------------
 
 %% Initialization: reboot, addpath, constants, default parameters. See init.m

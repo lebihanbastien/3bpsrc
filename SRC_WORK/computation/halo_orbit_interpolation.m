@@ -1,9 +1,18 @@
-%-------------------------------------------------------------------------%
-% halo_orbit_interpolation(cr3bp, orbit, halo_init, params, cst)
+function orbit = halo_orbit_interpolation(cr3bp, orbit, abacus, params, cst)
+% HALO_ORBIT_INTERPOLATION computes a halo orbit of the Earth-Moon system.
 %
-% Polynomial interpolation in abacus to recover a good guess of the
-% the initial conditions orbit.y0, given either an energy level orbit.C or
-% an estimate of the vertical extension orbit.Az.
+% HALO_ORBIT_INTERPOLATION(CR3BP, ORBIT, ABACUS, PARAMS, CST) computes a
+% halo orbit of the Earth-Moon CRTBP, with the characteristics given in
+% ORBIT:
+%     - ORBIT.li: the lagrange point of reference.
+%     - ORBIT.family: NORTHERN or SOUTHERN.
+% and either
+%     - ORBIT.C: the jacobian constant.
+% or
+%     - ORBIT.Az: the vertical extension.
+% The routines makes use of user-defined parameters and constants defined
+% in the structure PARAMS and CST, respectively. The interpolation of the
+% initial conditions are made with data stored in the structure ABACUS.
 % The temporary structure fit contains all the elements 
 % for this interpolation.
 %
@@ -15,25 +24,23 @@
 % WARNING 2: the interpolation possibilies are limited: see energy bounds
 % in halo_init.
 %
-% RM: the data files contain the NORTHERN family.
+% RM: the data files contain the NORTHERN family. The SOUTHERN family is
+% obtained by simple symmetry with respect to the xy-plane.
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-function orbit = halo_orbit_interpolation(cr3bp, orbit, halo_init, params, cst)
-%-------------------------------------------------------------------------%
+% BLB 2015
+
+%--------------------------------------------------------------------------
 % First guess from abacus
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 if(isfield(orbit, 'C')) %if an energy level is provided
     
-    if(orbit.C > halo_init.Cjaclimit(1) && orbit.C < halo_init.Cjaclimit(2))
+    if(orbit.C > abacus.Cjaclimit(1) && orbit.C < abacus.Cjaclimit(2))
         fit.half = 2;
         fit.degree = 2*fit.half;
-        [~, array_position] = min(abs(halo_init.matrix(:,8) - orbit.C));
-        fit.x =  halo_init.matrix(array_position - fit.half: array_position + fit.half,8);
+        [~, array_position] = min(abs(abacus.matrix(:,8) - orbit.C));
+        fit.x =  abacus.matrix(array_position - fit.half: array_position + fit.half,8);
         for count =1:6
-            fit.y(:,count) =  halo_init.matrix(array_position - fit.half: array_position + fit.half,count);
+            fit.y(:,count) =  abacus.matrix(array_position - fit.half: array_position + fit.half,count);
             %Fitting for every dimension of the state (6)
             [fit.p, ~, fit.mu] = polyfit(fit.x,fit.y(:,count),fit.degree);
             %Evaluation
@@ -45,13 +52,13 @@ if(isfield(orbit, 'C')) %if an energy level is provided
     
 elseif(isfield(orbit, 'Az')) %if a vertical extension is provided
     
-    if(orbit.Az < halo_init.Azlimit)
+    if(orbit.Az < abacus.Azlimit)
         fit.half = 2;
         fit.degree = 2*fit.half;
-        [~, array_position] = min(abs(halo_init.matrix(:,7) - orbit.Az));
-        fit.x =  halo_init.matrix(array_position - fit.half: array_position + fit.half,7);
+        [~, array_position] = min(abs(abacus.matrix(:,7) - orbit.Az));
+        fit.x =  abacus.matrix(array_position - fit.half: array_position + fit.half,7);
         for count =1:6
-            fit.y(:,count) =  halo_init.matrix(array_position - fit.half: array_position + fit.half,count);
+            fit.y(:,count) =  abacus.matrix(array_position - fit.half: array_position + fit.half,count);
             %Fitting for every dimension of the state (6)
             [fit.p, ~, fit.mu] = polyfit(fit.x,fit.y(:,count),fit.degree);
             %Evaluation
@@ -73,9 +80,9 @@ if(strcmp(orbit.family,cst.orbit.family.SOUTHERN))
 end
 
 
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 % Refinement
-%-------------------------------------------------------------------------%     
-orbit = orbit_refinement(cr3bp, orbit, params, yv0, cst, 0);
+%--------------------------------------------------------------------------     
+orbit = orbit_refinement(cr3bp, orbit, params, yv0, cst);
 
 end

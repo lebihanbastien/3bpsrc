@@ -1,0 +1,12 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+
+  constants_init [URL="constants_init.html"];
+  init_CR3BP [URL="init_CR3BP.html"];
+  init_event [URL="init_event.html"];
+  init_halo_orbit_energy [URL="init_halo_orbit_energy.html"];
+  init_manifold_branch [URL="init_manifold_branch.html"];
+  init_manifold_branch_event [URL="init_manifold_branch_event.html"];
+  init_orbit [URL="init_orbit.html"];
+  parameters_default_init [URL="parameters_default_init.html"];
+}

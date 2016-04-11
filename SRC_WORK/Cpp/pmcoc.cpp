@@ -171,6 +171,164 @@ void NCtoSYS(double t, const double yNC[], double yEM[], void *params_void)
 }
 
 
+//-----------------------------------------------------------------------------
+// COC: NC <--> EM
+//-----------------------------------------------------------------------------
+/**
+ *  \brief COC: from Normalized-Centered coordinates to Earth-Moon coordinates
+ **/
+void NCtoEM(double t, const double yNC[], double yEM[], QBCP_L *qbp)
+{
+    //-------------------------------------------------------------------------------
+    // Misc parameters
+    //-------------------------------------------------------------------------------
+    double n     =  qbp->us_em.n;
+    double gamma =  qbp->cs_em.gamma;
+    double c1    =  qbp->cs_em.c1;
+
+    //-------------------------------------------------------------------------------
+    //Evaluate the alphas and their derivatives @ t
+    //1, 3, 4, 6, 7 even
+    //2, 5, 8 odd
+    //-------------------------------------------------------------------------------
+    double alpha[8];
+    evaluateCoef(alpha, t, n, qbp->nf, qbp->cs_em.coeffs, 8);
+
+    //-------------------------------------------------------------------------------
+    //CoC
+    //-------------------------------------------------------------------------------
+    //X = -gamma*(x-c1)
+    yEM[0] = -gamma*(yNC[0] - c1);
+    //Y = -gamma*y
+    yEM[1] = -gamma*yNC[1];
+    //Z = +gamma*z
+    yEM[2] = +gamma*yNC[2];
+
+    //PX = -gamma(px+a2/a1*c1)
+    yEM[3] = -gamma*(yNC[3] + alpha[1]/alpha[0]*c1);
+    //PY = -gamma(py-a3/a1*c1)
+    yEM[4] = -gamma*(yNC[4] - alpha[2]/alpha[0]*c1);
+    //PZ = +gamma*pz
+    yEM[5] = +gamma*yNC[5];
+
+}
+
+/**
+ *  \brief COC: from Earth-Moon coordinates to Normalized-Centered coordinates
+ **/
+void EMtoNC(double t, const double yEM[], double yNC[], QBCP_L *qbp)
+{
+    //-------------------------------------------------------------------------------
+    // Misc parameters
+    //-------------------------------------------------------------------------------
+    double n     =  qbp->us_em.n;
+    double gamma =  qbp->cs_em.gamma;
+    double c1    =  qbp->cs_em.c1;
+
+    //-------------------------------------------------------------------------------
+    //Evaluate the alphas and their derivatives @ t
+    //1, 3, 4, 6, 7 even
+    //2, 5, 8 odd
+    //-------------------------------------------------------------------------------
+    double alpha[8];
+    evaluateCoef(alpha, t, n, qbp->nf, qbp->cs_em.coeffs, 8);
+
+    //-------------------------------------------------------------------------------
+    //CoC
+    //-------------------------------------------------------------------------------
+    //x = -X/gamma + c1
+    yNC[0] = -yEM[0]/gamma  + c1;
+    //y = -Y/gamma
+    yNC[1] = -yEM[1]/gamma;
+    //z = +Z/gamma
+    yNC[2] = +yEM[2]/gamma;
+    //px = -PX/gamma - a2/a1*c1
+    yNC[3] = -yEM[3]/gamma - alpha[1]/alpha[0]*c1;
+    //py = -PY/gamma + a3/a1*c1
+    yNC[4] = -yEM[4]/gamma + alpha[2]/alpha[0]*c1;
+    //pz = +PZ/gamma
+    yNC[5] = +yEM[5]/gamma;
+}
+
+//-----------------------------------------------------------------------------
+// COC: NC <--> SEM
+//-----------------------------------------------------------------------------
+/**
+ *  \brief COC: from Sun-Earth-Moon coordinates to Normalized-Centered coordinates
+ **/
+void SEMtoNC(double t, const double ySEM[], double yNC[], QBCP_L *qbp)
+{
+    //-------------------------------------------------------------------------------
+    // Misc parameters
+    //-------------------------------------------------------------------------------
+    double n     =  qbp->us_sem.n;
+    double gamma =  qbp->cs_sem.gamma;
+    double c1    =  qbp->cs_sem.c1;
+
+    //-------------------------------------------------------------------------------
+    //Evaluate the alphas and their derivatives @ t
+    //1, 3, 4, 6, 7 even
+    //2, 5, 8 odd
+    //-------------------------------------------------------------------------------
+    double alpha[8];
+    evaluateCoef(alpha, t, n, qbp->nf, qbp->cs_sem.coeffs, 8);
+
+    //-------------------------------------------------------------------------------
+    //CoC
+    //-------------------------------------------------------------------------------
+    //x = -X/gamma + c1
+    yNC[0] = -ySEM[0]/gamma  + c1;
+    //y = -Y/gamma
+    yNC[1] = -ySEM[1]/gamma;
+    //z = +Z/gamma
+    yNC[2] = +ySEM[2]/gamma;
+    //px = -PX/gamma - a2/a1*c1
+    yNC[3] = -ySEM[3]/gamma - alpha[1]/alpha[0]*c1;
+    //py = -PY/gamma + a3/a1*c1
+    yNC[4] = -ySEM[4]/gamma + alpha[2]/alpha[0]*c1;
+    //pz = +PZ/gamma
+    yNC[5] = +ySEM[5]/gamma;
+}
+
+/**
+ *  \brief COC: from Normalized-Centered coordinates to Sun-Earth-Moon coordinates
+ **/
+void NCtoSEM(double t, const double yNC[], double ySEM[], QBCP_L *qbp)
+{
+    //-------------------------------------------------------------------------------
+    // Misc parameters
+    //-------------------------------------------------------------------------------
+    double n     =  qbp->us_sem.n;
+    double gamma =  qbp->cs_sem.gamma;
+    double c1    =  qbp->cs_sem.c1;
+
+    //-------------------------------------------------------------------------------
+    //Evaluate the alphas and their derivatives @ t
+    //1, 3, 4, 6, 7 even
+    //2, 5, 8 odd
+    //-------------------------------------------------------------------------------
+    double alpha[8];
+    evaluateCoef(alpha, t, n, qbp->nf, qbp->cs_sem.coeffs, 8);
+
+    //-------------------------------------------------------------------------------
+    //CoC
+    //-------------------------------------------------------------------------------
+    //X = -gamma*(x-c1)
+    ySEM[0] = -gamma*(yNC[0] - c1);
+    //Y = -gamma*y
+    ySEM[1] = -gamma*yNC[1];
+    //Z = +gamma*z
+    ySEM[2] = +gamma*yNC[2];
+
+    //PX = -gamma(px+a2/a1*c1)
+    ySEM[3] = -gamma*(yNC[3] + alpha[1]/alpha[0]*c1);
+    //PY = -gamma(py-a3/a1*c1)
+    ySEM[4] = -gamma*(yNC[4] - alpha[2]/alpha[0]*c1);
+    //PZ = +gamma*pz
+    ySEM[5] = +gamma*yNC[5];
+
+}
+
 
 //---------------------------------------------------------------------------------------------------------------------------------------
 //
@@ -637,3 +795,31 @@ double evaluateOddDerivative(double t, double omega,  int order, double *coef, d
     for(int i= order; i>=1; i--) result += omega*i*coef[i]*cR[i-1];//odd type
     return result;
 }
+
+//-----------------------------------------------------------------------------
+// Evaluating the QBTBP
+//-----------------------------------------------------------------------------
+/**
+ *  \brief Evaluate z(t), with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evz(Ofsc& zt, double t, double n, double ni, double ai)
+{
+    return ai*(cos(ni*t)+I*sin(ni*t))*zt.evaluate(n*t);
+}
+
+/**
+ *  \brief Evaluate dz(t)/dt, with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evzdot(Ofsc& zt, Ofsc& ztdot, double t, double n, double ni, double ai)
+{
+    return ai*(cos(ni*t)+I*sin(ni*t))*(ztdot.evaluate(n*t) + I*ni*zt.evaluate(n*t));
+}
+
+/**
+ *  \brief Evaluate d2z(t)/dt2, with \f$ z(t) = e^{it} z_r(t) \f$ in Earth-Moon units.
+ */
+cdouble evzddot(Ofsc& zt, Ofsc& ztdot, Ofsc& ztddot, double t, double n, double ni, double ai)
+{
+    return ai*(cos(ni*t)+I*sin(ni*t))*( 2*I*ni*ztdot.evaluate(n*t) - ni*ni*zt.evaluate(n*t) + ztddot.evaluate(n*t));
+}
+

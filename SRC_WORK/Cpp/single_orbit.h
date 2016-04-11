@@ -94,6 +94,11 @@ void orbit_update_ic(SingleOrbit &orbit, const double si[], double t0);
 int trajectory_integration_grid(SingleOrbit &orbit, double t0, double tf, double **yNCE, double *tNCE, int N, int isResetOn);
 
 /**
+ *   \brief Integrates a given trajectory up to tf, on a variable grid of maximum size N
+ **/
+int trajectory_integration_variable_grid(SingleOrbit &orbit, double t0, double tf, double **yNCE, double *tNCE, int N, int isResetOn);;
+
+/**
  * \brief Projection on the center manifold
  **/
 void NCprojCCMtoCUS(double *yv, double tv, double sti[5], SingleOrbit &orbit, double epsilon, matrix<Ofsc>  &MIcoc, vector<Ofsc>  &Vcoc);

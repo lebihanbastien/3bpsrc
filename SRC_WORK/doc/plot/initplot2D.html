@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of initplot2D</title>
+  <meta name="keywords" content="initplot2D">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">plot</a> &gt; initplot2D.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for plot&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>initplot2D
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function [] = initplot2D(index, cr3bp, params, li, ip, jp) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+ Init the 2D plot (primaries...)
+--------------------------------------------------------------------------</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="rgb.html" class="code" title="function RGB = rgb( index_or_name )">rgb</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="manifold_plot.html" class="code" title="function [] = manifold_plot(yv, orbit, manifold_branch, params, cst)">manifold_plot</a>	--------------------------------------------------------------------------</li><li><a href="orbit_plot.html" class="code" title="function [] = orbit_plot(yv, orbit, params, cst)">orbit_plot</a>	--------------------------------------------------------------------------</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%--------------------------------------------------------------------------</span>
+0002 <span class="comment">% Init the 2D plot (primaries...)</span>
+0003 <span class="comment">%--------------------------------------------------------------------------</span>
+0004 <a name="_sub0" href="#_subfunctions" class="code">function [] = initplot2D(index, cr3bp, params, li, ip, jp)</a>
+0005 
+0006 <span class="comment">%--------------------------------------------------------------------------</span>
+0007 <span class="comment">%Constants</span>
+0008 <span class="comment">%--------------------------------------------------------------------------</span>
+0009 <span class="comment">%Distance in  10^3 km</span>
+0010 Lf = cr3bp.L;
+0011 
+0012 <span class="comment">%--------------------------------------------------------------------------</span>
+0013 <span class="comment">%Create handle</span>
+0014 <span class="comment">%--------------------------------------------------------------------------</span>
+0015 figure(index);
+0016 hold on
+0017 
+0018 <span class="comment">%--------------------------------------------------------------------------</span>
+0019 <span class="comment">%Settings</span>
+0020 <span class="comment">%--------------------------------------------------------------------------</span>
+0021 axis equal
+0022 grid on
+0023 <span class="comment">%Strings</span>
+0024 <span class="keyword">if</span>(ip == 1 &amp;&amp; jp == 2)
+0025     si = <span class="string">'X'</span>;
+0026     sj = <span class="string">'Y'</span>;
+0027 <span class="keyword">elseif</span>(ip == 1 &amp;&amp; jp == 3)
+0028     si = <span class="string">'X'</span>;
+0029     sj = <span class="string">'Z'</span>;
+0030 <span class="keyword">elseif</span>(ip == 2 &amp;&amp; jp == 3)
+0031     si = <span class="string">'Y'</span>;
+0032     sj = <span class="string">'Z'</span>;
+0033 <span class="keyword">end</span>
+0034 xlabel(strcat(si, <span class="string">' (km)'</span>));
+0035 ylabel(strcat(sj, <span class="string">' (km)'</span>));
+0036 title([<span class="string">'Projection in the '</span>, si, sj, <span class="string">'-plane'</span>]);
+0037 <span class="comment">%Default size</span>
+0038 set(figure(index), <span class="string">'defaultTextFontSize'</span>, 12);
+0039 set(figure(index), <span class="string">'defaultTextFontWeight'</span>, <span class="string">'bold'</span>);
+0040 set(figure(index), <span class="string">'defaultTextHorizontalAlignment'</span>, <span class="string">'center'</span>);
+0041 set(figure(index), <span class="string">'defaultLineMarkerSize'</span>, 2);
+0042 
+0043 <span class="comment">%----------</span>
+0044 <span class="comment">%Second primary</span>
+0045 <span class="comment">%----------</span>
+0046 Rm2 = cr3bp.m2.Req/cr3bp.L;
+0047 VTheta = 0:0.01:2*pi;
+0048 <span class="comment">%Sphere</span>
+0049 S_L = zeros(2, size(VTheta,2));
+0050 S_L(1,:) = Rm2 *cos(VTheta);
+0051 S_L(2,:) = Rm2 *sin(VTheta);
+0052 <span class="comment">%Position</span>
+0053 V_L = [1 - cr3bp.mu  0  0];
+0054 fill((V_L(ip) + S_L(1,:))*Lf,(V_L(jp) + S_L(2,:))*Lf, <span class="string">'k'</span>);
+0055 
+0056 <span class="comment">%----------</span>
+0057 <span class="comment">%First primary</span>
+0058 <span class="comment">%----------</span>
+0059 <span class="keyword">if</span>(params.plot.firstPrimDisp)
+0060     
+0061     Rm1 = cr3bp.m1.Req/cr3bp.L;
+0062     <span class="comment">%Sphere</span>
+0063     S_E = zeros(2, size(VTheta,2));
+0064     S_E(1,:) = Rm1 *cos(VTheta);
+0065     S_E(2,:) = Rm1 *sin(VTheta);
+0066     <span class="comment">%Position</span>
+0067     V_E = [-cr3bp.mu  0  0];
+0068     
+0069     fill((V_E(ip) + S_E(1,:))*Lf,(V_E(jp) + S_E(2,:))*Lf, <span class="string">'k'</span>);
+0070     
+0071 <span class="keyword">end</span>
+0072 
+0073 <span class="comment">%----------</span>
+0074 <span class="comment">%Libration point</span>
+0075 <span class="comment">%----------</span>
+0076 Li = li.position;
+0077 plot(Li(ip)*Lf, Li(jp)*Lf, <span class="string">'o'</span>, <span class="string">'Color'</span>,  <a href="rgb.html" class="code" title="function RGB = rgb( index_or_name )">rgb</a>(<span class="string">'dark red'</span>), <span class="string">'MarkerFaceColor'</span>,  <a href="rgb.html" class="code" title="function RGB = rgb( index_or_name )">rgb</a>(<span class="string">'dark red'</span>), <span class="string">'markers'</span>, 2, <span class="string">'MarkerSize'</span>, 2);
+0078 
+0079 <span class="comment">%----------</span>
+0080 <span class="comment">%Second primary</span>
+0081 <span class="comment">%----------</span>
+0082 
+0083 
+0084 
+0085 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

@@ -22,6 +22,8 @@
 % exterior stable and unstable manifolds.
 %
 % WARNING: this computation includes:
+% 0. Only the solutions with eastward LEO rotation should be
+%    kept.
 % 1. A procedure to leave the close vicinity of the Moon
 % 2. A first guess fo the deltaV of the second maneuver
 %    (at the insertion point of the stable/unstable manifold branch)
@@ -34,10 +36,11 @@ init;
 
 %% Inner changes from default parameters
 % Integration precision values are dramatically lowered to allow fast
-% computation: only for plotting!
+% computation.
 default.ode45.RelTol = 1e-8;
 default.ode45.AbsTol = 1e-10;
-default.plot.XY = true;
+default.plot.XY = true;         
+default.plot.firstPrimDisp = cst.TRUE;  %plot the Earth on the figures
 
 %% Structures init
 %Environment
@@ -48,17 +51,15 @@ orbit = init_orbit(cr3bp, cr3bp.l2,  cst.orbit.type.HALO, cst.orbit.family.NORTH
 halo_init = halo_init_EML2;
 
 %% User input data
-user.hLEO       = 800;              %Desired LEO altitude [km]
-user.theta      = 0;                %Arbitrary position on the orbit, in [0 1]
-user.showSteps  = false;            %To show/hide the steps of the corrective scheme
-
+user.hLEO       = 800;                  %Desired LEO altitude [km]
+user.theta      = 0;                    %Arbitrary position on the orbit, in [0 1]
+user.showSteps  = false;                %To show/hide the steps of the corrective scheme
 user.flyby.tangentManeuver = false;     %Is the Flyby Maneuver forced to be tangent? Very restrictive! May lead to no solution
 user.flyby.fbangle  = degtorad(-130);   %Flyby angle at the moon [rad]
 
-
 %Computed from user inputs, or arbitrary
 user.hLEOa = user.hLEO/cr3bp.L;  %Desired LEO altitude [adim]
-user.t0    = 10;                 %Integration duration (arbitrary, will not be reached because of the termination @lunar flyby
+user.t0    = 10;                 %Integration duration (arbitrary, will not be reached because of the termination @lunar flyby)
 
 
 %% Orbit computation
@@ -108,13 +109,13 @@ isPreviousSolution = false;
 it = 1;
 
 for theta = 0:0.1:1
-    %-------------------------------------
+    %----------------------------------------------------------------------
     %New starting point
-    %-------------------------------------
+    %----------------------------------------------------------------------
     user.theta = theta;
-    %-------------------------------------
+    %----------------------------------------------------------------------
     %Manifold computation
-    %-------------------------------------
+    %----------------------------------------------------------------------
     manifold_branch_stable = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable, user.theta, user.t0, default, cst);
     %-------------------------------------
     % LFB
@@ -125,7 +126,9 @@ for theta = 0:0.1:1
         [output, isPreviousSolution] = lfb(manifold_branch_stable, cr3bp, earth, moon, user, default, cst); 
     end
     
+    %----------------------------------------------------------------------
     % Saved outputs throughout the loop
+    %----------------------------------------------------------------------
     if(isPreviousSolution)
         deltaVD(it) = output.deltaV_dim;
         thetaV(it)   = user.theta;
@@ -133,10 +136,11 @@ for theta = 0:0.1:1
         it = it+1;
     end
     
-    %waitbar
+    %----------------------------------------------------------------------
+    % Waitbar
+    %----------------------------------------------------------------------
     waitbar(theta);
 end
-
 close(h)
 
 %% Maneuver cost vs position on the Halo orbit

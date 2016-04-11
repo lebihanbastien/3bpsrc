@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of constants_init</title>
+  <meta name="keywords" content="constants_init">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">init</a> &gt; constants_init.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for init&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>constants_init
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function cst = constants_init() </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+ constants_init()
+
+ Initialisation of various constants for halo orbit computation
+
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%
+ @return the structure cst
+-------------------------------------------------------------------------%
+ Misc
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">% constants_init()</span>
+0003 <span class="comment">%</span>
+0004 <span class="comment">% Initialisation of various constants for halo orbit computation</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Author: BLB</span>
+0007 <span class="comment">% Version: 1.0</span>
+0008 <span class="comment">% Year: 2015</span>
+0009 <span class="comment">%-------------------------------------------------------------------------%</span>
+0010 <span class="comment">% @return the structure cst</span>
+0011 <a name="_sub0" href="#_subfunctions" class="code">function cst = constants_init()</a>
+0012 <span class="comment">%-------------------------------------------------------------------------%</span>
+0013 <span class="comment">% Misc</span>
+0014 <span class="comment">%-------------------------------------------------------------------------%</span>
+0015 cst.TRUE  = 1;
+0016 cst.FALSE = 0;
+0017 
+0018 <span class="comment">%-------------------------------------------------------------------------%</span>
+0019 <span class="comment">%Type of coordinates</span>
+0020 <span class="comment">%-------------------------------------------------------------------------%</span>
+0021 cst.coord.NC   = 0; <span class="comment">% Normalized-Centered coordinates coordinates (x, p) (canonical)</span>
+0022 cst.coord.SYS  = 1; <span class="comment">% Three-Body Problem coordinates (x, p) (canonical) with the US convention (the Earth has a negative abscissa)</span>
+0023 cst.coord.VSYS = 2; <span class="comment">% Three-Body Problem (EM or SEM) coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)</span>
+0024 cst.coord.VSEM = 3; <span class="comment">% SEM coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)</span>
+0025 
+0026 <span class="comment">%-------------------------------------------------------------------------%</span>
+0027 <span class="comment">%Type of framework</span>
+0028 <span class="comment">%-------------------------------------------------------------------------%</span>
+0029 cst.fwrk.EM  = 0; <span class="comment">%Earth-Moon focus</span>
+0030 cst.fwrk.SEM = 1; <span class="comment">%Sun-(Earth+Moon) focus</span>
+0031 
+0032 <span class="comment">%-------------------------------------------------------------------------%</span>
+0033 <span class="comment">%Type of model</span>
+0034 <span class="comment">%-------------------------------------------------------------------------%</span>
+0035 cst.model.RTBP = 0; <span class="comment">%Restricted Three-Body model</span>
+0036 cst.model.QBCP = 1; <span class="comment">%Quasi-Bicircular model</span>
+0037 
+0038 <span class="comment">%-------------------------------------------------------------------------%</span>
+0039 <span class="comment">%Type of manifold</span>
+0040 <span class="comment">%-------------------------------------------------------------------------%</span>
+0041 cst.mantype.MAN_CENTER = 0;
+0042 cst.mantype.MAN_CENTER_S = 1;
+0043 cst.mantype.MAN_CENTER_U = 2;
+0044 cst.mantype.MAN_CENTER_US = 3;
+0045 
+0046 <span class="comment">%-------------------------------------------------------------------------%</span>
+0047 <span class="comment">% Environment</span>
+0048 <span class="comment">%-------------------------------------------------------------------------%</span>
+0049 cst.env.G = 6.67428e-11; <span class="comment">%gravitational constant</span>
+0050 cst.env.AU = 1.49597871e8;        <span class="comment">%astronomical unit in km</span>
+0051 cst.env.julian.y2015 = 2457023.5; <span class="comment">%Julian date of 01/01/2015 at 00:00</span>
+0052 cst.env.julian.y2000 = 2451544.5; <span class="comment">%Julian date of 01/01/2015 at 00:00</span>
+0053 cst.env.hours = 3600;             <span class="comment">%in seconds</span>
+0054 cst.env.days  = 86400;            <span class="comment">%in seconds</span>
+0055 cst.env.years = 31556926;         <span class="comment">%in seconds (true value)</span>
+0056 
+0057 <span class="comment">%-------------------------------------------------------------------------%</span>
+0058 <span class="comment">% Orbit</span>
+0059 <span class="comment">%-------------------------------------------------------------------------%</span>
+0060 <span class="comment">% Family</span>
+0061 cst.orbit.family.NORTHERN = <span class="string">'NORTHERN'</span>;
+0062 cst.orbit.family.SOUTHERN = <span class="string">'SOUTHERN'</span>;
+0063 cst.orbit.family.PLANAR   = <span class="string">'PLANAR'</span>;
+0064 
+0065 <span class="comment">% Computation type used to built the orbit ('EMPTY' initially)</span>
+0066 cst.orbit.EMPTY        =  <span class="string">'EMPTY'</span>;
+0067 cst.orbit.APPROXIMATED =  <span class="string">'APPROXIMATED'</span>;
+0068 cst.orbit.REAL         =  <span class="string">'REAL'</span>;
+0069 
+0070 <span class="comment">% Initialisation of the STM as the identity matrix</span>
+0071 cst.orbit.STM0 = eye(6);
+0072 
+0073 <span class="comment">%Type</span>
+0074 cst.orbit.type.HALO  = <span class="string">'HALO'</span>;
+0075 cst.orbit.type.VLYAP = <span class="string">'VERTICAL_LYAPUNOV'</span>;
+0076 cst.orbit.type.PLYAP = <span class="string">'PLANAR_LYAPUNOV'</span>;
+0077 
+0078 <span class="comment">%-------------------------------------------------------------------------%</span>
+0079 <span class="comment">% Type of differential corrector</span>
+0080 <span class="comment">%-------------------------------------------------------------------------%</span>
+0081 cst.corr.X0_FIXED = 1;
+0082 cst.corr.Z0_FIXED = 2;
+0083 cst.corr.MIN_NORM = 3;
+0084 
+0085 <span class="comment">%-------------------------------------------------------------------------%</span>
+0086 <span class="comment">% Type of plot</span>
+0087 <span class="comment">%-------------------------------------------------------------------------%</span>
+0088 cst.plot.ADIM = 0;
+0089 cst.plot.DIM  = 1;
+0090 
+0091 <span class="comment">%-------------------------------------------------------------------------%</span>
+0092 <span class="comment">%Manifold</span>
+0093 <span class="comment">%-------------------------------------------------------------------------%</span>
+0094 <span class="comment">% EXTERIOR == towards east, INTERIOR == towards west</span>
+0095 cst.manifold.EXTERIOR = 1;
+0096 cst.manifold.INTERIOR = -1;
+0097 
+0098 <span class="comment">% Type</span>
+0099 cst.manifold.STABLE   = 1;
+0100 cst.manifold.UNSTABLE = -1;
+0101 
+0102 <span class="comment">% Type of termination (by event or freely)</span>
+0103 cst.manifold.event.type.FREE      = <span class="string">'FREE'</span>;                       <span class="comment">%no termination event</span>
+0104 cst.manifold.event.type.X_SECTION = <span class="string">'X_SECTION'</span>;                  <span class="comment">%termination on a section x = cst</span>
+0105 cst.manifold.event.type.Y_SECTION = <span class="string">'Y_SECTION'</span>;                  <span class="comment">%termination on a section y = cst</span>
+0106 cst.manifold.event.type.Z_SECTION = <span class="string">'Z_SECTION'</span>;                  <span class="comment">%termination on a section z = cst</span>
+0107 cst.manifold.event.type.ANGLE_SECTION = <span class="string">'ANGLE_SECTION'</span>;          <span class="comment">%termination on a section phi = cst, with phi a given angle</span>
+0108 cst.manifold.event.type.FLIGHT_PATH_ANGLE = <span class="string">'FLIGHT_PATH_ANGLE'</span>;  <span class="comment">%termination on a section fpa = cst</span>
+0109 
+0110 <span class="comment">% Is the event terminal?</span>
+0111 cst.manifold.event.isterminal.YES = 1;
+0112 cst.manifold.event.isterminal.NO = 0;
+0113 
+0114 <span class="comment">% Which zeros trigger the event?</span>
+0115 cst.manifold.event.direction.INCREASING =  1;
+0116 cst.manifold.event.direction.DECREASING = -1;
+0117 cst.manifold.event.direction.ALL        =  0;
+0118 
+0119 
+0120 <span class="comment">%-------------------------------------------------------------------------%</span>
+0121 <span class="comment">%Computation</span>
+0122 <span class="comment">%-------------------------------------------------------------------------%</span>
+0123 cst.computation.MATLAB = 0;    <span class="comment">%use MATLAB routines only</span>
+0124 cst.computation.MEX = 1;       <span class="comment">%use MEX routines</span>
+0125 
+0126 <span class="keyword">end</span>
+0127 
+0128</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

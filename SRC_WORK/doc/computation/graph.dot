@@ -1,0 +1,34 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  blt -> flight_path_angle;
+  blt -> matrixToVector;
+  blt -> vectorToMatrix;
+  earth2manifold -> flight_path_angle;
+  earth2manifold -> matrixToVector;
+  earth2manifold -> vectorToMatrix;
+  halo_orbit_interpolation -> orbit_refinement;
+  lfb -> flight_path_angle;
+  lfb -> matrixToVector;
+  lfb -> vectorToMatrix;
+  lfb_eml1 -> flight_path_angle;
+  lfb_eml1 -> matrixToVector;
+  lfb_eml1 -> vectorToMatrix;
+  orbit_computation -> orbit_refinement;
+  orbit_refinement -> jacobi;
+  orbit_refinement -> matrixToVector;
+  orbit_refinement_cont -> matrixToVector;
+
+  blt [URL="blt.html"];
+  earth2manifold [URL="earth2manifold.html"];
+  flight_path_angle [URL="flight_path_angle.html"];
+  halo_orbit_interpolation [URL="halo_orbit_interpolation.html"];
+  jacobi [URL="jacobi.html"];
+  lfb [URL="lfb.html"];
+  lfb_eml1 [URL="lfb_eml1.html"];
+  manifold_branch_computation [URL="manifold_branch_computation.html"];
+  matrixToVector [URL="matrixToVector.html"];
+  orbit_computation [URL="orbit_computation.html"];
+  orbit_refinement [URL="orbit_refinement.html"];
+  orbit_refinement_cont [URL="orbit_refinement_cont.html"];
+  vectorToMatrix [URL="vectorToMatrix.html"];
+}

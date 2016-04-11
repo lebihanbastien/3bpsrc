@@ -1,0 +1,22 @@
+/* Created by mdot for Matlab */
+digraph m2html {
+  mex_test -> init_lyap_orbit;
+  mex_test -> lyapunov_orbit_computation;
+
+  cell2num [URL="cell2num.html"];
+  differential_correction [URL="differential_correction.html"];
+  halo_orbit_computation [URL="halo_orbit_computation.html"];
+  halo_orbit_continuation [URL="halo_orbit_continuation.html"];
+  halo_orbit_interpolation_energy [URL="halo_orbit_interpolation_energy.html"];
+  init_halo_orbit [URL="init_halo_orbit.html"];
+  init_lyap_orbit [URL="init_lyap_orbit.html"];
+  init_vert_lyap_orbit [URL="init_vert_lyap_orbit.html"];
+  lyapunov_orbit_computation [URL="lyapunov_orbit_computation.html"];
+  lyapunov_orbit_continuation [URL="lyapunov_orbit_continuation.html"];
+  mex_test [URL="mex_test.html"];
+  third_order_halo_orbit [URL="third_order_halo_orbit.html"];
+  third_order_lyap_orbit [URL="third_order_lyap_orbit.html"];
+  third_order_vert_lyap_orbit [URL="third_order_vert_lyap_orbit.html"];
+  vert_lyap_continuation [URL="vert_lyap_continuation.html"];
+  vert_lyap_orbit_computation [URL="vert_lyap_orbit_computation.html"];
+}

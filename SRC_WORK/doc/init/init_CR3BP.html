@@ -1,0 +1,389 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of init_CR3BP</title>
+  <meta name="keywords" content="init_CR3BP">
+  <meta name="description" content="-------------------------------------------------------------------------%">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">init</a> &gt; init_CR3BP.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for init&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>init_CR3BP
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>-------------------------------------------------------------------------%</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function cr3bp = init_CR3BP(m1, m2, params) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">-------------------------------------------------------------------------%
+                                                                         
+  Environment definition                           
+  (CR3BP, Libration points, primaries...)                 
+                                                                         
+ Author: BLB
+ Version: 1.0
+ Year: 2015
+-------------------------------------------------------------------------%</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)</a></li><li><a href="#_sub2" class="code">function root = rtnewt(y, precision_gg, mu, number)</a></li><li><a href="#_sub3" class="code">function [f, df] = polynomialLi(mu, number, y)</a></li><li><a href="#_sub4" class="code">function body = init_body(m1)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%-------------------------------------------------------------------------%</span>
+0002 <span class="comment">%</span>
+0003 <span class="comment">%  Environment definition</span>
+0004 <span class="comment">%  (CR3BP, Libration points, primaries...)</span>
+0005 <span class="comment">%</span>
+0006 <span class="comment">% Author: BLB</span>
+0007 <span class="comment">% Version: 1.0</span>
+0008 <span class="comment">% Year: 2015</span>
+0009 <span class="comment">%-------------------------------------------------------------------------%</span>
+0010 
+0011 <span class="comment">%-------------------------------------------------------------------------%</span>
+0012 <span class="comment">% init_CR3BP(m1, m2, params)</span>
+0013 <span class="comment">%</span>
+0014 <span class="comment">% Initializes a CR3BP model (in particular, the libration points)</span>
+0015 <span class="comment">%-------------------------------------------------------------------------%</span>
+0016 <span class="comment">% Inputs:</span>
+0017 <span class="comment">% 1. m1 the first primary name (string)</span>
+0018 <span class="comment">% 2. m2 the second primary name (string)</span>
+0019 <span class="comment">% 3. params the structure containing the user parameters</span>
+0020 <span class="comment">%</span>
+0021 <span class="comment">% Outputs:</span>
+0022 <span class="comment">%</span>
+0023 <span class="comment">% 1. the structure cr3bp (see within code)</span>
+0024 <span class="comment">%-------------------------------------------------------------------------%</span>
+0025 <a name="_sub0" href="#_subfunctions" class="code">function cr3bp = init_CR3BP(m1, m2, params)</a>
+0026 
+0027 <span class="comment">%Primaries init</span>
+0028 cr3bp.m1 = <a href="#_sub4" class="code" title="subfunction body = init_body(m1)">init_body</a>(m1);
+0029 cr3bp.m2 = <a href="#_sub4" class="code" title="subfunction body = init_body(m1)">init_body</a>(m2);
+0030 
+0031 <span class="comment">%Inner parameters</span>
+0032 cr3bp.mu =  cr3bp.m2.M/( cr3bp.m1.M + cr3bp.m2.M );         <span class="comment">% µ = m2/(m1 + m2)</span>
+0033 cr3bp.L =  cr3bp.m2.a;                                      <span class="comment">% Distance parameter = semi major axis of m2</span>
+0034 cr3bp.T =  cr3bp.m2.T;                                      <span class="comment">% Time parameter = sidereal period of m2</span>
+0035 cr3bp.R1 = cr3bp.m1.Req;                                    <span class="comment">% m1 radius</span>
+0036 cr3bp.R2 = cr3bp.m2.Req;                                    <span class="comment">% m2 radius</span>
+0037 cr3bp.rh = (cr3bp.mu/3)^1/3;                                <span class="comment">% Hill's radius (adim formula)</span>
+0038 cr3bp.libp_precision = params.libp.precision;               <span class="comment">% precision used to compute the libration points Li</span>
+0039 
+0040 <span class="comment">%Li initialization</span>
+0041 cr3bp.l1 = <a href="#_sub1" class="code" title="subfunction libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)">init_libp</a>(cr3bp, 1, cr3bp.libp_precision);
+0042 cr3bp.l2 = <a href="#_sub1" class="code" title="subfunction libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)">init_libp</a>(cr3bp, 2, cr3bp.libp_precision);
+0043 cr3bp.l3 = <a href="#_sub1" class="code" title="subfunction libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)">init_libp</a>(cr3bp, 3, cr3bp.libp_precision);
+0044 cr3bp.l4 = <a href="#_sub1" class="code" title="subfunction libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)">init_libp</a>(cr3bp, 4, cr3bp.libp_precision);
+0045 cr3bp.l5 = <a href="#_sub1" class="code" title="subfunction libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)">init_libp</a>(cr3bp, 5, cr3bp.libp_precision);
+0046 
+0047 <span class="comment">%Name</span>
+0048 cr3bp.name =  [cr3bp.m1.name, <span class="string">'+'</span>, cr3bp.m2.name];
+0049 
+0050 <span class="comment">%Distance to manifold</span>
+0051 <span class="keyword">if</span>(strcmp(m1,<span class="string">'EARTH'</span>) &amp;&amp; strcmp(m2,<span class="string">'MOON'</span>))
+0052     cr3bp.d_man = 50/cr3bp.L;  <span class="comment">% 50km for the Earth-Moon system</span>
+0053 <span class="keyword">else</span>
+0054     cr3bp.d_man = 100/cr3bp.L; <span class="comment">% 100km ortherwise</span>
+0055 <span class="keyword">end</span>
+0056 
+0057 <span class="comment">%Position of the primaries</span>
+0058 cr3bp.m1.pos = [-cr3bp.mu 0 0];
+0059 cr3bp.m2.pos = [1-cr3bp.mu 0 0];
+0060 
+0061 <span class="keyword">end</span>
+0062 
+0063 <span class="comment">%% Lib points</span>
+0064 <span class="comment">%-------------------------------------------------------------------------%</span>
+0065 <span class="comment">% Initializes libration point</span>
+0066 <span class="comment">%-------------------------------------------------------------------------%</span>
+0067 <span class="comment">% @return the structure libp</span>
+0068 <a name="_sub1" href="#_subfunctions" class="code">function libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)</a>
+0069 <span class="comment">%Number</span>
+0070 libp.number = number;
+0071 
+0072 <span class="keyword">switch</span> number  
+0073     
+0074     <span class="keyword">case</span> 1
+0075         <span class="comment">%gamma_i: distance to the closest primary</span>
+0076         gamma_i = cr3bp.rh - 1/3.0*cr3bp.rh^2- 1/9*cr3bp.rh^3;                    <span class="comment">%initial guess</span>
+0077         gamma_i = <a href="#_sub2" class="code" title="subfunction root = rtnewt(y, precision_gg, mu, number)">rtnewt</a>(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);   <span class="comment">%newton-raphson method</span>
+0078         libp.gamma_i = gamma_i;
+0079         libp.c1      = (cr3bp.mu-1.0+libp.gamma_i)/libp.gamma_i;
+0080         
+0081         <span class="comment">%Position</span>
+0082         libp.position(1) = 1 - cr3bp.mu - gamma_i;
+0083         libp.position(2) = 0;
+0084         libp.position(3) = 0;
+0085               
+0086     <span class="keyword">case</span> 2
+0087         <span class="comment">%gamma_i: distance to the closest primary</span>
+0088         gamma_i = cr3bp.rh + 1/3.0*cr3bp.rh^2- 1/9*cr3bp.rh^3;
+0089         gamma_i = <a href="#_sub2" class="code" title="subfunction root = rtnewt(y, precision_gg, mu, number)">rtnewt</a>(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);
+0090         libp.gamma_i = gamma_i;
+0091         libp.c1      = (cr3bp.mu-1.0-libp.gamma_i)/libp.gamma_i;
+0092         
+0093         <span class="comment">%Position</span>
+0094         libp.position(1) = 1 - cr3bp.mu + gamma_i;
+0095         libp.position(2) = 0;
+0096         libp.position(3) = 0;
+0097                  
+0098     <span class="keyword">case</span> 3
+0099         <span class="comment">%gamma_i: distance to the closest primary</span>
+0100         gamma_i = 7/12.0*cr3bp.mu + 237^2/12^4*cr3bp.mu^3;
+0101         gamma_i = <a href="#_sub2" class="code" title="subfunction root = rtnewt(y, precision_gg, mu, number)">rtnewt</a>(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);
+0102         libp.gamma_i = 1-gamma_i;  <span class="comment">%BEWARE  for L3, gamma3 = L3-M1 distance != L3-M2</span>
+0103         libp.c1      = (cr3bp.mu+libp.gamma_i)/libp.gamma_i;
+0104          
+0105         <span class="comment">%Position</span>
+0106         libp.position(1) = -1 - cr3bp.mu + gamma_i;
+0107         libp.position(2) = 0;
+0108         libp.position(3) = 0;
+0109                 
+0110     <span class="keyword">case</span> 4
+0111         <span class="comment">%gamma_i: distance to the closest primary</span>
+0112         libp.gamma_i = 1;
+0113         
+0114         <span class="comment">%Position</span>
+0115         libp.position(1) = -cr3bp.mu + 0.5;
+0116         libp.position(2) = sqrt(3)/2.0;
+0117         libp.position(3) = 0;
+0118                
+0119     <span class="keyword">case</span> 5
+0120         <span class="comment">%gamma_i: distance to the closest primary</span>
+0121         libp.gamma_i = 1;
+0122         
+0123         <span class="comment">%Position</span>
+0124         libp.position(1) = -cr3bp.mu + 0.5;
+0125         libp.position(2) = -sqrt(3)/2.0;
+0126         libp.position(3) = 0;        
+0127 <span class="keyword">end</span>
+0128 
+0129 <span class="comment">%Energy &amp; Jacobi constant</span>
+0130 libp.Ci = jacobi(libp.position, cr3bp.mu);
+0131 libp.Ei = -0.5*libp.Ci;
+0132 <span class="keyword">end</span>
+0133  
+0134 <span class="comment">%-------------------------------------------------------------------------%</span>
+0135 <span class="comment">% Using the Newton-Raphson method, find the root of a function known to lie</span>
+0136 <span class="comment">% close to y. The root rtnewt will be refined until its accuracy is known</span>
+0137 <span class="comment">% within ± precision_gg. polynomialLi is a user-supplied routine that returns both the</span>
+0138 <span class="comment">% function value and the first derivative of the function at the point gg_var.</span>
+0139 <span class="comment">%-------------------------------------------------------------------------%</span>
+0140 <a name="_sub2" href="#_subfunctions" class="code">function root = rtnewt(y, precision_gg, mu, number)</a>
+0141 gg_var = y;
+0142 <span class="keyword">while</span>(true)
+0143     [f00, df0] = <a href="#_sub3" class="code" title="subfunction [f, df] = polynomialLi(mu, number, y)">polynomialLi</a>(mu, number, gg_var);
+0144     
+0145     <span class="keyword">if</span>(abs(f00) &lt; precision_gg);
+0146         <span class="keyword">break</span>;
+0147     <span class="keyword">end</span>
+0148     
+0149     gg_var = gg_var - f00/df0;
+0150 <span class="keyword">end</span>
+0151 root = gg_var;
+0152 <span class="keyword">end</span>
+0153 
+0154 <span class="comment">%-------------------------------------------------------------------------%</span>
+0155 <span class="comment">% Provides the function value and its first derivative for the</span>
+0156 <span class="comment">% newton-raphson method. f corresponds to the equation satisfied by the</span>
+0157 <span class="comment">% Li-m2 distance for the L1/L2 cases and by 1-(Li-m1 distance) for the L3</span>
+0158 <span class="comment">% case.</span>
+0159 <span class="comment">%-------------------------------------------------------------------------%</span>
+0160 <a name="_sub3" href="#_subfunctions" class="code">function [f, df] = polynomialLi(mu, number, y)</a>
+0161 
+0162 <span class="keyword">switch</span> number
+0163     <span class="keyword">case</span> 1
+0164         f =  y^5   - (3.0-mu)*y^4 + (3-2*mu)*y^3 - mu*y^2 +  2*mu*y - mu;
+0165         df = 5*y^4 - 4*(3.0-mu)*y^3 + 3*(3-2*mu)*y^2 - 2*mu*y    +  2*mu;
+0166     <span class="keyword">case</span> 2
+0167         f =  y^5   + (3.0-mu)*y^4 + (3-2*mu)*y^3 - mu*y^2 -  2*mu*y - mu;
+0168         df = 5*y^4 + 4*(3.0-mu)*y^3 + 3*(3-2*mu)*y^2 - 2*mu*y    -  2*mu;
+0169     <span class="keyword">case</span> 3
+0170         f= y^5 + (7+mu)*y^4 + (19+6*mu)*y^3 -(24+13*mu)*y^2 + (12+14*mu)*y -7*mu;
+0171         df= 5*y^4 + 4*(7+mu)*y^3 + 3*(19+6*mu)*y^2 -2*(24+13*mu)*y + (12+14*mu);
+0172 <span class="keyword">end</span>
+0173 
+0174 <span class="keyword">end</span>
+0175 
+0176 <span class="comment">%% Bodies</span>
+0177 <span class="comment">%-------------------------------------------------------------------------%</span>
+0178 <span class="comment">% Initializes celestial bodies</span>
+0179 <span class="comment">%-------------------------------------------------------------------------%</span>
+0180 <a name="_sub4" href="#_subfunctions" class="code">function body = init_body(m1)</a>
+0181 
+0182 days = 86400;
+0183 body.name = m1;
+0184 <span class="keyword">switch</span> m1
+0185     
+0186     <span class="keyword">case</span> <span class="string">'MERCURY'</span>
+0187         
+0188         <span class="comment">%Physical parameters</span>
+0189         body.Req = 2439.7;        <span class="comment">%[km]</span>
+0190         body.Rm = 2439.7;         <span class="comment">%[km]</span>
+0191         body.M = 0.330104e24;     <span class="comment">%[kg]</span>
+0192         body.GM = 22032;          <span class="comment">%[km^3.s^-2]</span>
+0193         
+0194         <span class="comment">%Orbital parameters</span>
+0195         body.a = 57.91e6;         <span class="comment">%[kg]</span>
+0196         body.T = 87.9691*days;     <span class="comment">%[s]</span>
+0197         
+0198     <span class="keyword">case</span> <span class="string">'VENUS'</span>
+0199         
+0200         <span class="comment">%Physical parameters</span>
+0201         body.Req = 6051.8;        <span class="comment">%[km]</span>
+0202         body.Rm = 6501.8;         <span class="comment">%[km]</span>
+0203         body.M = 4.86732e24;      <span class="comment">%[kg]</span>
+0204         body.GM = 324858.63;      <span class="comment">%[km^3.s^-2]</span>
+0205         
+0206         <span class="comment">%Orbital parameters</span>
+0207         body.a = 108.21e6;        <span class="comment">%[km]</span>
+0208         body.T = 224.701*days;     <span class="comment">%[s]</span>
+0209         
+0210     <span class="keyword">case</span> <span class="string">'EARTH'</span>
+0211         
+0212         <span class="comment">%Physical parameters</span>
+0213         body.Req = 6378.14;         <span class="comment">%[km]</span>
+0214         body.Rm  = 6371.00;         <span class="comment">%[km]</span>
+0215         body.M   = 5.97219e24;      <span class="comment">%[kg]</span>
+0216         body.GM  = 398600.440;      <span class="comment">%[km^3.s^-2]</span>
+0217         
+0218         <span class="comment">%Orbital parameters</span>
+0219         body.a = 149.60e6;          <span class="comment">%[km]</span>
+0220         body.T = 365.25636*days;     <span class="comment">%[s]</span>
+0221         
+0222     <span class="keyword">case</span> <span class="string">'MOON'</span>
+0223         
+0224         <span class="comment">%Physical parameters</span>
+0225         body.Req = 1737.5;                     <span class="comment">%[km]</span>
+0226         body.Rm  = 1737.5;                     <span class="comment">%[km]</span>
+0227         body.M   = 0.07345814120628661e24;     <span class="comment">%[kg] TO BE CONSISTENT WITH HARD CODED VALUE OF mu(Earth-Moon)=0.012150581623434</span>
+0228         body.GM  = 4902.801;                   <span class="comment">%[km^3.s^-2]</span>
+0229         
+0230         <span class="comment">%Orbital parameters</span>
+0231         body.a = 384400;           <span class="comment">%[km]</span>
+0232         body.T = 27.321582*days;    <span class="comment">%[s]</span>
+0233         
+0234     <span class="keyword">case</span> <span class="string">'MARS'</span>
+0235         
+0236         <span class="comment">%Physical parameters</span>
+0237         body.Req = 3396.19;       <span class="comment">%[km]</span>
+0238         body.Rm = 3389.50;        <span class="comment">%[km]</span>
+0239         body.M = 0.641693e24;     <span class="comment">%[kg]</span>
+0240         body.GM = 42828.3;        <span class="comment">%[km^3.s^-2]</span>
+0241         
+0242         <span class="comment">%Orbital parameters</span>
+0243         body.a = 227.92e6;       <span class="comment">%[kg]</span>
+0244         body.T = 686.98*days;     <span class="comment">%[s]</span>
+0245         
+0246     <span class="keyword">case</span> <span class="string">'JUPITER'</span>
+0247         
+0248         <span class="comment">%Physical parameters</span>
+0249         body.Req =  71492;      <span class="comment">%[km]</span>
+0250         body.Rm = 69911;        <span class="comment">%[km]</span>
+0251         body.M = 1898.13e24;     <span class="comment">%[kg]</span>
+0252         body.GM = 126686511;       <span class="comment">%[km^3.s^-2]</span>
+0253         
+0254         <span class="comment">%Orbital parameters</span>
+0255         body.a = 778.57e6;       <span class="comment">%[kg]</span>
+0256         body.T = 4332.589*days;     <span class="comment">%[s]</span>
+0257         
+0258     <span class="keyword">case</span> <span class="string">'SATURN'</span>
+0259         
+0260         <span class="comment">%Physical parameters</span>
+0261         body.Req =  60268;    <span class="comment">%[km]</span>
+0262         body.Rm = 58232;       <span class="comment">%[km]</span>
+0263         body.M = 568.319e24;     <span class="comment">%[kg]</span>
+0264         body.GM = 37931207.8;      <span class="comment">%[km^3.s^-2]</span>
+0265         
+0266         <span class="comment">%Orbital parameters</span>
+0267         body.a = 1433.53e6;       <span class="comment">%[kg]</span>
+0268         body.T = 10759.22*days;     <span class="comment">%[s]</span>
+0269         
+0270     <span class="keyword">case</span> <span class="string">'URANUS'</span>
+0271         
+0272         <span class="comment">%Physical parameters</span>
+0273         body.Req = 25559;      <span class="comment">%[km]</span>
+0274         body.Rm = 25362;        <span class="comment">%[km]</span>
+0275         body.M =  86.8103e24;    <span class="comment">%[kg]</span>
+0276         body.GM =  5793966;      <span class="comment">%[km^3.s^-2]</span>
+0277         
+0278         <span class="comment">%Orbital parameters</span>
+0279         body.a =  2872.46e6;      <span class="comment">%[kg]</span>
+0280         body.T =  30685.4*days;   <span class="comment">%[s]</span>
+0281         
+0282     <span class="keyword">case</span> <span class="string">'NEPTUNE'</span>
+0283         
+0284         <span class="comment">%Physical parameters</span>
+0285         body.Req = 24764;      <span class="comment">%[km]</span>
+0286         body.Rm = 24622;        <span class="comment">%[km]</span>
+0287         body.M = 102.410e24;     <span class="comment">%[kg]</span>
+0288         body.GM =  6835107;      <span class="comment">%[km^3.s^-2]</span>
+0289         
+0290         <span class="comment">%Orbital parameters</span>
+0291         body.a =  4495.06e6;      <span class="comment">%[kg]</span>
+0292         body.T =  60189*days;    <span class="comment">%[s]</span>
+0293         
+0294     <span class="keyword">case</span> <span class="string">'PLUTO'</span>
+0295         
+0296         <span class="comment">%Physical parameters</span>
+0297         body.Req =  1195;     <span class="comment">%[km]</span>
+0298         body.Rm =  1195;       <span class="comment">%[km]</span>
+0299         body.M = .01309e24;     <span class="comment">%[kg]</span>
+0300         body.GM =  872.4;      <span class="comment">%[km^3.s^-2]</span>
+0301         
+0302         <span class="comment">%Orbital parameters</span>
+0303         body.a =  5906.38e6;      <span class="comment">%[kg]</span>
+0304         body.T =  90465*days;    <span class="comment">%[s]</span>
+0305         
+0306     <span class="keyword">case</span> <span class="string">'SUN'</span>
+0307         
+0308         <span class="comment">%Physical parameters</span>
+0309         body.Req = 696342;                <span class="comment">%[km]</span>
+0310         body.Rm =  696342;                <span class="comment">%[km]</span>
+0311         body.M  = 1988544e24;             <span class="comment">%[kg]</span>
+0312         body.GM = 1.3271244004193938e11;  <span class="comment">%[km^3.s^-2]</span>
+0313         
+0314         <span class="comment">%Orbital parameters</span>
+0315         body.a = 0;    <span class="comment">%[kg]</span>
+0316         body.T = 0;    <span class="comment">%[s]</span>
+0317         
+0318     <span class="keyword">case</span> <span class="string">'EARTH_AND_MOON'</span>
+0319         <span class="comment">%Equivalent mass of the Earth+Moon system based at the center of mass</span>
+0320         <span class="comment">%additionnal physical properties are those of the Earth for consistency)</span>
+0321         
+0322         <span class="comment">%Physical parameters</span>
+0323         body.Req = 6378.14;        <span class="comment">%[km]</span>
+0324         body.Rm = 6371.00;         <span class="comment">%[km]</span>
+0325         body.M = 5.97219e24+0.07342e24;       <span class="comment">%[kg]</span>
+0326         body.GM = 398600.440+4902.801;      <span class="comment">%[km^3.s^-2]</span>
+0327         
+0328         <span class="comment">%Orbital parameters</span>
+0329         body.a = 149.60e6;          <span class="comment">%[km]</span>
+0330         body.T = 365.25636*days;     <span class="comment">%[s]</span>
+0331 <span class="keyword">end</span>
+0332 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

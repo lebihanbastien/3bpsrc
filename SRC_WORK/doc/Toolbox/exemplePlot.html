@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of exemplePlot</title>
+  <meta name="keywords" content="exemplePlot">
+  <meta name="description" content="">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">Toolbox</a> &gt; exemplePlot.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for Toolbox&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>exemplePlot
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong></strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"></pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="exportFig.html" class="code" title="function exportFig(f,nom,type)">exportFig</a>	Fonction pour sauvegarder vos figure en PDF.</li><li><a href="mouseMove.html" class="code" title="function mouseMove (event,data)">mouseMove</a>	</li><li><a href="prepareFig.html" class="code" title="function f = prepareFig(f)">prepareFig</a>	</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 clear all
+0002 close all
+0003 clc
+0004 
+0005 
+0006 
+0007 <span class="comment">% donn�s d'exemple .. -------------------------------------------------</span>
+0008 mu = 3.986e14;
+0009 rmin = (6378+600)*1e3;
+0010 i=0;
+0011 <span class="keyword">for</span> rmax = ([1125 2250 4500 9000 18000 36000]+6378)*1e3;
+0012 i=i+1;
+0013 a = (rmin+rmax)/2;
+0014 e = (rmax-rmin)/(rmax+rmin);
+0015 
+0016 theta = (0:1:360)'/180*pi;
+0017 
+0018 omega(:,i) = sqrt(mu/(a^3*(1-e^2)^3))*(1+e*cos(theta)).^2;
+0019 eta(:,i) = (mu/(a^3*(1-e^2)^3))*(1+e*cos(theta)).^3.*(-2*e*sin(theta));
+0020 
+0021 <span class="keyword">end</span>
+0022 <span class="comment">% fin donn�s d'exemple ------------------------------------------------</span>
+0023 
+0024 
+0025 
+0026 
+0027 f1 = figure(<span class="string">'Color'</span>,[1 1 1]);
+0028 set(gcf,<span class="string">'units'</span>,<span class="string">'centimeters'</span>,<span class="string">'position'</span>,[10 10 12 8]);
+0029 <span class="comment">% les deux dernier nombre sont la taille en cm. Important, c'est ICI que</span>
+0030 <span class="comment">% l'on choisit la taille que la figure aura sur le papier...</span>
+0031 <span class="comment">% (les deux premier nombre sont la position sur l'�ran, donc on s'en cogne.</span>
+0032 
+0033 
+0034 
+0035 <span class="comment">% ma figure d'exemple</span>
+0036 hold on
+0037 f1.CurrentAxes.ColorOrder = ((0.2:(1/0.741-0.2)/7:1/0.741))'*[0 0.4470 0.7410];
+0038 plot(theta,omega);
+0039 hold off
+0040 aux = f1.CurrentAxes.YAxis.Limits;
+0041 f1.CurrentAxes.XAxis.TickValues = (0:0.5:2)*pi;
+0042 f1.CurrentAxes.XAxis.TickLabels = {<span class="string">'$0$'</span>; <span class="string">'$\pi/2$'</span>; <span class="string">'$\pi$'</span>; <span class="string">'$3\pi/2$'</span>; <span class="string">'$2\pi$'</span>};
+0043 axis tight
+0044 f1.CurrentAxes.YAxis.Limits = aux;
+0045 box off
+0046 grid on
+0047 xlabel(<span class="string">'$\nu$ (rad)'</span>) <span class="comment">% ecrire les l�ende en latex. Elles seront mises a la bonne polie et taille par la suite.</span>
+0048 ylabel(<span class="string">'$\omega$ (rad s$^{-1}$)'</span>)
+0049 
+0050 
+0051 
+0052 f1 = <a href="prepareFig.html" class="code" title="function f = prepareFig(f)">prepareFig</a>(f1); <span class="comment">% cette fonction permet de d�inir les tailles des textes de la fig. (en pt de taille latex)</span>
+0053 
+0054 
+0055 
+0056 
+0057 set(f1, <span class="string">'WindowButtonMotionFcn'</span>, @<a href="mouseMove.html" class="code" title="function mouseMove (event,data)">mouseMove</a>); <span class="comment">% pour pouvoir positionner correctement des annotations ; ballade ta souris surla figure.</span>
+0058 
+0059 
+0060 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],[0.66 0.664],<span class="keyword">...</span>
+0061     <span class="string">'String'</span>,<span class="string">'$e = 0.036$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0062 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],0.588*[1 1],<span class="keyword">...</span>
+0063     <span class="string">'String'</span>,<span class="string">'$e = 0.106$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0064 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],0.495*[1 1],<span class="keyword">...</span>
+0065     <span class="string">'String'</span>,<span class="string">'$e = 0.218$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0066 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],0.40*[1 1],<span class="keyword">...</span>
+0067     <span class="string">'String'</span>,<span class="string">'$e = 0.376$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0068 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],0.32*[1 1],<span class="keyword">...</span>
+0069     <span class="string">'String'</span>,<span class="string">'$e = 0.555$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0070 annotation(f1,<span class="string">'textarrow'</span>,[0.8 0.66],0.27*[1 1],<span class="keyword">...</span>
+0071     <span class="string">'String'</span>,<span class="string">'$e = 0.717$'</span>,<span class="string">'Interpreter'</span>,<span class="string">'latex'</span>,<span class="string">'Fontsize'</span>,12);
+0072 
+0073 
+0074 <span class="comment">% export en pdf. La taille est celle d�inie en cr�nt la figure.</span>
+0075 <a href="exportFig.html" class="code" title="function exportFig(f,nom,type)">exportFig</a>(f1,<span class="string">'omegaNu'</span>)
+0076 
+0077</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

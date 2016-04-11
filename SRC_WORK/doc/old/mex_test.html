@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of mex_test</title>
+  <meta name="keywords" content="mex_test">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; mex_test.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>mex_test
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>This is a script file. </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+ Test of the mex routines
+--------------------------------------------------------------------------</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="init_lyap_orbit.html" class="code" title="function orbit = init_lyap_orbit(cr3bp, li, Axdim, cst)">init_lyap_orbit</a>	-------------------------------------------------------------------------%</li><li><a href="lyapunov_orbit_computation.html" class="code" title="function orbit = lyapunov_orbit_computation(cr3bp, orbit, params, cst)">lyapunov_orbit_computation</a>	-------------------------------------------------------------------------%</li></ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <span class="comment">%--------------------------------------------------------------------------</span>
+0002 <span class="comment">% Test of the mex routines</span>
+0003 <span class="comment">%--------------------------------------------------------------------------</span>
+0004 
+0005 <span class="comment">%% Initialization: reboot, addpath, constants, default parameters. See init.m</span>
+0006 init;
+0007 
+0008 <span class="comment">%Number format</span>
+0009 format long
+0010 
+0011 <span class="comment">%% Environment init</span>
+0012 cr3bp = init_CR3BP(<span class="string">'EARTH'</span>, <span class="string">'MOON'</span>, default);
+0013 
+0014 
+0015 
+0016 <span class="comment">%% Orbit init &amp; computation</span>
+0017 lyap = <a href="init_lyap_orbit.html" class="code" title="function orbit = init_lyap_orbit(cr3bp, li, Axdim, cst)">init_lyap_orbit</a>(cr3bp, cr3bp.l1, 8000 , cst);
+0018 lyap = <a href="lyapunov_orbit_computation.html" class="code" title="function orbit = lyapunov_orbit_computation(cr3bp, orbit, params, cst)">lyapunov_orbit_computation</a>(cr3bp, lyap, default, cst);
+0019 
+0020 <span class="comment">%% Computation over t1 = 1.0</span>
+0021 options = odeset(<span class="string">'Events'</span>,@odezero_y,<span class="string">'Reltol'</span>, default.ode45.RelTol, <span class="string">'Abstol'</span>, default.ode45.AbsTol);
+0022 
+0023 tic;
+0024 [te,ye] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),[0 lyap.T12],lyap.y0(1:6),options);
+0025 T = toc;
+0026 
+0027 
+0028 disp(<span class="string">'Via ode45, y(t1) = '</span>)
+0029 disp(ye(<span class="keyword">end</span>,:))
+0030 fprintf(<span class="string">'computed in %f s\n'</span>, T)
+0031 
+0032 
+0033 <span class="comment">%% Test of the mex function</span>
+0034 tic;
+0035 [tf, yf] = ode78_cr3bp(0.0, lyap.T12, lyap.y0, 42, cr3bp.mu);
+0036 T = toc;
+0037 
+0038 disp(<span class="string">'Via mex function, y(t1) = '</span>)
+0039 disp(yf(1:6))
+0040 fprintf(<span class="string">'computed in %f s\n'</span>, T)
+0041 
+0042 
+0043 disp(<span class="string">'Difference = '</span>)
+0044 disp(ye(<span class="keyword">end</span>,:)-yf(1:6))
+0045 
+0046 
+0047 
+0048 <span class="comment">%% Test of the mex function</span>
+0049 
+0050 <span class="comment">%Event structure</span>
+0051 val_par = init_event(cst.manifold.event.type.Y_SECTION,<span class="keyword">...</span>
+0052                      degtorad(0.0),<span class="keyword">...</span>
+0053                      cst.manifold.event.isterminal.YES,<span class="keyword">...</span>
+0054                      cst.manifold.event.direction.ALL,<span class="keyword">...</span><span class="comment"> </span>
+0055                      cr3bp.m2.pos,<span class="keyword">...</span>
+0056                      cst);
+0057     
+0058 
+0059 tic;
+0060 [te, ye, tv, yv] = ode78_cr3bp_event(0.0, 10*lyap.T12, lyap.y0, 6, cr3bp.mu, val_par);
+0061 T = toc;
+0062 
+0063 
+0064 
+0065 figure;
+0066 plot(yv(:,1), yv(:,2))</pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

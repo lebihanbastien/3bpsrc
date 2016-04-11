@@ -1,0 +1,119 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of third_order_vert_lyap_orbit</title>
+  <meta name="keywords" content="third_order_vert_lyap_orbit">
+  <meta name="description" content="--------------------------------------------------------------------------">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">old</a> &gt; third_order_vert_lyap_orbit.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for old&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>third_order_vert_lyap_orbit
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>--------------------------------------------------------------------------</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function yv_li =  third_order_vert_lyap_orbit(lyap, t) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment">--------------------------------------------------------------------------
+Init
+--------------------------------------------------------------------------</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+<!-- crossreference -->
+
+<h2><a name="_subfunctions"></a>SUBFUNCTIONS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="#_sub1" class="code">function yv_li = richardson(Ax_li, Az_li, tau1, dtau1dt, dm, RC)</a></li></ul>
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function yv_li =  third_order_vert_lyap_orbit(lyap, t)</a>
+0002 
+0003 <span class="comment">%--------------------------------------------------------------------------</span>
+0004 <span class="comment">%Init</span>
+0005 <span class="comment">%--------------------------------------------------------------------------</span>
+0006 yv_li = zeros(6,1);
+0007 gamma_i = lyap.li.gamma_i;
+0008 mu = lyap.cr3bp.mu;
+0009 dm = lyap.dm;
+0010 
+0011 <span class="comment">%Richardson coefficients</span>
+0012 RC = richardson_coefficients(lyap.cr3bp, lyap.li.number);
+0013 
+0014 <span class="comment">%X and Z-amplitude in Li-frame</span>
+0015 Az_li = lyap.Az_estimate/gamma_i;
+0016 Ax_li = 0.0;
+0017 
+0018 <span class="comment">%Phases</span>
+0019 Phi = 0.0; <span class="comment">%arbitrary</span>
+0020 
+0021 <span class="comment">%nu parameter</span>
+0022 nu = 1+RC.s1*Ax_li^2+RC.s2*Az_li^2;
+0023 
+0024 <span class="comment">%Third order estimate of the orbital period</span>
+0025 <span class="comment">%double Tto = (2*M_PI)/(RC.omega_p*nu);</span>
+0026 
+0027 <span class="comment">%State estimate @ t  in the Li-frame</span>
+0028 tau1 = RC.omega_p*nu*t + Phi;
+0029 dtau1dt = RC.omega_p*nu;
+0030 
+0031 yv_li = <a href="#_sub1" class="code" title="subfunction yv_li = richardson(Ax_li, Az_li, tau1, dtau1dt, dm, RC)">richardson</a>(Ax_li, Az_li, tau1, dtau1dt, dm, RC);
+0032 
+0033 <span class="comment">%Back into COM frame</span>
+0034 <span class="keyword">switch</span>(lyap.li.number) <span class="comment">%special case of the x dimension</span>
+0035 
+0036     <span class="keyword">case</span> 1
+0037         yv_li(1) = yv_li(1)*gamma_i - mu + 1 - gamma_i;
+0038 
+0039     <span class="keyword">case</span> 2
+0040         yv_li(1) = yv_li(1)*gamma_i - mu + 1 + gamma_i;
+0041 
+0042     <span class="keyword">case</span> 3
+0043         yv_li(1) = yv_li(1)*gamma_i - mu - gamma_i;
+0044 
+0045     <span class="keyword">otherwise</span> <span class="comment">%L2</span>
+0046         yv_li(1) = yv_li(1)*gamma_i - mu + 1 + gamma_i;
+0047 
+0048 <span class="keyword">end</span>
+0049 
+0050 <span class="keyword">for</span> i = 2:6 
+0051     yv_li(i) = gamma_i*yv_li(i); <span class="comment">%other dimensions</span>
+0052 <span class="keyword">end</span>
+0053         
+0054         
+0055 <span class="keyword">end</span>
+0056 
+0057 
+0058 <a name="_sub1" href="#_subfunctions" class="code">function yv_li = richardson(Ax_li, Az_li, tau1, dtau1dt, dm, RC)</a>
+0059     
+0060     yv_li(1) = RC.a21*Ax_li^2 + RC.a22*Az_li^2 - Ax_li*cos(tau1) + (RC.a23*Ax_li^2 - RC.a24*Az_li^2)*cos(2*tau1) + (RC.a31*Ax_li^3 - RC.a32*Ax_li*Az_li^2)*cos(3*tau1);
+0061     yv_li(2) = RC.kappa*Ax_li*sin(tau1) + (RC.b21*Ax_li^2 - RC.b22*Az_li^2)*sin(2*tau1) + (RC.b31*Ax_li^3 - RC.b32*Ax_li*Az_li^2)*sin(3*tau1);
+0062     yv_li(3) = dm*Az_li*cos(tau1) + dm*RC.d21*Ax_li*Az_li*(cos(2*tau1)-3) + dm*(RC.d32*Az_li*Ax_li^2 - RC.d31*Az_li^3)*cos(3*tau1);
+0063 
+0064     yv_li(4) = dtau1dt*( Ax_li*sin(tau1) - 2*(RC.a23*Ax_li^2 - RC.a24*Az_li^2)*sin(2*tau1) -3*(RC.a31*Ax_li^3 - RC.a32*Ax_li*Az_li^2)*sin(3*tau1)  );
+0065     yv_li(5) = dtau1dt*( RC.kappa*Ax_li*cos(tau1) + 2*(RC.b21*Ax_li^2 - RC.b22*Az_li^2)*cos(2*tau1) + 3*(RC.b31*Ax_li^3 - RC.b32*Ax_li*Az_li^2)*cos(3*tau1)   );
+0066     yv_li(6) = dtau1dt*( -dm*Az_li*sin(tau1) -2*dm*RC.d21*Ax_li*Az_li*sin(2*tau1) - 3*dm*(RC.d32*Az_li*Ax_li^2 - RC.d31*Az_li^3)*sin(3*tau1)  );
+0067 
+0068 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

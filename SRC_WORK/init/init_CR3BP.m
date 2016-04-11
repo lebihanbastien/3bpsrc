@@ -1,41 +1,31 @@
-%-------------------------------------------------------------------------%
-%                                                                         
-%  Environment definition                           
-%  (CR3BP, Libration points, primaries...)                 
-%                                                                         
-% Author: BLB
-% Version: 1.0
-% Year: 2015
-%-------------------------------------------------------------------------%
-
-%-------------------------------------------------------------------------%
-% init_CR3BP(m1, m2, params)
-%
-% Initializes a CR3BP model (in particular, the libration points)
-%-------------------------------------------------------------------------%
-% Inputs: 
-% 1. m1 the first primary name (string)
-% 2. m2 the second primary name (string)
-% 3. params the structure containing the user parameters
-% 
-% Outputs:
-%
-% 1. the structure cr3bp (see within code)
-%-------------------------------------------------------------------------%
 function cr3bp = init_CR3BP(m1, m2, params)
+% INIT_CR3BP initializes a given CRTBP system.
+% 
+% CR3BP = INIT_CR3BP(M1, M2, PARAMS) initializes a CRTBP whose primaries
+% are defined by their names in string (M1, M2), M1 being the big primary 
+% and M2 the small one (e.g. M1 = 'EARTH', M2 = 'MOON').
+%
+% The fields (all in SI units) computed by this routine include:
+%   - CR3BP.mu: the mass ratio [-].
+%   - CR3BP.L:  the unit of distance [km].
+%   - CR3BP.T:  the unit of time [s].
+%
+% See code for details.
+% 
+% BLB 2016
 
 %Primaries init
 cr3bp.m1 = init_body(m1);
 cr3bp.m2 = init_body(m2);
 
 %Inner parameters
-cr3bp.mu =  cr3bp.m2.M/( cr3bp.m1.M + cr3bp.m2.M );        % µ = m2/(m1 + m2)
-cr3bp.L =  cr3bp.m2.a;                                         % Distance parameter = semi major axis of m2
-cr3bp.T =  cr3bp.m2.T;                                         % Time parameter = sidereal period of m2
-cr3bp.R1 = cr3bp.m1.Req;                                      % m1 radius
-cr3bp.R2 = cr3bp.m2.Req;                                      % m2 radius
-cr3bp.rh = (cr3bp.mu/3)^1/3;                                  % Hill's radius (adim formula)
-cr3bp.libp_precision = params.libp.precision;                 % precision used to compute the libration points Li
+cr3bp.mu =  cr3bp.m2.M/( cr3bp.m1.M + cr3bp.m2.M );         % [-]  µ = m2/(m1 + m2)
+cr3bp.L  =  cr3bp.m2.a;                                     % [km] Distance parameter = semi major axis of m2
+cr3bp.T  =  cr3bp.m2.T;                                     % [s]  Time parameter = sidereal period of m2
+cr3bp.R1 = cr3bp.m1.Req;                                    % [km] m1 radius
+cr3bp.R2 = cr3bp.m2.Req;                                    % [km] m2 radius
+cr3bp.rh = (cr3bp.mu/3)^1/3;                                % [-]  Hill's radius (adim formula)
+cr3bp.libp_precision = params.libp.precision;               % [-]  precision used to compute the libration points Li
 
 %Li initialization
 cr3bp.l1 = init_libp(cr3bp, 1, cr3bp.libp_precision);
@@ -61,9 +51,9 @@ cr3bp.m2.pos = [1-cr3bp.mu 0 0];
 end
 
 %% Lib points
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 % Initializes libration point
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 % @return the structure libp
 function libp = init_libp(cr3bp, number, LIBRATION_POINT_PRECISION)
 %Number
@@ -131,12 +121,12 @@ libp.Ci = jacobi(libp.position, cr3bp.mu);
 libp.Ei = -0.5*libp.Ci;
 end
  
-%-------------------------------------------------------------------------% 
+%-------------------------------------------------------------------------- 
 % Using the Newton-Raphson method, find the root of a function known to lie 
 % close to y. The root rtnewt will be refined until its accuracy is known 
 % within ± precision_gg. polynomialLi is a user-supplied routine that returns both the 
 % function value and the first derivative of the function at the point gg_var.
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 function root = rtnewt(y, precision_gg, mu, number)
 gg_var = y;
 while(true)
@@ -151,12 +141,12 @@ end
 root = gg_var;
 end
 
-%-------------------------------------------------------------------------%  
+%--------------------------------------------------------------------------  
 % Provides the function value and its first derivative for the 
 % newton-raphson method. f corresponds to the equation satisfied by the 
 % Li-m2 distance for the L1/L2 cases and by 1-(Li-m1 distance) for the L3 
 % case.
-%-------------------------------------------------------------------------% 
+%-------------------------------------------------------------------------- 
 function [f, df] = polynomialLi(mu, number, y)
 
 switch number
@@ -174,9 +164,9 @@ end
 end
 
 %% Bodies
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 % Initializes celestial bodies
-%-------------------------------------------------------------------------%
+%--------------------------------------------------------------------------
 function body = init_body(m1)
 
 days = 86400;
@@ -210,9 +200,9 @@ switch m1
     case 'EARTH'
         
         %Physical parameters
-        body.Req = 6378.14;        %[km]
+        body.Req = 6378.14;         %[km]
         body.Rm  = 6371.00;         %[km]
-        body.M   = 5.97219e24;       %[kg]
+        body.M   = 5.97219e24;      %[kg]
         body.GM  = 398600.440;      %[km^3.s^-2]
         
         %Orbital parameters
@@ -222,10 +212,10 @@ switch m1
     case 'MOON'
         
         %Physical parameters
-        body.Req = 1737.5;       %[km]
-        body.Rm = 1737.5;        %[km]
-        body.M =  0.07345814120628661e24;    %[kg] TO BE CONSISTENT WITH HARD CODED VALUE OF mu(Earth-Moon)
-        body.GM = 4902.801;      %[km^3.s^-2]
+        body.Req = 1737.5;                     %[km]
+        body.Rm  = 1737.5;                     %[km]
+        body.M   = 0.07345814120628661e24;     %[kg] TO BE CONSISTENT WITH HARD CODED VALUE OF mu(Earth-Moon)=0.012150581623434
+        body.GM  = 4902.801;                   %[km^3.s^-2]
         
         %Orbital parameters
         body.a = 384400;           %[km]

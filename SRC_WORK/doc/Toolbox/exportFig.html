@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+                "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<head>
+  <title>Description of exportFig</title>
+  <meta name="keywords" content="exportFig">
+  <meta name="description" content="Fonction pour sauvegarder vos figure en PDF.">
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="generator" content="m2html v1.5 &copy; 2003-2005 Guillaume Flandin">
+  <meta name="robots" content="index, follow">
+  <link type="text/css" rel="stylesheet" href="../m2html.css">
+</head>
+<body>
+<a name="_top"></a>
+<div><a href="../index.html">Home</a> &gt;  <a href="index.html">Toolbox</a> &gt; exportFig.m</div>
+
+<!--<table width="100%"><tr><td align="left"><a href="../index.html"><img alt="<" border="0" src="../left.png">&nbsp;Master index</a></td>
+<td align="right"><a href="index.html">Index for Toolbox&nbsp;<img alt=">" border="0" src="../right.png"></a></td></tr></table>-->
+
+<h1>exportFig
+</h1>
+
+<h2><a name="_name"></a>PURPOSE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>Fonction pour sauvegarder vos figure en PDF.</strong></div>
+
+<h2><a name="_synopsis"></a>SYNOPSIS <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="box"><strong>function exportFig(f,nom,type) </strong></div>
+
+<h2><a name="_description"></a>DESCRIPTION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre class="comment"> Fonction pour sauvegarder vos figure en PDF.</pre></div>
+
+<!-- crossreference -->
+<h2><a name="_cross"></a>CROSS-REFERENCE INFORMATION <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+This function calls:
+<ul style="list-style-image:url(../matlabicon.gif)">
+</ul>
+This function is called by:
+<ul style="list-style-image:url(../matlabicon.gif)">
+<li><a href="SpiralOrbit.html" class="code" title="">SpiralOrbit</a>	</li><li><a href="exemplePlot.html" class="code" title="">exemplePlot</a>	</li></ul>
+<!-- crossreference -->
+
+
+
+<h2><a name="_source"></a>SOURCE CODE <a href="#_top"><img alt="^" border="0" src="../up.png"></a></h2>
+<div class="fragment"><pre>0001 <a name="_sub0" href="#_subfunctions" class="code">function exportFig(f,nom,type)</a>
+0002 
+0003 <span class="comment">% Fonction pour sauvegarder vos figure en PDF.</span>
+0004 
+0005 <span class="comment">% INPUTS</span>
+0006 <span class="comment">% f est le handle de la figure</span>
+0007 <span class="comment">% nom est un string, le nom a donner. Ne pas inclure d'extension !!</span>
+0008 
+0009 <span class="comment">% Have fun !</span>
+0010 
+0011 <span class="comment">% Emilien</span>
+0012 
+0013 <span class="keyword">if</span> (nargin&lt;3)
+0014     type = 2;
+0015 <span class="keyword">end</span>
+0016 
+0017 <span class="keyword">if</span> (abs(type)==1)
+0018     nom = [nom <span class="string">'.eps'</span>];
+0019     snam=<span class="string">'figureStyle'</span>;
+0020     s=hgexport(<span class="string">'readstyle'</span>,snam);
+0021     s.Width = num2str(f.Position(3));
+0022     s.Height = num2str(f.Position(4));
+0023     
+0024     hgexport(f,nom,s);
+0025     
+0026     code = [<span class="string">'!epstopdf '</span>, nom];
+0027     
+0028     eval(code);
+0029     <span class="keyword">if</span> (type&gt;0)
+0030         delete(nom)
+0031     <span class="keyword">end</span>
+0032 <span class="keyword">else</span>
+0033     
+0034     nom = [nom <span class="string">'.pdf'</span>];
+0035     snam=<span class="string">'figureStyle'</span>;
+0036     s=hgexport(<span class="string">'readstyle'</span>,snam);
+0037     s.Width = num2str(f.Position(3));
+0038     s.Height = num2str(f.Position(4));
+0039     
+0040     
+0041     f.PaperSize = [f.Position(3:4)];
+0042     f.PaperPosition = [0 0 f.Position(3:4)];
+0043     
+0044     saveas(f,nom)
+0045 <span class="keyword">end</span></pre></div>
+<hr><address>Generated on Sat 09-Apr-2016 16:20:23 by <strong><a href="http://www.artefact.tk/software/matlab/m2html/" title="Matlab Documentation in HTML">m2html</a></strong> &copy; 2005</address>
+</body>
+</html>

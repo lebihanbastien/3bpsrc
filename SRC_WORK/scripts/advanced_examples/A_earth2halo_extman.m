@@ -1,7 +1,7 @@
 %--------------------------------------------------------------------------
 % Advanced example n°1: 
 %  
-% This matlab file compute an Earth-to-Halo transfer with:
+% This matlab file compute an Earth-to-Halo (EML2) transfer with:
 % - A first maneuver @LEO
 % - A second maneuver at the injection point in an exterior stable manifold
 %
@@ -21,30 +21,20 @@
 % ./data/halo_init_matrix_EML2.dat to generate an EML2 halo orbit and its
 % exterior stable and unstable manifolds.
 %
-% WARNING: this computation includes:
-% 1. A procedure to leave the vicinity of the Moon
-% 2. A first guess fo the deltaV of the second maneuver
-%    (at the insertion point of the stable/unstable manifold branch)
-% Both are arbitrarily implemented from heuristic considerations. They
-% both need to be improved since the final result greatly depends on them.
+% WARNING: this computation includes a first guess fo the deltaV of the 
+% second maneuver (at the insertion point of the stable/unstable manifold 
+% branch).
+% This first guess is implemented from heuristic considerations, and has a
+% great influence on the final result.
 %
-% Author: BLB
-% Version: 1.0
-% Year: 2015
+% BLB 2016
 %--------------------------------------------------------------------------
 
 %% Initialization: reboot, addpath, constants, default parameters. See init.m
 init;
 
 %% Inner changes from default parameters
-%default.plot.XY = false;
-default.plot.TD = false;
-
-%default.computation.type = cst.computation.MATLAB;
-% if(default.computation.type == cst.computation.MATLAB)
-%     default.ode45.AbsTol = 1e-15;
-%     default.ode45.RelTol = 1e-15;
-% end
+default.plot.TD = false;  %do not plot the 3D results.
 
 %% Structures init
 %Environment
@@ -55,9 +45,9 @@ orbit = init_orbit(cr3bp, cr3bp.l2,  cst.orbit.type.HALO, cst.orbit.family.NORTH
 halo_init = halo_init_EML2;
 
 %% User input data
-%------------------------------------------
+%--------------------------------------------------------------------------
 %May be modified
-%------------------------------------------
+%--------------------------------------------------------------------------
 user.hLEO       = 185;                %Desired LEO altitude [km]
 user.theta      = 0;                  %Arbitrary position on the orbit, in [0 1]
 user.showSteps  = false;              %To show/hide the steps of the corrective scheme
@@ -65,9 +55,9 @@ user.maxGapV    = 5.0;                %Maximum velocity gap allowed at injection
 user.tangentManeuver = false;         %Is the Flyby Maneuver forced to be tangent? Very restrictive! May lead to no solution
 user.fbangle  = degtorad(45);         %Termination angle of the manifold wrt the Earth-Moon line
 
-%------------------------------------------
+%--------------------------------------------------------------------------
 %Computed from user inputs, or arbitrary
-%------------------------------------------
+%--------------------------------------------------------------------------
 user.hLEOa = user.hLEO/cr3bp.L;  %Desired LEO altitude [adim]
 user.t0    = 10;                 %Integration duration (arbitrary, will not be reached because of the termination @lunar flyby
 user.isBCP = false;              %Are we using the Bicircular Problem? No
@@ -81,13 +71,13 @@ moon.event = init_event(cst.manifold.event.type.ANGLE_SECTION,...          %the 
                         user.fbangle,...                                   %given in user data...
                         cst.manifold.event.isterminal.YES,...              %the trajectory stops at the first ocurrence...
                         cst.manifold.event.direction.ALL,...               %all direction are considered...
-                        cr3bp.m1.pos, cst);                                %the center for the computation of the angle is the Moon
+                        cr3bp.m1.pos, cst);                                %the center for the computation of the angle is the Earth
                
 earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the event is triggered when the flight path angle is...
                          0.0,...                                           %equal to zero...
                          cst.manifold.event.isterminal.YES,...             %the trajectory stops at the first ocurrence...
-                         cst.manifold.event.direction.INCREASING,...              %all direction are considered...
-                         cr3bp.m1.pos, cst);                               %the center for the computation of the angle is the Moon
+                         cst.manifold.event.direction.INCREASING,...       %all direction are considered...
+                         cr3bp.m1.pos, cst);                               %the center for the computation of the angle is the Earth
 
 %% Additional options
 %Associated ode options
@@ -118,24 +108,28 @@ isPreviousSolution = false;
 % For saving outputs throughout the loop
 it = 1;
 for theta = 0:0.1:1
-    %-------------------------------------
+    %----------------------------------------------------------------------
     %New starting point
-    %-------------------------------------
+    %----------------------------------------------------------------------
     user.theta = theta;
-    %-------------------------------------
+    
+    %----------------------------------------------------------------------
     %Manifold computation
-    %-------------------------------------
+    %----------------------------------------------------------------------
     manifold_branch_stable = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable, user.theta, user.t0, default, cst);
-    %-------------------------------------
+    
+    %----------------------------------------------------------------------
     % LFB
-    %-------------------------------------
+    %----------------------------------------------------------------------
     if(isPreviousSolution) % a first guess is added from a previous solution
         [output, isPreviousSolution] = blt(manifold_branch_stable, cr3bp, earth, moon, user, default, cst, output.manifold.deltaV);
     else % no previous solution
         [output, isPreviousSolution] = blt(manifold_branch_stable, cr3bp, earth, moon, user, default, cst); 
     end
     
+    %----------------------------------------------------------------------
     % Saved outputs throughout the loop
+    %----------------------------------------------------------------------
     if(isPreviousSolution)
         deltaVD(it) = output.deltaV_dim;
         thetaV(it)  = user.theta;
@@ -143,15 +137,20 @@ for theta = 0:0.1:1
         it = it+1;
     end
     
+    %----------------------------------------------------------------------
     %Uncomment this line if you do not want to use the first guess from a
     %previous solution
+    %----------------------------------------------------------------------
     %isPreviousSolution = false;
     
-    %waitbar
+    %----------------------------------------------------------------------
+    % Waitbar
+    %----------------------------------------------------------------------
     waitbar(theta);
 end
-
 close(h)
+
+
 %% Maneuver cost vs position on the Halo orbit
 figure;
 hold on
