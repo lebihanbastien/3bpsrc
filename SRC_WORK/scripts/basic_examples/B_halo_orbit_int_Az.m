@@ -80,7 +80,7 @@ end
 % manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable,...
 %                             theta, t, default, cst,...
 %                             @(t,y)odezero_angle(t,y,earth.event))
-% The function handlers permit allow the user to define its own event
+% The function handlers allow the user to define its own event
 % routines, on top of the usual ones, defined in the structure
 % cst.manifold.event.type
 

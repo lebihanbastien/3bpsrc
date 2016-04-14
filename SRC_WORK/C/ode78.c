@@ -296,8 +296,7 @@ int ode78_cr3bp_vec_var(double *t,                  //current time
         tv[ki] = *t;
         for(int i = 0; i < nvar; i++) yv[i][ki] = y[i];
         ki++;    
-    }while(*t < tf && ki <= nGrid);
-    
+    }while(fabs(*t-tf) != 0.0 && ki <= nGrid);
     return ki-1;
 }
 
@@ -576,7 +575,7 @@ int ode78_bcp_vec_var(double *t,                  //current time
         tv[ki] = *t;
         for(int i = 0; i < nvar; i++) yv[i][ki] = y[i];
         ki++;    
-    }while(*t < tf && ki <= nGrid);
+    }while(fabs(*t-tf) != 0.0 && ki <= nGrid);
     
     return ki-1;
 }

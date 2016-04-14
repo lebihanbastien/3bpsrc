@@ -43,8 +43,7 @@ halo = orbit_computation(cr3bp, halo, default, cst);
 
 %% Manifold leg
 % We define an unstable manifold
-manifold_branch_unstable  = init_manifold_branch(cst.manifold.UNSTABLE,...
-    cst.manifold.EXTERIOR);
+manifold_branch_unstable  = init_manifold_branch(cst.manifold.UNSTABLE, cst.manifold.EXTERIOR);
 % Integration duration
 t0 = user.t0;
 
@@ -56,7 +55,7 @@ manifold_branch_unstable = manifold_branch_computation(cr3bp, halo, manifold_bra
 %% MATLAB ode integration options (important for precision!)
 options = odeset('Reltol', default.ode113.RelTol, 'Abstol', default.ode113.AbsTol);
 
-%% Rest of the trajectory can be computed in the 4bp
+%% Rest of the trajectory can be computed in the CR3BP...
 
 %--------------------------------------------------------------------------
 % Interval of integration
@@ -65,24 +64,24 @@ tspan = [user.t0 user.t0+user.tl];
 
 
 %--------------------------------------------------------------------------
-% Initial position of the Sun (in radians)
-%--------------------------------------------------------------------------
-initSunPos = user.initSunPos;
-
-%--------------------------------------------------------------------------
 % Integration. 2 possibilities:
 %       - With MATLAB ode113 routine
 %       - With MEX file ode78_bcp (compiled C routine)
 %--------------------------------------------------------------------------
 % With ode113
+%------------------------------------
 tic()
-[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options);
-toc();
+[~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yv, options);
+dtoc = toc();
+fprintf('ode113 integration in %5.5f s\n', dtoc);
 
-% With ode78_bcp
+%------------------------------------
+% With ode78_cr3bp
+%------------------------------------
 % tic()
-%[~, ~, ~, yarc_bcp] = ode78_bcp(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS);
-% toc();
+% [~, ~, ~, yarc_3bp] = ode78_cr3bp(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu);
+% dtoc = toc();
+% fprintf('ode78_cr3bp integration in %5.5f s\n', dtoc);
 
 %--------------------------------------------------------------------------
 % Moreover, events structure can be used to stop the integration at a given 
@@ -101,11 +100,14 @@ earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the 
 options_with_event = odeset('Events',@(t,y)odezero_flightpathangle(t,y,earth.event),...
                             'Reltol', default.ode113.RelTol,...
                             'Abstol', default.ode113.AbsTol);
-  
+                        
+%------------------------------------
 % Integration with ode113 and event
-tic()
-[~, yarc_bcp, ~, yearc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options_with_event);
-toc();         
+%------------------------------------
+% tic()
+% [~, yearc_bcp, ~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yv, options_with_event);
+% dtoc = toc();
+% fprintf('ode113 integration in %5.5f s\n', dtoc);        
 
 %--------------------------------------------------------------------------
 % Again, MATLAB and MEX routines can be used.
@@ -120,9 +122,77 @@ toc();
 %  max_events to a very big values (the max allowed is 1000).
 %--------------------------------------------------------------------------
 earth.event.max_events = 3;
+%------------------------------------
+% With ode78_cr3bp_event and event
+%------------------------------------
+% tic()
+% [~, yearc_bcp, ~, yarc_3bp] = ode78_cr3bp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, earth.event);
+% dtoc = toc();
+% fprintf('ode78_cr3bp_event integration in %5.5f s\n', dtoc);
+
+% CAREFUL! Note that the outputs are inversed with respect to the MATLAB
+% implementation. It was easier to do that way in compiled C.
+
+%--------------------------------------------------------------------------
+% Plot
+%--------------------------------------------------------------------------
+%2D
+figure(1);
+hold on
+hp(1) = plot(yarc_3bp(:,1)*cr3bp.L, yarc_3bp(:,2)*cr3bp.L, 'Color', rgb('dark blue'), 'LineWidth', 1.5);
+if(exist('yearc_3bp', 'var'))
+    plot(yearc_3bp(:,1)*cr3bp.L, yearc_3bp(:,2)*cr3bp.L, 'o', 'Color', rgb('dark blue'), 'MarkerFaceColor', rgb('dark green'), 'MarkerSize', 3);
+end
+
+
+%3D
+figure(4);
+hold on
+ht(1) = plot3(yarc_3bp(:,1)*cr3bp.L, yarc_3bp(:,2)*cr3bp.L, yarc_3bp(:,3)*cr3bp.L, 'Color', rgb('dark blue'), 'LineWidth', 1.5);
+
+
+%% ... Or in the 4bp
+
+%--------------------------------------------------------------------------
+% Initial position of the Sun (in radians)
+%--------------------------------------------------------------------------
+initSunPos = user.initSunPos;
+
+%--------------------------------------------------------------------------
+% Integration. Same remarks
+%--------------------------------------------------------------------------
+% With ode113
+%------------------------------------
+tic()
+[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options);
+dtoc = toc();
+fprintf('ode113 integration in %5.5f s\n', dtoc);
+
+%------------------------------------
+% With ode78_bcp
+%------------------------------------
+% tic()
+% [~, ~, ~, yarc_bcp] = ode78_bcp(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS);
+% dtoc = toc();
+% fprintf('ode78_bcp integration in %5.5f s\n', dtoc);
+ 
+%------------------------------------
+% With ode113 and event
+%------------------------------------
+% tic()
+% [~, yarc_bcp, ~, yearc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options_with_event);
+% dtoc = toc();
+% fprintf('ode113 integration in %5.5f s\n', dtoc);        
+
+%------------------------------------
+% With ode78_bcp and event
+%------------------------------------
+% earth.event.max_events = 3;
 % tic()
 % [~, yearc_bcp, ~, yarc_bcp] = ode78_bcp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS, earth.event);
-% toc()
+% dtoc = toc();
+% fprintf('ode78_bcp integration in %5.5f s\n', dtoc);
+
 % CAREFUL! Note that the outputs are inversed with respect to the MATLAB
 % implementation. It was easier to do that way in compiled C.
 
@@ -132,43 +202,18 @@ earth.event.max_events = 3;
 % 2D
 figure(1);
 hold on
-hp(1) = plot(yarc_bcp(:,1)*cr3bp.L, yarc_bcp(:,2)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 1.5);
+hp(2) = plot(yarc_bcp(:,1)*cr3bp.L, yarc_bcp(:,2)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 1.5);
 if(exist('yearc_bcp', 'var'))
     plot(yearc_bcp(:,1)*cr3bp.L, yearc_bcp(:,2)*cr3bp.L, 'o', 'Color', rgb('dark green'), 'MarkerFaceColor', rgb('dark green'), 'MarkerSize', 3);
 end
+legend(hp, {'CR3BP', 'BCP'});
+
 % 3D
 figure(4);
 hold on
-ht(1) = plot3(yarc_bcp(:,1)*cr3bp.L, yarc_bcp(:,2)*cr3bp.L, yarc_bcp(:,3)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 1.5);
+ht(2) = plot3(yarc_bcp(:,1)*cr3bp.L, yarc_bcp(:,2)*cr3bp.L, yarc_bcp(:,3)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 1.5);
+legend(ht, {'CR3BP', 'BCP'});
 
-%% Or in the CR3BP
-
-%--------------------------------------------------------------------------
-% Integration
-%--------------------------------------------------------------------------
-%[~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), tspan, manifold_branch_unstable.yv, options);
-% tic()
-%[~, yearc_3bp, ~, yarc_3bp] = ode78_cr3bp(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu);
-% toc()
-[~, yearc_3bp, ~, yarc_3bp] = ode78_cr3bp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, earth.event);
-
-%--------------------------------------------------------------------------
-% Plot
-%--------------------------------------------------------------------------
-%2D
-figure(1);
-hold on
-hp(2) = plot(yarc_3bp(:,1)*cr3bp.L, yarc_3bp(:,2)*cr3bp.L, 'Color', rgb('dark blue'), 'LineWidth', 1.5);
-if(exist('yearc_3bp', 'var'))
-    plot(yearc_3bp(:,1)*cr3bp.L, yearc_3bp(:,2)*cr3bp.L, 'o', 'Color', rgb('dark blue'), 'MarkerFaceColor', rgb('dark green'), 'MarkerSize', 3);
-end
-legend(hp, {'BCP', 'CR3BP'});
-
-%3D
-figure(4);
-hold on
-ht(2) = plot3(yarc_3bp(:,1)*cr3bp.L, yarc_3bp(:,2)*cr3bp.L, yarc_3bp(:,3)*cr3bp.L, 'Color', rgb('dark blue'), 'LineWidth', 1.5);
-legend(ht, {'BCP', 'CR3BP'});
 
 %% Plot the 3bsoi sphere
 
