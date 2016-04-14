@@ -112,9 +112,9 @@ while(true)
         % If MEX routines are allowed
         %-----------------------------
         if(params.plot.diff_corr)
-            [te, ve, ~, yv] = ode78_cr3bp(0.0, T12, v0, 42, cr3bp.mu);
+            [te, ve, ~, yv] = ode78_cr3bp([0 T12], v0, cr3bp.mu);
         else
-            [te, ve] = ode78_cr3bp(0.0, T12, v0, 42, cr3bp.mu);
+            [te, ve] = ode78_cr3bp([0 T12], v0, cr3bp.mu);
         end
     end
     
@@ -183,7 +183,7 @@ while(true)
     v0(1) = v0(1) - dX0(1);
     v0(3) = v0(3) - dX0(2);
     v0(5) = v0(5) - dX0(3);
-    T12    = T12    - dX0(4);
+    T12   = T12   - dX0(4);
     
     %----------------------------------------------------------------------
     % Plotting (potentially)

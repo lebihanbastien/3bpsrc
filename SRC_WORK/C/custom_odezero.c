@@ -7,7 +7,7 @@
 #include <stddef.h>
 //GSL
 #include <gsl/gsl_odeiv2.h>
-#include <gsl_interp.h>
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_roots.h>
 //Custom
 #include "define_env.h"
@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define MAX_EVENTS 50
+#define MAX_EVENTS 1000
 
 
 int custom_odezero(double y[], double *tcross, double t1, custom_ode_structure *ode_s)
@@ -238,6 +238,7 @@ double null_flight_path_angle(double t, double yv[], void *params)
 int custom_odezero_2(double y[],
                      double** ye,
                      double *tcross,
+                     double t0,
                      double t1,
                      custom_ode_structure *ode_s,
                      struct value_function fvalue)
@@ -274,7 +275,7 @@ int custom_odezero_2(double y[],
     //Reaching y=0
     //------------------------------------------------------------------------------
     //Previous value of yv an t are kept
-    t = 0.0;
+    t = t0;
     previous_t = t;
     for(i=0; i<dim; i++) previous_yv[i] = yv[i];
 
@@ -353,13 +354,12 @@ int custom_odezero_2(double y[],
 
     if(fabs(t)>=fabs(t1))
     {
-        mexPrintf("custom_odezero_2. Final time was reached, last state is returned.\n");
+        //mexPrintf("custom_odezero_2. Final time was reached, last state is returned.\n");
         for(i=0; i<dim; i++){
             ye[i][events] = yv[i];
         }
         last_indix = events;
-        *tcross = t;
-
+        tcross[events] = t;
     }
     else last_indix = events-1;
 

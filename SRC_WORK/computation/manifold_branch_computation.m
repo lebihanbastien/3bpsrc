@@ -133,7 +133,7 @@ if(pos > 0)
         %-----------------------------
         % If MEX routines are allowed
         %-----------------------------
-        [~, yv] = ode78_cr3bp(0.0, orbit.T*pos, orbit.y0, 42, cr3bp.mu);
+        [~, yv] = ode78_cr3bp([0 orbit.T*pos], orbit.y0, cr3bp.mu);
     end
 else
     yv = orbit.y0';
@@ -218,9 +218,9 @@ else
     %-----------------------------
     switch(manifold_branch.event.type)
         case cst.manifold.event.type.FREE
-            [te, yve, ~, yv] = ode78_cr3bp(0.0, tspan(2), xs01, 6, cr3bp.mu);
+            [te, yve, ~, yv] = ode78_cr3bp(tspan, xs01, cr3bp.mu);
         otherwise
-            [te, yve, ~, yv] = ode78_cr3bp_event(0.0, tspan(2), xs01, 6, cr3bp.mu, manifold_branch.event);
+            [te, yve, ~, yv] = ode78_cr3bp_event(tspan, xs01, cr3bp.mu, manifold_branch.event);
     end
 end
 

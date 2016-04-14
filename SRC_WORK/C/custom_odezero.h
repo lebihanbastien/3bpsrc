@@ -3,7 +3,7 @@
 
 //GSL
 #include <gsl/gsl_odeiv2.h>
-#include <gsl_interp.h>
+#include <gsl/gsl_interp.h>
 #include <gsl/gsl_roots.h>
 
 //Custom
@@ -95,6 +95,7 @@ int custom_odezero(double y[], double *tcross, double t1, custom_ode_structure *
 int custom_odezero_2(double y[],
                      double** ye,
                      double *tcross,
+                     double t0,
                      double t1,
                      custom_ode_structure *ode_s,
                      struct value_function fvalue);

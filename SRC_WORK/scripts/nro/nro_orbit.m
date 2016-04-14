@@ -15,7 +15,7 @@ default.plot.YZ          = true;  %plot also the results in Y-Z plane
 cr3bp = init_CR3BP('EARTH', 'MOON', default);
 
 %% Orbit
-%Initialize NRO
+% Initialize NRO
 nro = init_nro(cr3bp, cr3bp.l2, cst.orbit.family.SOUTHERN, cst);
 
 % Interpolation and plot

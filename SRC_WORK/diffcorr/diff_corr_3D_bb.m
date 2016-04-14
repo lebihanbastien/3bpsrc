@@ -104,9 +104,9 @@ while(true)
         % If MEX routines are allowed
         %-----------------------------
         if(params.plot.diff_corr)
-            [te, ve, ~, yv] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+            [te, ve, ~, yv] = ode78_cr3bp_event([0 10], v0, cr3bp.mu, val_par);
         else
-            [te, ve] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+            [te, ve] = ode78_cr3bp_event([0 10], v0, cr3bp.mu, val_par);
         end
         
     end

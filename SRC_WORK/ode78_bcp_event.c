@@ -12,7 +12,7 @@
 //-------------------------------------------------------------------------
 //Mex
 #include "mex.h"
-
+#include <string.h>
 //Custom
 #include "C/ode78.h"
 #include "C/custom_ode.h"
@@ -23,21 +23,20 @@
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_errno.h>
 
-
 //-------------------------------------------------------------------------
 // C function
 //-------------------------------------------------------------------------
-void ode78_bcp_event(double *t,                     //current time
-                       double *y,                    //current state
-                       double **ye,                  //event states
-                       double *te,                   //event times
-                       double const *y0,             //initial condition
-                       double const t0,              //initial time
-                       double tf,                    //final time
-                       int nvar,                     //number of state variables
-                       struct value_params *val_par, //event structure
-                       int *nEvents,                 //the effective number of events found
-                       double *param)              //bcp parameters
+void ode78_bcp_event(double *t,                    //current time
+                     double *y,                    //current state
+                     double **ye,                  //event states
+                     double *te,                   //event times
+                     double const *y0,             //initial condition
+                     double const t0,              //initial time
+                     double tf,                    //final time
+                     int nvar,                     //number of state variables
+                     struct value_params *val_par, //event structure
+                     int *nEvents,                 //the effective number of events found
+                     double *param)                //bcp parameters
 {
     //---------------------------------------------------------------------
     // Initialize the integration structures
@@ -119,7 +118,7 @@ void ode78_bcp_event(double *t,                     //current time
     ode_s.h = (tf>t0) ? fabs(ode_s.h) : -fabs(ode_s.h);
     
     //Apply custom_odezero_2
-    *nEvents = custom_odezero_2(y, ye, te, tf, &ode_s, fvalue);
+    *nEvents = custom_odezero_2(y, ye, te, t0, tf, &ode_s, fvalue);
     
     // custom_odezero_2 return the last indix rather than the number of events
     // So we need to add one event
@@ -129,14 +128,15 @@ void ode78_bcp_event(double *t,                     //current time
 
 //-------------------------------------------------------------------------
 // The gateway function.
-// The inputs must be, in that order:
-// 1. double t0, the initial time
-// 2. double tf, the final time
-// 3. double y0[6 or 42], the initial state
-// 4. int    nvar = 6 or 42, the number of state variables
-// 5. double mu, the cr3bp mass ratio
-// 6. double omega0, the initial phase angle of the Sun
-// 7. struct struct_event the event structure 
+// The input must be, in that order:
+// 1. [t0, tf] the time span
+// 2. double y0[6 or 42], the initial state
+// 3. double mu, the cr3bp mass ratio
+// 4. double theta0, the initial phase of the Sun
+// 5. double ms, the mass of the Sun
+// 6. double as, the semi-major axis of the Sun
+// 7. double omS, the mean motion of the Sun
+// 8. struct struct_event the event structure 
 //-------------------------------------------------------------------------
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
@@ -144,8 +144,8 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //---------------------------------------------------------------------
     // Check for proper number of arguments
     //---------------------------------------------------------------------
-    if(nrhs!=7) {
-        mexErrMsgIdAndTxt("custom:ode78_bcp_event:nrhs","7 inputs required.");
+    if(nrhs!=8) {
+        mexErrMsgIdAndTxt("custom:ode78_bcp_event:nrhs","8 inputs required.");
     }
     if(!(nlhs == 2 || nlhs == 4)) {
         mexErrMsgIdAndTxt("custom:ode78_bcp_event:nlhs",
@@ -162,19 +162,47 @@ void mexFunction( int nlhs, mxArray *plhs[],
     // 6. om0, the initial phase angle of the Sun
     // 7. struct struct_event the event structure 
     //---------------------------------------------------------------------
-    double t0  = mxGetScalar(prhs[0]);
-    double tf  = mxGetScalar(prhs[1]);
-    double *y0 = mxGetPr(prhs[2]);
-    int nvar   = (int) mxGetScalar(prhs[3]);
-    double mu  = mxGetScalar(prhs[4]);
-    double om0 = mxGetScalar(prhs[5]);
+    double *ts = mxGetPr(prhs[0]);
+    int nts    = mxGetN(prhs[0]);
+    double *y0 = mxGetPr(prhs[1]);
+    int nvar   = mxGetN(prhs[1]);
+    int mvar   = mxGetM(prhs[1]);
+    double mu  = mxGetScalar(prhs[2]);
+    double th0 = mxGetScalar(prhs[3]);
+    double ms  = mxGetScalar(prhs[4]); 
+    double as  = mxGetScalar(prhs[5]);
+    double omS = mxGetScalar(prhs[6]);
+    
+    //---------------------------------------------------------------------
+    // Set the size of the state as the max(nvar, mvar);
+    //---------------------------------------------------------------------
+    nvar = nvar > mvar? nvar:mvar;
+    
+    //---------------------------------------------------------------------
+    // Do some checks on the inputs
+    //---------------------------------------------------------------------
+    if(nts!=2) {
+        mexErrMsgIdAndTxt("custom:ode78_bcp:nts","The time vector (first input) must be of size 2: [t0 tf]");
+    }
+    
+    if(nvar!=6 && nvar!=42)
+    {
+        mexPrintf("nvar = %d\n", nvar);
+        mexErrMsgIdAndTxt("custom:ode78_bcp:nts","The state vector (second input) must be of size either 6 or 42.");  
+    }
+    
+    //---------------------------------------------------------------------
+    // Build the times
+    //---------------------------------------------------------------------
+    double t0 = ts[0];
+    double tf = ts[1];
     
     //---------------------------------------------------------------------
     // particular case of the event structure:
     //---------------------------------------------------------------------
     // Get input arguments
-    mwSize nfields = mxGetNumberOfFields(prhs[6]);           //number of fields
-    mwSize NStructElems = mxGetNumberOfElements(prhs[6]);    //number of elements (must be 1)
+    mwSize nfields = mxGetNumberOfFields(prhs[7]);           //number of fields
+    mwSize NStructElems = mxGetNumberOfElements(prhs[7]);    //number of elements (must be 1)
     
     if(NStructElems != 1)
     {
@@ -191,7 +219,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
     
     //---------------------------------------------------------------------
-    //Get the different fields in the event structure val_par = prhs[6]:
+    //Get the different fields in the event structure val_par = prhs[7]:
     // val_par.max_events
     // val_par.direction
     // val_par.dim
@@ -199,37 +227,45 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //---------------------------------------------------------------------
     mxArray *tmp;
     int max_events, direction, dim;
-    char *type;
     double value;
     double *center = (double*) calloc(3, sizeof(double));
+    
 
     //0. Type
-    tmp = mxGetField(prhs[6], 0, "type");
-    type = (char*) mxGetChars(tmp);
+    tmp = mxGetField(prhs[7], 0, "type");
+    int tmpN = mxGetN(tmp)+1;
+    char type[tmpN];
+    mxGetString(tmp, type, tmpN);
     //mexPrintf("type = %s\n", type);
     
+    //Check that the event type is not free.
+    if (strcmp(type, "FREE") == 0) {
+        mexErrMsgIdAndTxt("custom:ode78_bcp_event:type",
+                "The event structure as type FREE. Use ode78_bcp instead.");
+    }
+    
     //1. val_par.max_events
-    tmp = mxGetField(prhs[6], 0, "max_events");
+    tmp = mxGetField(prhs[7], 0, "max_events");
     max_events = (int) mxGetScalar(tmp);
     //mexPrintf("max_events = %d\n", max_events); 
     
     //2. val_par.direction
-    tmp = mxGetField(prhs[6], 0, "direction");
+    tmp = mxGetField(prhs[7], 0, "direction");
     direction = (int) mxGetScalar(tmp);
     //mexPrintf("direction = %d\n", direction); 
     
     //3. val_par.dim
-    tmp = mxGetField(prhs[6], 0, "dim");
+    tmp = mxGetField(prhs[7], 0, "dim");
     dim = (int) mxGetScalar(tmp)-1;
     //mexPrintf("dim = %d\n", dim); 
     
     //4. val_par.value
-    tmp = mxGetField(prhs[6], 0, "value");
+    tmp = mxGetField(prhs[7], 0, "value");
     value = mxGetScalar(tmp);
     //mexPrintf("value = %5.5f\n", value); 
     
     //5. val_par.center
-    tmp = mxGetField(prhs[6], 0, "center");
+    tmp = mxGetField(prhs[7], 0, "center");
     center = mxGetPr(tmp);
     //mexPrintf("center = (%5.5f, %5.5f, %5.5f)\n", center[0], center[1], center[2]);
     
@@ -243,17 +279,19 @@ void mexFunction( int nlhs, mxArray *plhs[],
     val_par.dim        = dim;
     val_par.value      = value;
     val_par.center     = center;
-    val_par.type       = (int) *type;
+    //Note: only the first letter is used! 
+    //So do not create an event with the same initials as another one...
+    val_par.type       = (int) *type; 
     
     //---------------------------------------------------------------------
     // Number of events
     //---------------------------------------------------------------------
-    int MAX_EVENTS = 50;  //maximum allowed is 50
+    int MAX_EVENTS = 1000;  //maximum allowed is 1000
     int nEv; //actual number of events stored at the end of the computation
     
     if(max_events > MAX_EVENTS)
     {
-        mexErrMsgIdAndTxt("custom:ode78_bcp_event:maxEv","Number of required events must be < 50.");
+        mexErrMsgIdAndTxt("custom:ode78_cr3bp_events:maxEv","Number of required events must be < %d.", MAX_EVENTS);
     }
     
     
@@ -271,34 +309,68 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //---------------------------------------------------------------------
     // BCP params
     //---------------------------------------------------------------------
-    double *params = (double*) calloc(2, sizeof(double));
+    //Sun parameters
+    double *params = (double*) calloc(5, sizeof(double));
     params[0] = mu;
-    params[1] = om0;
+    params[1] = th0;
+    params[2] = ms;
+    params[3] = as;
+    params[4] = omS;
     
     //---------------------------------------------------------------------
     // Integration
     //---------------------------------------------------------------------
     ode78_bcp_event(&t, y, ye, te, y0, t0, tf, nvar, &val_par, &nEv, params);
-    
+     
     //print the number of events found
     //mexPrintf("ode78_bcp_event. %d were found.\n", nEv);
     
     //---------------------------------------------------------------------
     // If it is desired, store the state on a time grid up to te[end]
     //---------------------------------------------------------------------
-    int nGrid = 1000;
-    //Event states
-    double **yv = (double **) calloc(nvar, sizeof(double*));
-    for(int n = 0; n < nvar; n++) yv[n] = (double*) calloc(nGrid+1, sizeof(double));
-    //Event time
-    double *tv = (double*) calloc(nGrid+1, sizeof(double));
+    int nGrid = 1000, nV;
+    double **yv, *tv;
     //New final time
     tf = te[nEv-1];
     //Integration, if necessary
     if(nlhs == 4)
     {
-        ode78_bcp_vec(&t, y, tv, yv, nGrid, y0, t0, tf, nvar, params);
+        //Old version with fixed grid
+        //ode78_cr3bp_vec(&t, y, tv, yv, nGrid, y0, t0, tf, nvar, &mu);
+        
+        //New version
+        do{
+            //-------------------------------------------------------------
+            // State will be stored on a given grid, if necessary
+            //-------------------------------------------------------------
+            //Event states
+            yv = (double **) calloc(nvar, sizeof(double*));
+            for(int n = 0; n < nvar; n++) yv[n] = (double*) calloc(nGrid+1, sizeof(double));
+            //Event time
+            tv = (double*) calloc(nGrid+1, sizeof(double));
+            
+            //-------------------------------------------------------------
+            // Integration
+            //-------------------------------------------------------------
+            nV = ode78_bcp_vec_var(&t, y, tv, yv, nGrid, y0, t0, tf, nvar, params);
+            
+            //-------------------------------------------------------------
+            // Check that the grid is not overflowed
+            //-------------------------------------------------------------
+            if(nV < nGrid)
+            {
+                nGrid = nV;
+                break;
+            }
+            else
+            {
+                free(tv);
+                for (int i=0; i<=nvar; i++) free(yv[i]); free(yv);
+                nGrid *= 2;
+            }
+        }while(nGrid < 5e4);
     }
+    
     //---------------------------------------------------------------------
     // Output
     //---------------------------------------------------------------------
@@ -309,8 +381,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //get a pointer to the real data in the output matrix
     double *tout = mxGetPr(plhs[0]);
     double *yout = mxGetPr(plhs[1]);
-    
-    
+      
     //Store the event states
     int indix = 0;
     for(int i = 0; i < nvar; i++)
@@ -359,9 +430,12 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //---------------------------------------------------------------------
     // Free memory
     //---------------------------------------------------------------------
-    free(tv);
+    if(nlhs == 4)
+    {
+        free(tv);
+        for (int i=0; i<=nvar; i++) free(yv[i]); free(yv);
+    }
     free(te);
     free(params);
-    for (int i=0; i<=nvar; i++) free(yv[i]); free(yv);
     for (int i=0; i<=nvar; i++) free(ye[i]); free(ye);
 }

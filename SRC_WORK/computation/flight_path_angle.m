@@ -15,8 +15,11 @@ function fpa = flight_path_angle(yvc, center)
 % BLB 2016
 
 % Position wrt object's center
-erl = yvc(1:3) - center';
-
+if(iscolumn(yvc))
+    erl = yvc(1:3) - center';
+else
+    erl = (yvc(1:3) - center);
+end
 % Flight path angle is obtained from sinus
 sinfpal = -  erl' * yvc(4:6)/ (norm(erl) * norm(yvc(4:6)));
 fpa = asin(sinfpal);

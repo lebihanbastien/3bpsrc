@@ -131,7 +131,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             %-----------------------------
             % If MEX routines are allowed
             %-----------------------------
-            [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+            [tearc, yearc, ~, yarc] = ode78_cr3bp_event(tspan, output.flyby.ystatem, cr3bp.mu, earth.event);
         end
         
         if(isempty(yearc))  %no solution, we return
@@ -167,7 +167,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
         if(user.showSteps)
             figure(1)
             hold on
-            plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , 'r', 'LineSmoothing','on');
+            plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , 'r');
         end
         
     end
@@ -191,7 +191,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             %-----------------------------
             % If MEX routines are allowed
             %-----------------------------
-            [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+            [tearc, yearc, ~, yarc] = ode78_cr3bp_event(tspan, output.flyby.ystatem, cr3bp.mu, earth.event);
         end
         
         %------------------------------------------------------------------
@@ -409,14 +409,14 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
     if(params.plot.XY && isSolution)
         figure(1)
         hold on
-        plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , 'm', 'LineSmoothing','on');
+        plot(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L , 'm');
         title({strTitle1, strTitle2, strTitle3, strTitle4, strTitle5});
     end
     
     if(params.plot.TD && isSolution)
         figure(4)
         hold on
-        plot3(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L, yarc(:,3)*cr3bp.L , 'm', 'LineSmoothing','on');
+        plot3(yarc(:,1)*cr3bp.L ,yarc(:,2)*cr3bp.L, yarc(:,3)*cr3bp.L , 'm');
         title({strTitle1, strTitle2, strTitle3, strTitle4, strTitle5});
     end
     
@@ -458,7 +458,7 @@ else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yearc, ~, ~] = ode78_cr3bp_event(0.0, tspan(2), output.flyby.ystatem(1:6), 6, cr3bp.mu, earth.event);
+    [~, yearc, ~, ~] = ode78_cr3bp_event(tspan, output.flyby.ystatem(1:6), cr3bp.mu, earth.event);
 end
 
 %If a solution has been found, compute the error

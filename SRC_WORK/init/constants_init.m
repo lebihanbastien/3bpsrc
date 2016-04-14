@@ -43,13 +43,22 @@ cst.mantype.MAN_CENTER_US = 3;
 %-------------------------------------------------------------------------%
 % Environment
 %-------------------------------------------------------------------------%
-cst.env.G = 6.67428e-11; %gravitational constant
+cst.env.G = 6.67428e-11;          %gravitational constant
 cst.env.AU = 1.49597871e8;        %astronomical unit in km
 cst.env.julian.y2015 = 2457023.5; %Julian date of 01/01/2015 at 00:00
 cst.env.julian.y2000 = 2451544.5; %Julian date of 01/01/2015 at 00:00
 cst.env.hours = 3600;             %in seconds
 cst.env.days  = 86400;            %in seconds
 cst.env.years = 31556926;         %in seconds (true value)
+
+% Three-body sphere of influence of the Moon in the Sun-Earth-Moon system
+% (see Parker 2007). In km
+cst.env.em3bsoi = cst.env.AU*(0.07345814120628661/1988544)^(2/5);
+
+% Sun constants
+cst.sun.ms = 328900.54;              %Sun mass in Earth-Moon units
+cst.sun.as = 388.81114;              %Sun semi-major axis in Earth-Moon units
+cst.sun.omegaS = -0.925195985520347; %Sun mean motion axis in Earth-Moon units
 
 %-------------------------------------------------------------------------%
 % Orbit
@@ -113,6 +122,10 @@ cst.manifold.event.direction.INCREASING =  1;
 cst.manifold.event.direction.DECREASING = -1;
 cst.manifold.event.direction.ALL        =  0;
 
+%-------------------------------------------------------------------------%
+%Event (copy from manifold)
+%-------------------------------------------------------------------------%
+cst.event = cst.manifold.event;
 
 %-------------------------------------------------------------------------%
 %Computation

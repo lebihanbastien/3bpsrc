@@ -110,7 +110,7 @@ for nsol = ns:ns
                 %-----------------------------
                 % If MEX routines are allowed
                 %-----------------------------
-                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(tspan, output.flyby.ystatem, cr3bp.mu, earth.event);
             end
             
             %Plot approximations
@@ -161,7 +161,7 @@ for nsol = ns:ns
                 %-----------------------------
                 % If MEX routines are allowed
                 %-----------------------------
-                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.flyby.ystatem, 42, cr3bp.mu, earth.event);
+                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(tspan, output.flyby.ystatem, cr3bp.mu, earth.event);
             end
             
             if(~isempty(yearc)) %if the event has occured
@@ -397,7 +397,7 @@ else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yearc, ~, ~] = ode78_cr3bp_event(0.0, tspan(2), output.flyby.ystatem(1:6), 6, cr3bp.mu, earth.event);
+    [~, yearc, ~, ~] = ode78_cr3bp_event(tspan, output.flyby.ystatem(1:6), cr3bp.mu, earth.event);
 end
 
 % figure(1)

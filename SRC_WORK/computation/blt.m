@@ -53,10 +53,10 @@ end
 %--------------------------------------------------------------------------
 
 %Last position & velocity on the manifold
-output.manifold.ystate = manifold_branch_stable.yv';
+output.manifold.ystate = manifold_branch_stable.yv;
 
 %Last position & velocity on the manifold in yvcm(1:6)
-output.manifold.ystatem = (1:42)';
+output.manifold.ystatem = (1:42);
 output.manifold.ystatem(1:6) =  output.manifold.ystate;
 
 %Inline identity matrix in yvcm(7:42)
@@ -69,7 +69,7 @@ vminit = output.manifold.ystate(4:6);
 output.manifold.lunarFlightPathAngle = flight_path_angle(output.manifold.ystate, moon.position);
 
 %Distance to the center of the Moon
-output.manifold.distanceToMoon = norm(moon.position' - output.manifold.ystate(1:3));
+output.manifold.distanceToMoon = norm(moon.position - output.manifold.ystate(1:3));
 
 %--------------------------------------------------------------------------
 % Correction scheme
@@ -121,7 +121,7 @@ if(output.manifold.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             % If MATLAB routines only
             %-----------------------------
             if(user.isBCP)
-                [~, yarc, tearc, yearc, ~] = ode113(@(t,y)bcfbp_derivatives_42(t,y,cr3bp.mu, user.initSunPos),tspan,output.manifold.ystatem, earth.options);
+                [~, yarc, tearc, yearc, ~] = ode113(@(t,y)bcfbp_derivatives_42(t,y,cr3bp.mu, user.initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan,output.manifold.ystatem, earth.options);
                 
             else
                 [~, yarc, tearc, yearc, ~] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.manifold.ystatem, earth.options);
@@ -131,9 +131,9 @@ if(output.manifold.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             % If MEX routines are allowed
             %-----------------------------
             if(user.isBCP)
-                [tearc, yearc, ~, yarc] = ode78_bcp_event(0.0, -20, output.manifold.ystatem, 42, cr3bp.mu, user.initSunPos, earth.event);
+                [tearc, yearc, ~, yarc] = ode78_bcp_event(tspan, output.manifold.ystatem, cr3bp.mu, user.initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS, earth.event);
             else
-                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(0.0, -20, output.manifold.ystatem, 42, cr3bp.mu, earth.event);
+                [tearc, yearc, ~, yarc] = ode78_cr3bp_event(tspan, output.manifold.ystatem, cr3bp.mu, earth.event);
             end
         end
         
@@ -396,7 +396,7 @@ if(params.computation.type == cst.computation.MATLAB)
     % If MATLAB routines only
     %-----------------------------
     if(user.isBCP)
-        [~, ~, ~, yearc, ~] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, user.initSunPos), tspan, output.manifold.ystatem(1:6), earth.options);
+        [~, ~, ~, yearc, ~] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, user.initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS), tspan, output.manifold.ystatem(1:6), earth.options);
         
     else
         [~, ~, ~, yearc, ~] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), tspan, output.manifold.ystatem(1:6), earth.options);
@@ -408,10 +408,10 @@ else
     % If MEX routines are allowed
     %-----------------------------
     if(user.isBCP)
-        [~, yearc, ~, ~] = ode78_bcp_event(0.0, tspan(2), output.manifold.ystatem(1:6), 6, cr3bp.mu, user.initSunPos, earth.event);
+        [~, yearc, ~, ~] = ode78_bcp_event(tspan, output.manifold.ystatem(1:6), cr3bp.mu, user.initSunPos, user.initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS, earth.event);
         
     else
-        [~, yearc, ~, ~] = ode78_cr3bp_event(0.0, tspan(2), output.manifold.ystatem(1:6), 6, cr3bp.mu, earth.event);
+        [~, yearc, ~, ~] = ode78_cr3bp_event(tspan, output.manifold.ystatem(1:6), cr3bp.mu, earth.event);
     end
 end
 

@@ -102,7 +102,7 @@ end
 output.C       = extractfield(output.orbit,'C');
 output.T       = extractfield(output.orbit,'T');
 output.Az      = extractfield(output.orbit,'Az');
-output.Azdim      = extractfield(output.orbit,'Azdim');
+output.Azdim   = extractfield(output.orbit,'Azdim');
 output.perigee = cell2mat(extractfield(output.orbit,'perigee'));
 output.altitudeOfPerigee = extractfield(output.perigee,'altitude');
 output.perigeeDistanceToMoonCenter = extractfield(output.perigee,'radius');

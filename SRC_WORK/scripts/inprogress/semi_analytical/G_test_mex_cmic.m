@@ -73,7 +73,7 @@ for order = 10:10:40
             options = odeset('Reltol', default.ode45.RelTol, 'Abstol', default.ode45.AbsTol);
             [~,yv] = ode45(@(t,y)cr3bp_mn_6(t,y, cr3bp.mu, li.c1, li.gamma_i) ,[0 5], y0, options);
         case cst.coord.VSYS
-            [~, yf, ~, yv] = ode78_cr3bp(0.0, 5, y0, 6, cr3bp.mu);
+            [~, yf, ~, yv] = ode78_cr3bp([0 5], y0, cr3bp.mu);
     end
     
     

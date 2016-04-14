@@ -44,7 +44,7 @@ else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yve] = ode78_cr3bp(0.0, orbit.T12, orbit.y0(1:6), 6, cr3bp.mu);
+    [~, yve] = ode78_cr3bp([0 orbit.T12], orbit.y0(1:6), cr3bp.mu);
 end
 
 % Choose the maximum value between yve and yv0.
@@ -53,7 +53,7 @@ switch(orbit.type)
         orbit.Az    = max(abs(yve(3)), abs(orbit.y0(3)));
         orbit.Azdim = orbit.Az*cr3bp.L;
     case cst.orbit.type.PLYAP
-        orbit.Ax    = max(abs(yve(1)), abs(orbit.y0(1)));
+        orbit.Ax    = max(abs(yve(1)- orbit.li.position(1)), abs(orbit.y0(1)- orbit.li.position(1)));
         orbit.Axdim = orbit.Ax*cr3bp.L;
 end
 
@@ -85,7 +85,7 @@ else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yf, ~, yv] = ode78_cr3bp(0.0, orbit.T, orbit.y0, 42, cr3bp.mu);
+    [~, yf, ~, yv] = ode78_cr3bp([0 orbit.T], orbit.y0, cr3bp.mu);
 end
 
 %--------------------------------------------------------------------------

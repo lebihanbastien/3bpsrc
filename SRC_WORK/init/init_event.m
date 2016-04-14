@@ -12,7 +12,8 @@ function [ event ] = init_event(type, value, isterminal, direction, center, cst)
 %   7. event.max_events: with MEX functions, any given maximum number of
 %   events can be used to terminate the integration. This field is used in
 %   place of event.isterminal to check wether the integration must be
-%   stopped.
+%   stopped. As a consequence, the field isterminal is NOT used by MEX
+%   routines.
 %
 %  See also EVENT
 %
@@ -34,7 +35,6 @@ switch(event.type)
         event.dim = 3;
     otherwise
         event.dim = 1; %by default, to avoid any error in mex files.
-
 end
 
 %Decreasing (-1), increasing (1) or all (0) zeros;

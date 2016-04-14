@@ -52,9 +52,9 @@ while(true)
         % If MEX routines are allowed
         %-----------------------------
         if(params.plot.diff_corr)
-            [te, ve, ~, yv] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+            [te, ve, ~, yv] = ode78_cr3bp_event([0 10], v0, cr3bp.mu, val_par);
         else
-            [te, ve] = ode78_cr3bp_event(0.0, 10, v0, 42, cr3bp.mu, val_par);
+            [te, ve] = ode78_cr3bp_event([0 10], v0, cr3bp.mu, val_par);
         end
         
     end
@@ -119,7 +119,7 @@ end
 
 %Orbit update
 orbit.y0 = v0;
-orbit.T12 = te; %1/2 period
+orbit.T12 = te;   %1/2 period
 orbit.T   = 2*te; %period
 end
 

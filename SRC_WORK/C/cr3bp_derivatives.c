@@ -176,13 +176,10 @@ int bcp_derivatives_6 (double t, const double y[], double f[], void *params)
     double *p = (double *)params;
     double mu     = p[0];    //crtbp mass ratio
     double omega0 = p[1];    //initial phase of the fourth body
-    
-    //printf("mu = %5.5f, omega0 = %5.5f\n", mu, omega0);
-    
-    //Sun parameters
-    double ms = 328900.54; 
-    double as = 388.81114;
-    double omegaS = -0.925195985520347;
+    double ms     = p[2];    //mass of the Sun
+    double as     = p[3];    //semi-major axis of the Sun
+    double omegaS = p[4];    //mean motion of the Sun
+   
 
     //Current Sun phase angle
     double theta = omega0 + omegaS*t; 
@@ -230,11 +227,9 @@ int bcp_derivatives_42 (double t, const double y[], double f[], void *params)
     double *p = (double *)params;
     double mu     = p[0];    //crtbp mass ratio
     double omega0 = p[1];    //initial phase of the fourth body
-    
-    //Sun parameters
-    double ms = 328900.54; 
-    double as = 388.81114;
-    double omegaS = -0.925195985520347;
+    double ms     = p[2];    //mass of the Sun
+    double as     = p[3];    //semi-major axis of the Sun
+    double omegaS = p[4];    //mean motion of the Sun
 
     //Current Sun phase angle
     double theta = omega0 + omegaS*t; 
