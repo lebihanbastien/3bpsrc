@@ -14,17 +14,6 @@ close all;
 % Recursively add all subfolders
 addpath(genpath('.'));
 
-% Or add them one by one
-% addpath('./computation');
-% addpath('./richardson');
-% addpath('./data');
-% addpath('./init');
-% addpath('./ode');
-% addpath('./plot');
-% addpath('./results');
-% addpath('./scripts');
-% addpath('./diffcorr');
-
 %% Data loading (abacuses)
 load halo_init_matrix_EML2 halo_init_EML2;
 load halo_init_matrix_EML1 halo_init_EML1;

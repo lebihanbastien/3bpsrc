@@ -40,12 +40,13 @@ default.libp.precision = 1e-12;
 %--------------------------------------------------------------------------
 default.plot.orbit           = true;  %Global switch for plotting
 default.plot.diff_corr       = false; %during differential correction
-default.plot.XY              = true;  %Plot the XY view
+default.plot.XY              = false; %Plot the XY view
 default.plot.YZ              = false; %Plot the YZ view
 default.plot.XZ              = false; %Plot the XZ view
 default.plot.TD              = true;  %Plot the 3D view
+default.plot.SUBTD           = false; %Plot the 3D view
 default.plot.manifold_branch = true;  %during manifold computation
-default.plot.LineSmoothing   = 'off';     %during manifold computation
+default.plot.LineSmoothing   = 'off'; %during manifold computation
 
 default.plot.firstPrimDisp   = false;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
 default.plot.allLibPoints    = false;  %are all libration points displayed?

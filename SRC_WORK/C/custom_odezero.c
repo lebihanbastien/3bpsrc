@@ -422,9 +422,9 @@ int custom_odezero_2(double y[],
                 status = gsl_root_test_residual (fy , ode_s->eps_root);
    
             }
-            while (status == GSL_CONTINUE && (++iter)<50);
+            while (status == GSL_CONTINUE && (++iter)<100);
 
-            if(iter>=50)
+            if(iter>=100)
             {
                 mexPrintf("custom_odezero_2. Warning: number of iter max exceeded in custom_odezero. Last precision is %5.5e.\n", fy);
                 //return GSL_FAILURE;
@@ -453,7 +453,6 @@ int custom_odezero_2(double y[],
         }
 
     }
-
     return last_indix;
 
 }
