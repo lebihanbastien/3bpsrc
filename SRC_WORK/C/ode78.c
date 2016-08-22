@@ -17,10 +17,10 @@
 #include "ode78.h"
 
 //Precisions
-double eps_AbsTol=1e-15;
-double eps_RelTol=1e-15;
-double eps_Diff=1e-13;
-double eps_Root=1e-13;
+double eps_AbsTol=1e-14;
+double eps_RelTol=1e-14;
+double eps_Diff=1e-12;
+double eps_Root=1e-12;
 
 /*-------------------------------------------------------------------------
  * Integration of the CRTBP vector field of mass ratio mu, from the initial

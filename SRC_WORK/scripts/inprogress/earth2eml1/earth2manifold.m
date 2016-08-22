@@ -32,9 +32,6 @@ end
 %% Recovery of information at the insertion point
 nsol = size(manifold_branch_stable.yv,1);
 
-
-
-
 %Last position & velocity on the manifold
 output.flyby.ystate = manifold_branch_stable.yv(nsol,:)';
 
@@ -56,7 +53,6 @@ output.flyby.distanceToMoon = norm(moon.position' - output.flyby.ystate(1:3));
 
 
 % Correction scheme
-
 %--------------------------------------------------
 %Checking for collision with the Moon's surface prior to computation
 %--------------------------------------------------

@@ -72,7 +72,7 @@ void third_order_halo_orbit(Orbit halo, double t, double yv_li[])
 void apply_halo_orbit_third_order(Orbit *orbit)
 {
     //Init
-    gsl_matrix *STM0 = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM0 = gsl_matrix_calloc(6,6);
     gsl_matrix_set_identity (STM0);
 
     //Third order approximation of the state

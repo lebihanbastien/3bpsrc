@@ -127,7 +127,7 @@ for theta = 0:0.01:1
     %-------------------------------------
     manifold_branch_stable = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable, user.theta, user.t0, default, cst);
     
-    if(manifold_branch_stable.termination_time(end) ~= 0) %if indeed there was a solution
+    if(manifold_branch_stable.te(end) ~= 0) %if indeed there was a solution
         %-------------------------------------
         % LFB
         %-------------------------------------

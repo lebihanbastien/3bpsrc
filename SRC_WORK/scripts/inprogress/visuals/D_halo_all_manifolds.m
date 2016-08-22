@@ -37,14 +37,14 @@ default.plot.bigPrimFac      = 3.0;       %the primaries appear bigPrimFac x big
 cr3bp = init_CR3BP('EARTH', 'MOON', default);
 %Orbit
 orbit = init_orbit(cr3bp, ...                     % Parent CR3BP
-                   cr3bp.l2, ...                  % Parent libration point
+                   cr3bp.l1, ...                  % Parent libration point
                    cst.orbit.type.HALO, ...       % HALO orbit 
                    cst.orbit.family.NORTHERN, ... % Northern class
-                   30000, ...                     % Of vertical extension ~ 30000 km
+                   10000, ...                     % Of vertical extension ~ 30000 km
                    cst);                          % Numerical constants
               
 %Interpolation matrix
-halo_init = halo_init_EML2;
+halo_init = halo_init_EML1;
 
 %% Orbit computation
 orbit = halo_orbit_interpolation(cr3bp, orbit, halo_init, default, cst);
@@ -98,24 +98,24 @@ t = 10;
 
 %%
 %Unstable interior
-for theta = 0:0.02:1 %position on the orbit
+for theta = 0:0.1:1 %position on the orbit
     manifold_branch_unstable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_interior, theta, t, default, cst);
 end
 
 % Unstable exterior
-for theta = 0:0.02:1 %position on the orbit
+for theta = 0:0.1:1 %position on the orbit
     manifold_branch_unstable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_unstable_exterior, theta, t, default, cst);
 end
 
-% Stable exterior
-for theta = 0:0.02:1 %position on the orbit
-    manifold_branch_stable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_exterior, theta, t, default, cst);
-end
-
-% Stable interior
-for theta = 0:0.02:1 %position on the orbit
-    manifold_branch_stable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_interior, theta, t, default, cst);
-end
+% % Stable exterior
+% for theta = 0:0.05:1 %position on the orbit
+%     manifold_branch_stable_exterior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_exterior, theta, t, default, cst);
+% end
+% 
+% % Stable interior
+% for theta = 0:0.05:1 %position on the orbit
+%     manifold_branch_stable_interior = manifold_branch_computation(cr3bp, orbit, manifold_branch_stable_interior, theta, t, default, cst);
+% end
 
 %% Change the orientation of the 3D plot, if it exists
 if(any(findall(0,'Type','Figure')==4))

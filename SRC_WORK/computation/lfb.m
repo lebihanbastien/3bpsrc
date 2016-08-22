@@ -55,7 +55,7 @@ end
 % Recovery of information at the insertion point
 %--------------------------------------------------------------------------
 %Last position & velocity on the manifold
-output.flyby.ystate = manifold_branch_stable.yv';
+output.flyby.ystate = manifold_branch_stable.yve';
 
 %Last position & velocity on the manifold in yvcm(1:6)
 output.flyby.ystatem = (1:42)';

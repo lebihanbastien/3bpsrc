@@ -36,7 +36,7 @@ int halo_orbit_computation(Orbit *halo,
     third_order_halo_orbit(*halo, 0.0, ystart);
 
     //STM(0) is concatenated to the state
-    gsl_matrix *STM0 = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM0 = gsl_matrix_calloc(6,6);
     gsl_matrix_set_identity (STM0);
     custom_matrixToVector(ystart, STM0, 6, 6, 6);
     gsl_matrix_free(STM0);
@@ -73,7 +73,7 @@ int halo_orbit_refinement(Orbit *halo,
     //-----------------------------------------------------------------------------------------------------
     int i, status;
     //STM init
-    gsl_matrix *STM0 = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM0 = gsl_matrix_calloc(6,6);
     gsl_matrix_set_identity (STM0);
     //Copy of the initial state for next step
     double y[42], yhalf[42];
@@ -120,7 +120,7 @@ int halo_orbit_refinement(Orbit *halo,
     gsl_odeiv2_driver_apply (ode_s->d, &t, 2*tcross, y);
 
     //Monodromy matrix
-    gsl_matrix *monodromy = gsl_matrix_alloc(6,6);
+    gsl_matrix *monodromy = gsl_matrix_calloc(6,6);
     custom_vectorToMatrix(monodromy,y,6, 6, 6);
 
     //Output
@@ -142,13 +142,13 @@ int halo_orbit_refinement(Orbit *halo,
     //Output (stable)
     gsl_vector_complex_view evec_i = gsl_matrix_complex_column (evec, 5); //last one
     gsl_vector_view revec_i = gsl_vector_complex_real(&evec_i.vector);
-    halo->stable_direction = gsl_vector_alloc(6);
+    halo->stable_direction = gsl_vector_calloc(6);
     gsl_vector_memcpy (halo->stable_direction , &revec_i.vector);
 
     //Output (unstable)
     evec_i = gsl_matrix_complex_column (evec, 0); //first one
     revec_i = gsl_vector_complex_real(&evec_i.vector);
-    halo->unstable_direction = gsl_vector_alloc(6);
+    halo->unstable_direction = gsl_vector_calloc(6);
     gsl_vector_memcpy (halo->unstable_direction , &revec_i.vector);
 
     gsl_vector_complex_free(eval);

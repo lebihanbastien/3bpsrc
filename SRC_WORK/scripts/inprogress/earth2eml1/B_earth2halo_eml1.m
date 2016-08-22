@@ -58,7 +58,7 @@ default.plot.firstPrimDisp = cst.TRUE;
 %Environment
 cr3bp = init_CR3BP('EARTH', 'MOON', default);
 %Orbit
-orbit = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, 6000, cst);
+orbit = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.HALO, cst.orbit.family.NORTHERN, 15clos000, cst);
 %Interpolation matrix
 halo_init = halo_init_EML1;
 
@@ -73,18 +73,19 @@ user.flyby.fbangle  = degtorad(-130);   %Flyby angle at the moon [rad]
 
 %Computed from user inputs, or arbitrary
 user.hLEOa = user.hLEO/cr3bp.L;  %Desired LEO altitude [adim]
-user.t0    = 50;                 %Integration duration (arbitrary, will not be reached because of the termination @lunar flyby
+user.t0    = 3.5;                 %Integration duration (arbitrary, will not be reached because of the termination @lunar flyby
 
 
 %% Orbit computation
 orbit = halo_orbit_interpolation(cr3bp, orbit, halo_init, default, cst);
+%orbit = orbit_computation(cr3bp, orbit, default, cst);
 
 %% Events
 earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the event is triggered when the flight path angle is...
-    0.0,...                                           %equal to zero...
-    cst.manifold.event.isterminal.NO,...             %the trajectory stops at the first ocurrence...
-    cst.manifold.event.direction.INCREASING,...      %increasing direction are considered (perigee)...
-    cr3bp.m1.pos, cst);                               %the center for the computation of the angle is the Moon
+                         0.0,...                                           %equal to zero...
+                         cst.manifold.event.isterminal.NO,...             %the trajectory stops at the first ocurrence...
+                         cst.manifold.event.direction.INCREASING,...      %increasing direction are considered (perigee)...
+                         cr3bp.m1.pos, cst);                               %the center for the computation of the angle is the Moon
 
 % More than one event are considered. We use the last one to compute the
 % bridge leg to LEO
@@ -101,10 +102,15 @@ moon.position  = cr3bp.m2.pos;
 earth.position = cr3bp.m1.pos;
 
 %% Manifold initialization
-manifold_branch_stable  = init_manifold_branch_event(cst.manifold.STABLE,...    %the manifold is taken stable...
-    cst.manifold.INTERIOR,...  %and interior...
-    earth.event);              %the integration is stopped when a certain angle wrt to the moon is reached
 
+% Event: fpa = 0
+% manifold_branch_stable  = init_manifold_branch_event(cst.manifold.STABLE,...    %the manifold is taken stable...
+%                                                      cst.manifold.INTERIOR,...  %and interior...
+%                                                      earth.event);              %the integration is stopped when a certain angle wrt to the moon is reached
+                                                 
+% No event                                                
+manifold_branch_stable  = init_manifold_branch_event(cst.manifold.STABLE,...
+                                                     cst.manifold.INTERIOR);
 %% Loop on the position in L2
 %Waitbar
 h = waitbar(0,'Computation in progress...');

@@ -133,9 +133,9 @@ for i = 1:6
 end
 
 %Stable and unstable direction (linear approx of the manifolds)
-[~, posEigen] = min(orbit.eigenvalues);
+[~, posEigen] = min(abs(orbit.eigenvalues));
 orbit.stable_direction = V(:,posEigen);
-[~, posEigen] = max(orbit.eigenvalues);
+[~, posEigen] = max(abs(orbit.eigenvalues));
 orbit.unstable_direction = V(:,posEigen);
 
 end

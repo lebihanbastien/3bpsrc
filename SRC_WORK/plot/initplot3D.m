@@ -1,4 +1,4 @@
-function [] = initplot3D(index, cr3bp, params)
+function [] = initplot3D(index, cr3bp, params, li)
 % INITPLOT3D initializes the 2D plots used throughout the computations.
 %
 % INITPLOT3D(INDEX, CR3BP, PARAMS) initializes a 3D plot
@@ -31,7 +31,7 @@ grid on
 xlabel('X (x km)')
 ylabel('Y (x km)')
 zlabel('Z (x km)')
-title ('3D plot');
+title ('3D trajectories in the synodical frame');
 
 %Default size
 set(figure(index), 'defaultTextFontSize', 12);
@@ -43,11 +43,11 @@ set(figure(index), 'defaultLineMarkerSize', 2);
 %--------------------------------------------------------------------------
 switch(cr3bp.name)
     case('EARTH+MOON')
-        earth_moon_system(cr3bp, params);
+        earth_moon_system(cr3bp, params, li);
     case('SUN+EARTH')
-        sun_earth_system(cr3bp, params);
+        sun_earth_system(cr3bp, params, li);
     otherwise %default is EARTH+MOON
-        earth_moon_system(cr3bp, params);
+        earth_moon_system(cr3bp, params, li);
 end
 
 
@@ -56,7 +56,7 @@ end
 %--------------------------------------------------------------------------
 % Plot the Sun-Earth system
 %--------------------------------------------------------------------------
-function [] = sun_earth_system(cr3bp, params)
+function [] = sun_earth_system(cr3bp, params, li)
 
 %Distance in km
 Lf = cr3bp.L;
@@ -151,16 +151,10 @@ if(params.plot.allLibPoints)
     end
     
 else
-    Li = cr3bp.l1.position;
+    Li = li.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*Lf, 0, 500, 'L_1');
-    end
-    
-    Li = cr3bp.l2.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*Lf, 0, 500, 'L_2');
+        text(Li(1)*Lf, 0, 500, ['L_', num2str(li.number)]);
     end
 end
 
@@ -177,7 +171,7 @@ end
 %--------------------------------------------------------------------------
 % Plot the Earth_Moon system
 %--------------------------------------------------------------------------
-function [] = earth_moon_system(cr3bp, params)
+function [] = earth_moon_system(cr3bp, params, li)
 
 %Distance in 10^3 km
 Lf = cr3bp.L;
@@ -219,8 +213,17 @@ Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
 X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
 Y_M3D = 0           + Rm2*Y_M3D;
 Z_M3D = 0           + Rm2*Z_M3D;
-surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
+%HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
+HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf);%, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
 
+% Load Moon Image
+%topoMoon = imread('moon.jpg');
+load moonalb
+% Set it on MOON
+set(HMOON,'facecolor','texture',...
+    'cdata',im2double(moonalb),...
+    'edgecolor','none');
+colormap(gray(256));
 
 %----------
 %Names
@@ -268,16 +271,10 @@ if(params.plot.allLibPoints)
     end
     
 else
-    Li = cr3bp.l1.position;
+    Li = li.position;
     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
     if(params.plot.names)
-        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_1');
-    end
-    
-    Li = cr3bp.l2.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_2');
+        text(Li(1)*cr3bp.L, 0, 0.1301*Lf, ['L_', num2str(li.number)]);
     end
 end
 

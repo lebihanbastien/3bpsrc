@@ -21,9 +21,9 @@ default.plot.firstPrimDisp  = true;  % plot the Earth
 
 %% User parameter
 user.Az    = 10000;                 %size of the orbit (km)
-user.theta = 0.01;                  %position on the orbit (adim, between 0 and 1)
-user.t0    = 6;                     %integration time on the manifold in cr3bp (adim)
-user.tl    = 30;                    %integration time on the rest of the trajectory (adim)
+user.tau = 0.01;                  %position on the orbit (adim, between 0 and 1)
+user.t0    = 1;                     %integration time on the manifold in cr3bp (adim)
+user.tl    = 2;                    %integration time on the rest of the trajectory (adim)
 user.initSunPos = degtorad(100);    %initial position of the Sun (rad)
 
 %% Environment init
@@ -48,9 +48,9 @@ manifold_branch_unstable  = init_manifold_branch(cst.manifold.UNSTABLE, cst.mani
 t0 = user.t0;
 
 % Position on the orbit (between 0 and 1)
-theta = user.theta;
+tau = user.tau;
 
-manifold_branch_unstable = manifold_branch_computation(cr3bp, halo, manifold_branch_unstable, theta, t0, default, cst);
+manifold_branch_unstable = manifold_branch_computation(cr3bp, halo, manifold_branch_unstable, tau, t0, default, cst);
 
 %% MATLAB ode integration options (important for precision!)
 options = odeset('Reltol', default.ode113.RelTol, 'Abstol', default.ode113.AbsTol);
@@ -61,7 +61,6 @@ options = odeset('Reltol', default.ode113.RelTol, 'Abstol', default.ode113.AbsTo
 % Interval of integration
 %--------------------------------------------------------------------------
 tspan = [user.t0 user.t0+user.tl];
-
 
 %--------------------------------------------------------------------------
 % Integration. 2 possibilities:
@@ -91,7 +90,7 @@ fprintf('ode113 integration in %5.5f s\n', dtoc);
 % Earth-Spacecraft line (at perigee or apogee).
 earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the event is triggered when the flight path angle is...
                          0.0,...                                           %equal to zero...
-                         cst.manifold.event.isterminal.YES,...             %the trajectory stops at the first ocurrence...
+                         cst.manifold.event.isterminal.NO,...             %the trajectory stops at the first ocurrence...
                          cst.manifold.event.direction.ALL,...              %all direction are considered...
                          cr3bp.m1.pos, cst);                               %the center for the computation of the angle is the Earth
 
@@ -105,7 +104,7 @@ options_with_event = odeset('Events',@(t,y)odezero_flightpathangle(t,y,earth.eve
 % Integration with ode113 and event
 %------------------------------------
 % tic()
-% [~, yearc_bcp, ~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yv, options_with_event);
+% [~, yarc_3bp, ~, yearc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yv, options_with_event);
 % dtoc = toc();
 % fprintf('ode113 integration in %5.5f s\n', dtoc);        
 
@@ -121,12 +120,12 @@ options_with_event = odeset('Events',@(t,y)odezero_flightpathangle(t,y,earth.eve
 %  is only used by MEX routines). If you want ALL events, just set
 %  max_events to a very big values (the max allowed is 1000).
 %--------------------------------------------------------------------------
-earth.event.max_events = 3;
+earth.event.max_events = 2;
 %------------------------------------
 % With ode78_cr3bp_event and event
 %------------------------------------
 % tic()
-% [~, yearc_bcp, ~, yarc_3bp] = ode78_cr3bp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, earth.event);
+% [~, yearc_3bp, ~, yarc_3bp] = ode78_cr3bp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, earth.event);
 % dtoc = toc();
 % fprintf('ode78_cr3bp_event integration in %5.5f s\n', dtoc);
 
@@ -164,7 +163,7 @@ initSunPos = user.initSunPos;
 % With ode113
 %------------------------------------
 tic()
-[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options);
+[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, 0.2, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options);
 dtoc = toc();
 fprintf('ode113 integration in %5.5f s\n', dtoc);
 

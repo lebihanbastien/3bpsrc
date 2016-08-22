@@ -17,6 +17,10 @@ addpath(genpath('.'));
 %% Data loading (abacuses)
 load halo_init_matrix_EML2 halo_init_EML2;
 load halo_init_matrix_EML1 halo_init_EML1;
+% New abacuses (more complete)
+load halo2_init_EML2 halo2_init_EML2;
+load halo2_init_EML1 halo2_init_EML1;
+
 load nro_init_EML1 nro_init_EML1;
 load nro_init_EML2 nro_init_EML2;
 

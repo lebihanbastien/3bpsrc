@@ -19,4 +19,4 @@ cr3bp = init_CR3BP('EARTH', 'MOON', default);
 nro = init_nro(cr3bp, cr3bp.l2, cst.orbit.family.SOUTHERN, cst);
 
 % Interpolation and plot
-nro = nro_interpolation(cr3bp, nro, nro_init_EML2, default, cst, 'altitudeOfPerigee', 1000);
+nro = nro_interpolation(cr3bp, nro, nro_init_EML2, default, cst, 'altitudeOfPerigee', 500);

@@ -65,7 +65,7 @@ default.plot.lyap_orbit      = true;  %during lyap orbit computation (deprecated
 %   speed. Some functionalities are lost, such as user-defined event
 %   routines.
 %--------------------------------------------------------------------------
-default.computation.type = cst.computation.MEX; %use MATLAB routines by default
+default.computation.type = cst.computation.MATLAB; %use MATLAB routines by default
 
 end
 

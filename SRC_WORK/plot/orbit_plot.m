@@ -47,6 +47,9 @@ end
 
 if(params.plot.TD)
     halo_orbit_plot_3D(orbit, 4, params, color);
+    if(params.plot.SUBTD)
+        halo_orbit_subplot_3D(orbit, 5, params, color);
+    end
 end
 
 end
@@ -110,7 +113,7 @@ Lf = cr3bp.L;
 %----------
 %If the figure did not exist before, we set the basic environment.
 if(~ishandle(index))
-    initplot3D(index, cr3bp, params);
+    initplot3D(index, cr3bp, params, orbit.li);
 end
 
 % ----------
@@ -131,6 +134,62 @@ end
 figure(index);
 hold on;
 
+
+end
+
+%--------------------------------------------------------------------------
+% Plot an orbit in 3D. Various options are available through params
+%--------------------------------------------------------------------------
+function [] = halo_orbit_subplot_3D(orbit, index, params, varargin)
+
+%----------
+%Cr3bp
+%----------
+cr3bp = orbit.cr3bp;
+
+%----------
+%Factor
+%----------
+Lf = cr3bp.L;
+
+%----------
+%Plot
+%----------
+%If the figure did not exist before, we set the basic environment.
+if(~ishandle(index))
+    initplot3D(index, cr3bp, params, orbit.li);
+end
+
+% ----------
+% Orbit
+% ----------
+% FigHandle = figure(index);
+% set(FigHandle, 'Position', [95, 28, 1398, 921]);
+% subplot(2,2,1);
+figure(index);
+hold on;
+grid on;
+title('Best trajectories in the Earth-Moon synodical frame');
+switch(nargin)
+    case 3
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.5);
+    case 4
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.5);
+    otherwise
+        error('Wrong number of inputs.');
+end
+
+% ----------
+% Selenographic frame
+% ----------
+for i = 1:3
+  axsg = zeros(6,1);
+  axsg(i) = 1e-2;
+  axsynmc = selenographic2synodical(axsg, cr3bp);
+  c = zeros(1,3);
+  c(i) = 1;
+  arrow3(cr3bp.m2.pos*Lf, axsynmc(1:3)'*Lf, c, 2, 10,0.5);
+end
 
 end
 

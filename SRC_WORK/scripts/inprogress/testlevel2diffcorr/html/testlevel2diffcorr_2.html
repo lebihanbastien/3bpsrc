@@ -1,0 +1,351 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>testlevel2diffcorr_2</title><meta name="generator" content="MATLAB 8.1"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2016-06-23"><meta name="DC.source" content="testlevel2diffcorr_2.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">The initial vector: 6 + 36 variables</a></li><li><a href="#3">Leg 2: manifold leg</a></li><li><a href="#4">Target</a></li><li><a href="#5">Plot</a></li><li><a href="#6">We change the scope: everything is in one type now</a></li><li><a href="#7">Back to the problem of the manifold</a></li><li><a href="#8">Copy initial values</a></li><li><a href="#9">Differential Correction</a></li><li><a href="#10">Compute the cost (DV, DT)</a></li></ul></div><pre class="codeinput">init;
+
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% Test of FMINCON for QBCP</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% Number of points on each legs</span>
+N1 = 100;
+N2 = 2;
+N3 = 100;
+
+inputType  = cst.coord2.VNCSEM;
+outputType = cst.coord2.VNCSEM;
+dcs        = cst.fwrk.VSEM;
+quiverscale = 0.5;
+</pre><h2>The initial vector: 6 + 36 variables<a name="2"></a></h2><pre class="codeinput">y0 = zeros(42,1);
+<span class="comment">% STM concatenation after the 6-dim state</span>
+y0 = matrixToVector(y0, cst.orbit.STM0, 6, 6, 6);
+</pre><h2>Leg 2: manifold leg<a name="3"></a></h2><pre class="codeinput">y0(1:6) = [ -7.909020665016300e-01;
+            -2.057153010805557e-01;
+             0.000000000000000e+00;
+             2.397145759825049e+00;
+             2.699054245560647e+00;
+             0.000000000000000e+00];
+<span class="comment">% Initial &amp; final times in SE coordinates</span>
+t0 = 4.500955883493010e-01;
+tf = 2.901236913163497e+00;
+
+
+<span class="comment">%Integration</span>
+[tman, yman] = ode78_qbcp([t0 tf], y0, dcs, N2-1, inputType, outputType);
+</pre><h2>Target<a name="4"></a></h2><pre class="codeinput">yproj =  [4.311933504764909e-02;
+         -4.935876996264280e-01;
+          0.000000000000000e+00;
+         -4.525820233983336e-01;
+         -7.947431930418852e-01;
+          0.000000000000000e+00];
+</pre><h2>Plot<a name="5"></a></h2><pre class="codeinput">figure(1)
+hold <span class="string">on</span>
+grid <span class="string">on</span>;
+plot(yman(:,1),   yman(:,2),   <span class="string">'Color'</span>, <span class="string">'r'</span>, <span class="string">'LineWidth'</span>, 2);
+legend(<span class="string">'EML2 orbit'</span>, <span class="string">'Transfer leg'</span>, <span class="string">'SEML2 orbit'</span>);
+</pre><pre class="codeoutput">Warning: Ignoring extra legend entries. 
+</pre><img vspace="5" hspace="5" src="testlevel2diffcorr_2_01.png" alt=""> <h2>We change the scope: everything is in one type now<a name="6"></a></h2><pre class="codeinput">inputType  = cst.coord2.VNCSEM;
+outputType = cst.coord2.VNCSEM;
+dcs        = cst.fwrk.VSEM;
+</pre><h2>Back to the problem of the manifold<a name="7"></a></h2><pre class="codeinput">t0 = 0.436887365666364;
+tf = 2.96422997518981;
+</pre><h2>Copy initial values<a name="8"></a></h2><pre class="codeinput">ymd = yman;
+tmd = tman;
+
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% WARNING: for the last component, we integrate yseml2_0, since it is the</span>
+<span class="comment">% target!</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+ymd(end, 1:6) = yproj(1:6);
+
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% WARNING: we need to update the STM at each patch point!</span>
+<span class="comment">% Already done in ode78_qbcp, but you never know!</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="keyword">for</span> k = 1: size(ymd, 1)
+    ymd(k,:) = matrixToVector(ymd(k,:), cst.orbit.STM0, 6, 6, 6);
+<span class="keyword">end</span>
+</pre><h2>Differential Correction<a name="9"></a></h2><pre class="codeinput"><span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% - tmdn, ymdn contains the new departure state &amp; time</span>
+<span class="comment">% - yma contains the arrival state</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+isTimeFixed = false;
+<span class="comment">%[tmdn, ymdn, yma] = diff_corr_level_II(tmd, ymd, N2, dcs, inputType, isTimeFixed);</span>
+[tmdn, ymdn, yma] = diff_corr_level_I(tmd, ymd, N2, dcs, inputType, isTimeFixed);
+
+
+<span class="comment">%[tmdn, ymdn, yma] = diff_corr_level_II_with_constraints(tmd, ymd, N2, dcs, inputType, false);</span>
+<span class="comment">%[tmdn, ymdn, yma] = diff_corr_level_II_fixed_tspan_mixed(tmd, ymd, N2, dcs, inputType);</span>
+</pre><pre class="codeoutput">normC = 4.882155721038139e-03
+normC = 4.548045129350309e-02
+normC = 5.613831850388037e-04
+normC = 2.373986142428344e-05
+normC = 2.266345383578690e-08
+normC = 2.875329510455332e-08
+normC = 9.811524998737676e-09
+normC = 2.050031257125998e-08
+normC = 1.041910314313897e-08
+normC = 3.350587013488994e-08
+normC = 4.454057114352863e-08
+normC = 1.520084979829384e-08
+normC = 1.454037179998668e-08
+normC = 4.944311719574509e-08
+normC = 2.026997145654947e-09
+normC = 4.243313235473493e-08
+normC = 5.983733262416617e-09
+normC = 1.630217944475279e-08
+normC = 2.231387704844909e-08
+normC = 2.975403611721808e-08
+normC = 6.015021421528565e-09
+normC = 5.595153471972731e-09
+normC = 1.458378287774505e-08
+normC = 3.123411372014753e-09
+normC = 3.665664265328881e-09
+normC = 7.387113497303285e-09
+normC = 8.691546896493340e-09
+normC = 1.130941083524060e-08
+normC = 1.991586627294886e-08
+normC = 3.320347572909723e-08
+normC = 3.573062932693395e-08
+normC = 2.343466086314440e-08
+normC = 3.654769561719037e-08
+normC = 6.748806138276639e-09
+normC = 9.302284628457044e-09
+normC = 1.985690110011608e-08
+normC = 3.330358280484561e-08
+normC = 3.567677030823400e-08
+normC = 1.080170050919696e-08
+normC = 2.541260910858503e-08
+normC = 4.221775641414958e-08
+normC = 4.019917669146921e-08
+normC = 1.256183901805058e-08
+normC = 2.211231658834640e-09
+normC = 1.070587259475468e-08
+normC = 3.858734801471161e-09
+normC = 1.012883475789964e-08
+normC = 5.211481212754570e-09
+normC = 3.225522583010589e-09
+normC = 2.958372429244423e-08
+</pre><img vspace="5" hspace="5" src="testlevel2diffcorr_2_02.png" alt=""> <h2>Compute the cost (DV, DT)<a name="10"></a></h2><pre class="codeinput">cr3bp = init_CR3BP(<span class="string">'SUN'</span>, <span class="string">'EARTH_AND_MOON'</span>, default);
+gamma_i = 0.010078240625297; <span class="comment">%force a given gamma value, from C++ code</span>
+
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% Compute DV in m/s</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+DV = zeros(N2, 1);
+<span class="keyword">for</span> k = 1:N2
+    DV(k) = 1e3*cr3bp.L*2*pi/cr3bp.T*gamma_i*norm(yma(k, 4:6) - ymdn(k, 4:6));
+    ymdn(k, 4:6)
+    yma(k, 4:6)
+<span class="keyword">end</span>
+
+<span class="comment">%--------------------------------------------------------------------------</span>
+<span class="comment">% Compute DT in hours</span>
+<span class="comment">%--------------------------------------------------------------------------</span>
+DT = zeros(N2, 1);
+<span class="keyword">for</span> k = 1:N2
+    DT(k) = cr3bp.T/(2*pi*3600)*norm(tmdn(k) - tmd(k));
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans =
+
+    2.3972    2.6993         0
+
+
+ans =
+
+    2.3971    2.6991         0
+
+
+ans =
+
+   -0.4526   -0.7947         0
+
+
+ans =
+
+   -0.4305   -0.8017         0
+
+</pre><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2013a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+init;
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% Test of FMINCON for QBCP
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% Number of points on each legs
+N1 = 100;
+N2 = 2;
+N3 = 100;
+
+inputType  = cst.coord2.VNCSEM;
+outputType = cst.coord2.VNCSEM;
+dcs        = cst.fwrk.VSEM;
+quiverscale = 0.5;
+
+%% The initial vector: 6 + 36 variables
+y0 = zeros(42,1);
+% STM concatenation after the 6-dim state
+y0 = matrixToVector(y0, cst.orbit.STM0, 6, 6, 6);
+
+
+%% Leg 2: manifold leg
+y0(1:6) = [ -7.909020665016300e-01;
+            -2.057153010805557e-01;
+             0.000000000000000e+00;
+             2.397145759825049e+00;
+             2.699054245560647e+00;
+             0.000000000000000e+00];
+% Initial & final times in SE coordinates
+t0 = 4.500955883493010e-01;
+tf = 2.901236913163497e+00;
+
+
+%Integration
+[tman, yman] = ode78_qbcp([t0 tf], y0, dcs, N2-1, inputType, outputType);
+
+%% Target
+yproj =  [4.311933504764909e-02;
+         -4.935876996264280e-01;
+          0.000000000000000e+00;
+         -4.525820233983336e-01;
+         -7.947431930418852e-01;
+          0.000000000000000e+00];
+
+%% Plot
+figure(1)
+hold on
+grid on;
+plot(yman(:,1),   yman(:,2),   'Color', 'r', 'LineWidth', 2);
+legend('EML2 orbit', 'Transfer leg', 'SEML2 orbit');
+
+
+%% We change the scope: everything is in one type now
+inputType  = cst.coord2.VNCSEM;
+outputType = cst.coord2.VNCSEM;
+dcs        = cst.fwrk.VSEM;
+
+%% Back to the problem of the manifold
+t0 = 0.436887365666364;
+tf = 2.96422997518981;
+
+%% Copy initial values
+ymd = yman;
+tmd = tman;
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% WARNING: for the last component, we integrate yseml2_0, since it is the
+% target!
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+ymd(end, 1:6) = yproj(1:6);
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% WARNING: we need to update the STM at each patch point!
+% Already done in ode78_qbcp, but you never know!
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+for k = 1: size(ymd, 1)
+    ymd(k,:) = matrixToVector(ymd(k,:), cst.orbit.STM0, 6, 6, 6);
+end
+
+%% Differential Correction
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% - tmdn, ymdn contains the new departure state & time
+% - yma contains the arrival state
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+isTimeFixed = false;
+%[tmdn, ymdn, yma] = diff_corr_level_II(tmd, ymd, N2, dcs, inputType, isTimeFixed);
+[tmdn, ymdn, yma] = diff_corr_level_I(tmd, ymd, N2, dcs, inputType, isTimeFixed);
+
+
+%[tmdn, ymdn, yma] = diff_corr_level_II_with_constraints(tmd, ymd, N2, dcs, inputType, false);
+%[tmdn, ymdn, yma] = diff_corr_level_II_fixed_tspan_mixed(tmd, ymd, N2, dcs, inputType);
+
+
+%% Compute the cost (DV, DT)
+
+cr3bp = init_CR3BP('SUN', 'EARTH_AND_MOON', default);
+gamma_i = 0.010078240625297; %force a given gamma value, from C++ code
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% Compute DV in m/s
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+DV = zeros(N2, 1);
+for k = 1:N2
+    DV(k) = 1e3*cr3bp.L*2*pi/cr3bp.T*gamma_i*norm(yma(k, 4:6) - ymdn(k, 4:6));
+    ymdn(k, 4:6)
+    yma(k, 4:6)
+end
+
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+% Compute DT in hours
+%REPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASHREPLACE_WITH_DASH_DASH
+DT = zeros(N2, 1);
+for k = 1:N2
+    DT(k) = cr3bp.T/(2*pi*3600)*norm(tmdn(k) - tmd(k));
+end
+##### SOURCE END #####
+--></body></html>

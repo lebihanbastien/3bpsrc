@@ -63,10 +63,10 @@ if(any(findall(0,'Type','Figure')==4))
 end
 
 %% Go on with matlab 2015a
-h = figure(4);
-set(h, 'Color',[1 1 1]);
-set(h, 'Position', [100, 100, 1050, 900]);
-zoom(2)
-hold on;
-grid off;
-axis off;
+% h = figure(4);
+% set(h, 'Color',[1 1 1]);
+% set(h, 'Position', [100, 100, 1050, 900]);
+% zoom(2)
+% hold on;
+% grid off;
+% axis off;

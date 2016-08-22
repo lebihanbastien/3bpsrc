@@ -24,6 +24,9 @@
 #include <gsl/gsl_odeiv2.h>
 #include <gsl/gsl_errno.h>
 
+//C
+#include <string.h>
+
 //-------------------------------------------------------------------------
 // C function
 //-------------------------------------------------------------------------
@@ -219,7 +222,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     mxArray *tmp;
     int max_events, direction, dim;
     double value;
-    double *center = (double*) calloc(3, sizeof(double));
+    double *center = (double*) mxCalloc(3, sizeof(double));
     
     //0. Type
     tmp = mxGetField(prhs[3], 0, "type");
@@ -292,10 +295,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //Current state & time
     double t, y[nvar];
     //Event states
-    double **ye = (double **) calloc(nvar, sizeof(double*));
-    for(int n = 0; n < nvar; n++) ye[n] = (double*) calloc(MAX_EVENTS+1, sizeof(double));
+    double **ye = (double **) mxCalloc(nvar, sizeof(double*));
+    for(int n = 0; n < nvar; n++) ye[n] = (double*) mxCalloc(MAX_EVENTS+1, sizeof(double));
     //Event time
-    double *te = (double*) calloc(MAX_EVENTS+1, sizeof(double));
+    double *te = (double*) mxCalloc(MAX_EVENTS+1, sizeof(double));
     
     //---------------------------------------------------------------------
     // Integration
@@ -324,10 +327,10 @@ void mexFunction( int nlhs, mxArray *plhs[],
             // State will be stored on a given grid, if necessary
             //-------------------------------------------------------------
             //Event states
-            yv = (double **) calloc(nvar, sizeof(double*));
-            for(int n = 0; n < nvar; n++) yv[n] = (double*) calloc(nGrid+1, sizeof(double));
+            yv = (double **) mxCalloc(nvar, sizeof(double*));
+            for(int n = 0; n < nvar; n++) yv[n] = (double*) mxCalloc(nGrid+1, sizeof(double));
             //Event time
-            tv = (double*) calloc(nGrid+1, sizeof(double));
+            tv = (double*) mxCalloc(nGrid+1, sizeof(double));
             
             //-------------------------------------------------------------
             // Integration
@@ -341,28 +344,30 @@ void mexFunction( int nlhs, mxArray *plhs[],
             {
                 nGrid = nV;
                 break;
+                
             }
             else
             {
-                free(tv);
-                for (int i=0; i<=nvar; i++) free(yv[i]); free(yv);
+                mxFree(tv);
+                for (int i=0; i<=nvar; i++) mxFree(yv[i]); mxFree(yv);
                 nGrid *= 2;
             }
-        }while(nGrid < 5e4);
+        }while(nGrid < 5e6);
     }
-    
-    
+
     //---------------------------------------------------------------------
     // Output
     //---------------------------------------------------------------------
     // create the output matrices
     plhs[0] = mxCreateDoubleMatrix(nEv, 1, mxREAL);
     plhs[1] = mxCreateDoubleMatrix(nEv, nvar, mxREAL);
+
     
     //get a pointer to the real data in the output matrix
     double *tout = mxGetPr(plhs[0]);
     double *yout = mxGetPr(plhs[1]);
-       
+    
+    
     //Store the event states
     int indix = 0;
     for(int i = 0; i < nvar; i++)
@@ -374,6 +379,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
     for(int k = 0; k < nEv; k++) tout[k] = te[k];
     
+    
     //---------------------------------------------------------------------
     // Output: the state on a time grid, if necessary
     //---------------------------------------------------------------------
@@ -383,10 +389,11 @@ void mexFunction( int nlhs, mxArray *plhs[],
         plhs[2] = mxCreateDoubleMatrix(nGrid+1, 1, mxREAL);     //tv
         plhs[3] = mxCreateDoubleMatrix(nGrid+1, nvar, mxREAL);  //yv
         
-        
+
         //Get a pointer to the real data in the output
         double *tvout = mxGetPr(plhs[2]);
         double *yvout = mxGetPr(plhs[3]);
+
         
         //Store the state on the grid [0,..., nGrid]
         int indix = 0;
@@ -399,16 +406,18 @@ void mexFunction( int nlhs, mxArray *plhs[],
         }
         for(int k = 0; k <= nGrid; k++) tvout[k] = tv[k];
     }
+
     
     //---------------------------------------------------------------------
     // Free memory
     //---------------------------------------------------------------------
     if(nlhs == 4)
     {
-        free(tv);
-        for (int i=0; i<=nvar; i++) free(yv[i]); free(yv);
+        mxFree(tv);
+        for (int i=0; i<=nvar; i++) mxFree(yv[i]); 
+        mxFree(yv);
     }
     
-    free(te);
-    for (int i=0; i<=nvar; i++) free(ye[i]); free(ye);
+    mxFree(te);
+    for (int i=0; i<=nvar; i++) mxFree(ye[i]); mxFree(ye);
 }

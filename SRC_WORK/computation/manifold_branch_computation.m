@@ -1,4 +1,4 @@
-function manifold_branch = manifold_branch_computation(cr3bp, orbit, manifold_branch, pos, t, params, cst, varargin)
+function manifold_branch = manifold_branch_computation(cr3bp, orbit, manifold_branch, pos, ttraj, params, cst, varargin)
 % MANIFOLD_BRANCH_COMPUTATION computes a manifold leg associated to a given
 % orbit in the CRTBP.
 %
@@ -128,15 +128,15 @@ if(pos > 0)
         %-----------------------------
         options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
         [~,yvv] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T*pos],orbit.y0,options);
-        yv = yvv(end,:);
+        ytraj = yvv(end,:);
     else
         %-----------------------------
         % If MEX routines are allowed
         %-----------------------------
-        [~, yv] = ode78_cr3bp([0 orbit.T*pos], orbit.y0, cr3bp.mu);
+        [~, ytraj] = ode78_cr3bp([0 orbit.T*pos], orbit.y0, cr3bp.mu);
     end
 else
-    yv = orbit.y0';
+    ytraj = orbit.y0';
 end
 
 %--------------------------------------------------------------------------
@@ -146,7 +146,7 @@ STM = eye(6);
 for i = 1 : 6
     for j = 1 : 6
         m = 6*(i-1) + j;
-        STM(i,j) = yv(m+6);
+        STM(i,j) = ytraj(m+6);
     end
 end
 
@@ -164,18 +164,22 @@ end
 %Initial state
 xs01 = (1:6)';
 for i = 1 : 6
-    xs01(i) = yv(end,i) + vecp_norm(1)*manifold_branch.way*cr3bp.d_man*vecp_norm(i);
+    xs01(i) = ytraj(end,i) + vecp_norm(1)*manifold_branch.way*cr3bp.d_man*vecp_norm(i);
 end
 
+%--------------------------------------------------------------------------
+% Save initial point in manifold
+%--------------------------------------------------------------------------
+manifold_branch.yv0 = xs01;
 
 %--------------------------------------------------------------------------
 %Integration direction
 %--------------------------------------------------------------------------
 % Backwards or forward integration
 if(manifold_branch.stability == cst.manifold.STABLE)
-    tspan = [0 -t];
+    tspan = [0 -ttraj];
 else
-    tspan = [0 t];
+    tspan = [0 ttraj];
 end
 
 %--------------------------------------------------------------------------
@@ -190,25 +194,25 @@ if(params.computation.type == cst.computation.MATLAB)
             switch(manifold_branch.event.type)
                 case cst.manifold.event.type.FREE
                     options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
-                    [t,yv] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
-                    te = t(end);
-                    yve = yv(end, :);
+                    [ttraj,ytraj] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+                    te = ttraj(end);
+                    yve = ytraj(end, :);
                 otherwise
                     options = odeset('Event',fevent, 'Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
-                    [t,yv,te,yve] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+                    [ttraj,ytraj,te,yve] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
                     %If no event
                     if(isempty(te))
-                        te = t(end);
-                        yve = yv(end, :);
+                        te = ttraj(end);
+                        yve = ytraj(end, :);
                     end
             end
         case 'event_handler'  %the user-defined routine overwrite the potential EVENT structure in MANIFOLD_BRANCH
             options = odeset('Event',fevent, 'Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
-            [t,yv,te,yve] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
+            [ttraj,ytraj,te,yve] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan,xs01,options);
             %If no event
             if(isempty(te))
-                te = t(end);
-                yve = yv(end, :);
+                te = ttraj(end);
+                yve = ytraj(end, :);
             end
     end
     
@@ -218,23 +222,24 @@ else
     %-----------------------------
     switch(manifold_branch.event.type)
         case cst.manifold.event.type.FREE
-            [te, yve, ~, yv] = ode78_cr3bp(tspan, xs01, cr3bp.mu);
+            [te, yve, ttraj, ytraj] = ode78_cr3bp(tspan, xs01, cr3bp.mu);
         otherwise
-            [te, yve, ~, yv] = ode78_cr3bp_event(tspan, xs01, cr3bp.mu, manifold_branch.event);
+            [te, yve, ttraj, ytraj] = ode78_cr3bp_event(tspan, xs01, cr3bp.mu, manifold_branch.event);
     end
 end
 
 %--------------------------------------------------------------------------
 % Output
 %--------------------------------------------------------------------------
-manifold_branch.termination_time = te;
-manifold_branch.yv = yve;
-
+manifold_branch.te    = te;      %time of the events
+manifold_branch.yve   = yve;     %state at the events
+manifold_branch.ytraj = ytraj;   %entire trajectory
+manifold_branch.ttraj = ttraj;   %entire trajectory
 %--------------------------------------------------------------------------
 % Plotting (potentially)
 %--------------------------------------------------------------------------
 if(params.plot.manifold_branch)
-    manifold_plot(yv, orbit, manifold_branch, params, cst);
+    manifold_plot(ytraj, orbit, manifold_branch, params, cst);
 end
 
 

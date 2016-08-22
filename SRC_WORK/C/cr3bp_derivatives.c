@@ -79,7 +79,7 @@ int cr3bp_derivatives_42 (double t, const double y[], double f[], void *params)
     dU2[2][2] = mu/pow(pow(mu + y[0] - 1,2) + pow(y[1],2) + pow(y[2],2),3/2.0) - (mu - 1)/pow(pow(mu + y[0],2) + pow(y[1],2) + pow(y[2],2), 3/2.0) + (3*pow(y[2],2)*(mu - 1))/pow(pow(mu + y[0],2) + pow(y[1],2) + pow(y[2],2),5/2.0) - (3*mu*pow(y[2],2))/pow(pow(mu + y[0] - 1,2) + pow(y[1],2) + pow(y[2],2),5/2.0);
 
     //GSL version
-    gsl_matrix *dU2_gsl = gsl_matrix_alloc(3,3);
+    gsl_matrix *dU2_gsl = gsl_matrix_calloc(3,3);
     for(i=0; i<3 ; i++)
         for(j=0; j<3; j++) gsl_matrix_set(dU2_gsl, i, j, dU2[i][j]);
     gsl_matrix_scale (dU2_gsl, -1); //take the opposite of dU2 for later concatenation
@@ -99,13 +99,13 @@ int cr3bp_derivatives_42 (double t, const double y[], double f[], void *params)
     //STM derivative
     //-------------------------------------------------------------------------------
     //STM is updated
-    gsl_matrix *STM = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM = gsl_matrix_calloc(6,6);
     custom_vectorToMatrix(STM, (double *)y, 6, 6, 6);
 
     //Trivial matrices
-    gsl_matrix *eye3_gsl = gsl_matrix_alloc(3,3);
-    gsl_matrix *z3_gsl = gsl_matrix_alloc(3,3);
-    gsl_matrix *Omega2_gsl = gsl_matrix_alloc(3,3);
+    gsl_matrix *eye3_gsl = gsl_matrix_calloc(3,3);
+    gsl_matrix *z3_gsl = gsl_matrix_calloc(3,3);
+    gsl_matrix *Omega2_gsl = gsl_matrix_calloc(3,3);
 
     gsl_matrix_set_zero (z3_gsl);
     gsl_matrix_set_identity (eye3_gsl);
@@ -121,7 +121,7 @@ int cr3bp_derivatives_42 (double t, const double y[], double f[], void *params)
     //
     //      |  O          I3  |
     //Df =  |  -dU2    2Omega |
-    gsl_matrix *Df_gsl = gsl_matrix_alloc(6,6);
+    gsl_matrix *Df_gsl = gsl_matrix_calloc(6,6);
 
     gsl_matrix_view Df_ul = gsl_matrix_submatrix (Df_gsl , 0 , 0 , 3 , 3 );
     gsl_matrix_view Df_ur = gsl_matrix_submatrix (Df_gsl , 0 , 3 , 3 , 3 );
@@ -135,7 +135,7 @@ int cr3bp_derivatives_42 (double t, const double y[], double f[], void *params)
 
     //Matrix product
     //----------------------------------------------------------------------------
-    gsl_matrix *STMp = gsl_matrix_alloc(6,6);
+    gsl_matrix *STMp = gsl_matrix_calloc(6,6);
     gsl_blas_dgemm (CblasNoTrans, CblasNoTrans,1.0, Df_gsl, STM,0.0, STMp);
 
     //----------------------------------------------------------------------------
@@ -284,7 +284,7 @@ int bcp_derivatives_42 (double t, const double y[], double f[], void *params)
                   + 3.0*ms/pow(rs, 5.0)*y[2]*y[2]       - ms/pow(rs, 3.0);    
     
     //GSL version
-    gsl_matrix *dU2_gsl = gsl_matrix_alloc(3,3);
+    gsl_matrix *dU2_gsl = gsl_matrix_calloc(3,3);
     for(i=0; i<3 ; i++)
         for(j=0; j<3; j++) gsl_matrix_set(dU2_gsl, i, j, dU2[i][j]);
     //gsl_matrix_scale (dU2_gsl, -1); //do NOT take the opposite of dU2 here!!
@@ -305,13 +305,13 @@ int bcp_derivatives_42 (double t, const double y[], double f[], void *params)
     //STM derivative
     //-------------------------------------------------------------------------------
     //STM is updated
-    gsl_matrix *STM = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM = gsl_matrix_calloc(6,6);
     custom_vectorToMatrix(STM, (double *)y, 6, 6, 6);
 
     //Trivial matrices
-    gsl_matrix *eye3_gsl = gsl_matrix_alloc(3,3);
-    gsl_matrix *z3_gsl = gsl_matrix_alloc(3,3);
-    gsl_matrix *Omega2_gsl = gsl_matrix_alloc(3,3);
+    gsl_matrix *eye3_gsl = gsl_matrix_calloc(3,3);
+    gsl_matrix *z3_gsl = gsl_matrix_calloc(3,3);
+    gsl_matrix *Omega2_gsl = gsl_matrix_calloc(3,3);
 
     gsl_matrix_set_zero (z3_gsl);
     gsl_matrix_set_identity (eye3_gsl);
@@ -327,7 +327,7 @@ int bcp_derivatives_42 (double t, const double y[], double f[], void *params)
     //
     //      |  O          I3  |
     //Df =  |  -dU2    2Omega |
-    gsl_matrix *Df_gsl = gsl_matrix_alloc(6,6);
+    gsl_matrix *Df_gsl = gsl_matrix_calloc(6,6);
 
     gsl_matrix_view Df_ul = gsl_matrix_submatrix (Df_gsl , 0 , 0 , 3 , 3 );
     gsl_matrix_view Df_ur = gsl_matrix_submatrix (Df_gsl , 0 , 3 , 3 , 3 );
@@ -341,7 +341,7 @@ int bcp_derivatives_42 (double t, const double y[], double f[], void *params)
 
     //Matrix product
     //----------------------------------------------------------------------------
-    gsl_matrix *STMp = gsl_matrix_alloc(6,6);
+    gsl_matrix *STMp = gsl_matrix_calloc(6,6);
     gsl_blas_dgemm (CblasNoTrans, CblasNoTrans,1.0, Df_gsl, STM,0.0, STMp);
 
     //----------------------------------------------------------------------------

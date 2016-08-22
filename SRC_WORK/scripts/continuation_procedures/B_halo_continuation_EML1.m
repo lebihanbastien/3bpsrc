@@ -28,7 +28,7 @@ halo = init_orbit(cr3bp, ...        % Parent CR3BP
     cr3bp.l1, ...                   % Parent libration point
     cst.orbit.type.HALO, ...        % HALO orbit
     cst.orbit.family.NORTHERN, ...  % Northern class
-    2000, ...                       % Of vertical extension ~ 10000 km
+    100, ...                        % Of vertical extension ~ 100 km
     cst);                           % Numerical constants
 
 %% Pseudo-arclength continuation: initialization
@@ -62,18 +62,20 @@ h = waitbar(0,'Computation in progress...');
 % steps of size halo.cont.ds.
 %--------------------------------------------------------------------------
 % step vector
-output.index = 1:400;
+output.index = 1:200;
 % Loop
 for i = output.index
-    %----------------------------------------------------------------------
-    % Differential correction
-    %----------------------------------------------------------------------
-    halo = orbit_refinement_cont(cr3bp, halo, default, cst);
     
     %----------------------------------------------------------------------
     % Save outputs
     %----------------------------------------------------------------------
     output.orbit(i) = halo;
+    output.X0(i)    = halo.y0(1)*cr3bp.L;
+    
+    %----------------------------------------------------------------------
+    % Differential correction
+    %----------------------------------------------------------------------
+    halo = orbit_refinement_cont(cr3bp, halo, default, cst);
     
     %----------------------------------------------------------------------
     % Waitbar
@@ -83,28 +85,11 @@ end
 close(h)
 
 %% Postprocessing & plotting
-% The following defining constraints for NRO are selected:
-% - if the abscissa of the perigee with respect to the Moon projected on
-%   the xy-plane ust intersect the Moon's radius.
-% - The perigee altitude wrt to the Moon's surface must be positive.
-%
-% Select a given condition to isolate the NROs
-for i = output.index
-    %Get the perigee position
-    pos = output.orbit(i).perigee.position;
-    % If both conditions above are satisfied, we go on
-    if(abs(pos(1) - cr3bp.m2.pos(1)) < cr3bp.m2.Rm/cr3bp.L && output.orbit(i).perigee.altitude > 0)
-        output.isNRO(i) = true;
-    else
-        output.isNRO(i) = false;
-    end
-end
-
 % Extract the different parameters in the vector output.orbit
 output.C       = extractfield(output.orbit,'C');
 output.T       = extractfield(output.orbit,'T');
 output.Az      = extractfield(output.orbit,'Az');
-output.Azdim      = extractfield(output.orbit,'Azdim');
+output.Azdim   = extractfield(output.orbit,'Azdim');
 output.perigee = cell2mat(extractfield(output.orbit,'perigee'));
 output.altitudeOfPerigee = extractfield(output.perigee,'altitude');
 output.perigeeDistanceToMoonCenter = extractfield(output.perigee,'radius');
@@ -117,11 +102,7 @@ for i = 1:freq:nlength
     %Get the perigee position
     pos = output.orbit(i).perigee.position;
     % Orbit
-    if(output.isNRO(i))
-        orbit_plot(output.orbit(i), default, rgb('dark green'));
-    else
-        orbit_plot(output.orbit(i), default);
-    end
+    orbit_plot(output.orbit(i), default);
     % Perigee position
     figure(4)
     hold on;
@@ -134,40 +115,42 @@ figure;
 hold on;
 grid on;
 plot(output.index, output.C, 'k', 'MarkerFaceColor', 'k', 'LineWidth', 2);
-plot(output.index(output.isNRO), output.C(output.isNRO), 'Color', rgb('dark green'), 'LineWidth', 2);
 xlabel('Index [-]');
 ylabel('Jacobi constant');
-legend('halo', 'nro');
 
 %% Altitude of the perigee
 figure;
 hold on;
 grid on;
 plot(output.index, output.altitudeOfPerigee*cr3bp.L, 'k', 'MarkerFaceColor', 'k', 'LineWidth', 2);
-plot(output.index(output.isNRO), output.altitudeOfPerigee(output.isNRO)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 2);
 xlabel('Index [-]');
 ylabel('Altitude of perigee [km]');
-legend('halo', 'nro');
+
 
 %% Altitude of the perigee vs Period
 figure;
 hold on;
 grid on;
 plot(output.T*cr3bp.T/(2*pi*86400), output.altitudeOfPerigee*cr3bp.L, 'k', 'MarkerFaceColor', 'k', 'LineWidth', 2);
-plot(output.T(output.isNRO)*cr3bp.T/(2*pi*86400), output.altitudeOfPerigee(output.isNRO)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 2);
 xlabel('Period [days]');
 ylabel('Altitude of perigee [km]');
-legend('halo', 'nro');
+
 
 %% Altitude of the perigee vs Az
 figure;
 hold on;
 grid on;
 plot(output.Azdim, output.altitudeOfPerigee*cr3bp.L, 'k', 'MarkerFaceColor', 'k', 'LineWidth', 2);
-plot(output.Azdim(output.isNRO), output.altitudeOfPerigee(output.isNRO)*cr3bp.L, 'Color', rgb('dark green'), 'LineWidth', 2);
 xlabel('Az [km]');
 ylabel('Altitude of perigee [km]');
-legend('halo', 'nro');
+
+%% X0 vs Period
+figure;
+hold on;
+grid on;
+plot(output.T*cr3bp.T/(2*pi*86400), output.X0, 'k', 'MarkerFaceColor', 'k', 'LineWidth', 2);
+xlabel('Period [days]');
+ylabel('X0 [km]');
 
 %% Save the abacus
 % Exctract the initial conditions
@@ -176,33 +159,30 @@ output.yv = vec2mat(extractfield(output.orbit,'y0'),42);
 %--------------------------------------------------------------------------
 % Build the abacus
 %--------------------------------------------------------------------------
-if(max(output.isNRO))
-    % Initial conditions
-    nro_init_EML1.initialConditions = output.yv(output.isNRO,1:6);
-    
-    % Altitude of perigee
-    nro_init_EML1.altitudeOfPerigee = output.altitudeOfPerigee(output.isNRO);
-    nro_init_EML1.altitudeOfPerigeeLimit(1) = min(nro_init_EML1.altitudeOfPerigee);
-    nro_init_EML1.altitudeOfPerigeeLimit(2) = max(nro_init_EML1.altitudeOfPerigee);
-    
-    % Distance of the perigee wrt the center of the Moon
-    nro_init_EML1.perigeeDistanceToMoonCenter = output.perigeeDistanceToMoonCenter(output.isNRO);
-    nro_init_EML1.perigeeDistanceToMoonCenterLimit(1) = min(nro_init_EML1.perigeeDistanceToMoonCenter);
-    nro_init_EML1.perigeeDistanceToMoonCenterLimit(2) = max(nro_init_EML1.perigeeDistanceToMoonCenter);
-    
-    % Vertical extension
-    nro_init_EML1.Az = output.Az(output.isNRO);
-    nro_init_EML1.AzLimit(1) = min(nro_init_EML1.Az);
-    nro_init_EML1.AzLimit(2) = max(nro_init_EML1.Az);
-    
-    %--------------------------------------------------------------------------
-    % Save abacus (only if necessary!)
-    %--------------------------------------------------------------------------
-    % save nro_init_EML1 nro_init_EML1
-    
-end
+% Initial conditions
+halo2_init_EML1.initialConditions = output.yv(:,1:6);
 
-return;
+% X0 limit
+halo2_init_EML1.X0 = output.X0;
+halo2_init_EML1.X0Limit(1) = min(halo2_init_EML1.X0);
+halo2_init_EML1.X0Limit(2) = max(halo2_init_EML1.X0);
+
+% Energy
+halo2_init_EML1.C = output.C;
+halo2_init_EML1.CLimit(1) = min(halo2_init_EML1.C);
+halo2_init_EML1.CLimit(2) = max(halo2_init_EML1.C);
+
+% Vertical extension
+halo2_init_EML1.Az = output.Az;
+halo2_init_EML1.AzLimit(1) = min(halo2_init_EML1.Az);
+halo2_init_EML1.AzLimit(2) = max(halo2_init_EML1.Az);
+
+%--------------------------------------------------------------------------
+% Save abacus (only if necessary!)
+%--------------------------------------------------------------------------
+save halo2_init_EML1 halo2_init_EML1
+
+
 
 %% Example of use
 
@@ -210,7 +190,7 @@ return;
 default.plot.orbit = true;
 
 %Initialize NRO
-nro = init_nro(cr3bp, cr3bp.l1, cst.orbit.family.SOUTHERN, cst);
+halo = init_orbit(cr3bp, cr3bp.l1, cst.orbit.type.HALO, cst.orbit.family.NORTHERN, 0, cst);
 
 % Interpolation and plot
-nro = nro_interpolation(cr3bp, nro, nro_init_EML1, default, cst, 'Az', 80000);
+halo = halo_orbit_interpolation_2(cr3bp, halo, halo2_init_EML1, default, cst, 'Az', 1000);

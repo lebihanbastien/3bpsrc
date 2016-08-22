@@ -20,11 +20,23 @@ cst.coord.SYS  = 1; % Three-Body Problem coordinates (x, p) (canonical) with the
 cst.coord.VSYS = 2; % Three-Body Problem (EM or SEM) coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
 cst.coord.VSEM = 3; % SEM coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
 
+% Same but for cpp2 (for now)
+cst.coord2.NCSEM  = 0;
+cst.coord2.NCEM   = 1;
+cst.coord2.VNCSEM = 2;
+cst.coord2.VNCEM  = 3;
+cst.coord2.PSEM   = 4;
+cst.coord2.PEM    = 5;
+cst.coord2.VSEM   = 6;
+cst.coord2.VEM    = 7;
+
 %-------------------------------------------------------------------------%
 %Type of framework
 %-------------------------------------------------------------------------%
-cst.fwrk.EM  = 0; %Earth-Moon focus
-cst.fwrk.SEM = 1; %Sun-(Earth+Moon) focus
+cst.fwrk.EM   = 0; %Earth-Moon focus, with a state of the form (x, p)
+cst.fwrk.SEM  = 1; %Sun-(Earth+Moon) focus, with a state of the form (x, p)
+cst.fwrk.VEM  = 2; %Earth-Moon focus, with a state of the form (x, v)
+cst.fwrk.VSEM = 3; %Sun-(Earth+Moon) focus, with a state of the form (x, v)
 
 %-------------------------------------------------------------------------%
 %Type of model

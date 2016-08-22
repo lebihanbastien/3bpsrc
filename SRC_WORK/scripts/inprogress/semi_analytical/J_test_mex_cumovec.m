@@ -17,7 +17,7 @@ init;
 cr3bp = init_CR3BP('SUN', 'EARTH', default);
 
 %% Init plot
-initplot3D(4, cr3bp, default);
+initplot3D(4, cr3bp, default, cr3bp.l2);
 
 
 %% Test of cumovec.cpp

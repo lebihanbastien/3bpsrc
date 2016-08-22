@@ -34,13 +34,13 @@ if(params.plot.XY)
 end
 
 %% Recovery of information at the insertion point
-ns = size(manifold_branch_stable.yv,1);
+ns = size(manifold_branch_stable.yve,1);
 n1 = min(3, ns);
 
 for nsol = ns:ns
     
     %Last position & velocity on the manifold
-    output.flyby.ystate = manifold_branch_stable.yv(nsol,:)';
+    output.flyby.ystate = manifold_branch_stable.yve(nsol,:)';
     
     %Last position & velocity on the manifold in yvcm(1:6)
     output.flyby.ystatem = (1:42)';

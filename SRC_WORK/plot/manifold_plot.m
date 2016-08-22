@@ -64,7 +64,10 @@ if(params.plot.YZ)
 end
 
 if(params.plot.TD)
-    manifold_plot_3D(yv, orbit, params, color, 4);
+    manifold_plot_3D(yv, orbit, manifold_branch, params, color, 4);
+    if(params.plot.SUBTD)
+        manifold_subplot_3D(yv, orbit, manifold_branch, params, color, 5);
+    end
 end
 
 end
@@ -104,7 +107,7 @@ end
 %--------------------------------------------------------------------------
 % Plot a manifold in 3D. Primaries included.
 %--------------------------------------------------------------------------
-function [] = manifold_plot_3D(yv, orbit, params,  color, index)
+function [] = manifold_subplot_3D(yv, orbit, manifold_branch, params,  color, index)
 %----------
 %Cr3bp
 %----------
@@ -131,5 +134,50 @@ hold on
 grid on
 %Manifold branch
 plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.5);
-    
+% Termination point
+if(isfield(manifold_branch, 'yv'))
+    for i = 1:size(manifold_branch.yv, 1)
+        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.5);
+    end
+end
+
+end
+
+%--------------------------------------------------------------------------
+% Plot a manifold in 3D. Primaries included.
+%--------------------------------------------------------------------------
+function [] = manifold_plot_3D(yv, orbit, manifold_branch, params,  color, index)
+%----------
+%Cr3bp
+%----------
+cr3bp = orbit.cr3bp;
+
+%----------
+%Factor
+%----------
+Lf = cr3bp.L;
+
+%----------
+%Plot
+%----------
+%If the figure did not exist before, we set the basic environment.
+if(~ishandle(index))
+    initplot3D(index, cr3bp, params, orbit.li);
+end
+
+%----------
+%Manifold branch
+%----------
+figure(index);
+hold on
+grid on
+%Manifold branch
+plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.5);
+% Termination point
+if(isfield(manifold_branch, 'yv'))
+    for i = 1:size(manifold_branch.yv, 1)
+        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.5);
+    end
+end
+
 end

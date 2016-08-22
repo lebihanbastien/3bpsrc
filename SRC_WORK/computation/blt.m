@@ -53,7 +53,7 @@ end
 %--------------------------------------------------------------------------
 
 %Last position & velocity on the manifold
-output.manifold.ystate = manifold_branch_stable.yv;
+output.manifold.ystate = manifold_branch_stable.yve;
 
 %Last position & velocity on the manifold in yvcm(1:6)
 output.manifold.ystatem = (1:42);

@@ -77,7 +77,7 @@ int manifold_branch_computation(Manifold_branch *branch,
     //------------------------------------------------
     //Recovering the STM & vectors
     //------------------------------------------------
-    gsl_matrix *STM = gsl_matrix_alloc(6,6);
+    gsl_matrix *STM = gsl_matrix_calloc(6,6);
     custom_vectorToMatrix(STM,yv,6, 6, 6);
 
 
