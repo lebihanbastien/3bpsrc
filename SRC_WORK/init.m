@@ -9,6 +9,12 @@
 clear all;
 close all;
 
+%% Plot settings
+set(0, 'defaultTextFontSize', 18);
+set(0, 'defaultAxesFontSize', 18);
+set(0, 'defaultTextFontWeight', 'bold');
+set(0, 'defaultTextHorizontalAlignment', 'center');
+set(0, 'defaultLineMarkerSize', 2);
 
 %% Add subfolders to the path
 % Recursively add all subfolders

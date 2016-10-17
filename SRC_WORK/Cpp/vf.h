@@ -4,6 +4,14 @@
 #include "env.h"
 #include "pmcoc.h"
 
+//Precision
+#define PREC_ABS    1e-14
+#define PREC_REL    1e-14
+#define PREC_ROOT   1e-13
+#define PREC_DIFF   1e-12
+#define PREC_HSTART 1e-8
+#define PREC_GSM    1e-12
+
 //Vector field of the QBCP with EM units and Normalized-Li centered coordinates (no variationnal equations)
 int qbfbp_vfn_novar(double t, const double y[], double f[], void *params_void);
 

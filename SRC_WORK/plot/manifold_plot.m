@@ -101,7 +101,7 @@ end
 figure(index);
 hold on
 %Orbit
-plot(yv(:,ip)*Lf,yv(:,jp)*Lf, 'Color',  color, 'LineWidth', 1.5);
+plot(yv(:,ip)*Lf,yv(:,jp)*Lf, 'Color',  color, 'LineWidth', 1.2);
 end
 
 %--------------------------------------------------------------------------
@@ -133,11 +133,11 @@ figure(index);
 hold on
 grid on
 %Manifold branch
-plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.5);
+plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.2);
 % Termination point
 if(isfield(manifold_branch, 'yv'))
     for i = 1:size(manifold_branch.yv, 1)
-        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.5);
+        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.2);
     end
 end
 
@@ -172,11 +172,11 @@ figure(index);
 hold on
 grid on
 %Manifold branch
-plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.5);
+plot3(yv(:,1)*Lf, yv(:,2)*Lf,yv(:,3)*Lf, 'Color', color, 'LineWidth', 1.2);
 % Termination point
 if(isfield(manifold_branch, 'yv'))
     for i = 1:size(manifold_branch.yv, 1)
-        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.5);
+        plot3(manifold_branch.yv(i,1)*Lf, manifold_branch.yv(i,2)*Lf,manifold_branch.yv(i,3)*Lf, 'o', 'Color', color, 'MarkerFaceColor', color, 'LineWidth', 1.2);
     end
 end
 

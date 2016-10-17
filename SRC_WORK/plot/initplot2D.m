@@ -56,7 +56,7 @@ end
 
 xlabel(strcat(si, ' (km)'));
 ylabel(strcat(sj, ' (km)'));
-title(['Projection in the ', si, sj, '-plane']);
+%title(['Projection in the ', si, sj, '-plane']);
 %Default size
 set(figure(index), 'defaultTextFontSize', 12);
 set(figure(index), 'defaultTextFontWeight', 'bold');
@@ -90,7 +90,6 @@ if(params.plot.firstPrimDisp)
     V_E = [-cr3bp.mu  0  0];
     
     fill((V_E(ip) + S_E(1,:))*Lf,(V_E(jp) + S_E(2,:))*Lf, 'k');
-    
 end
 
 %----------

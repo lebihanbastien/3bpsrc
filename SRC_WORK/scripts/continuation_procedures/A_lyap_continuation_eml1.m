@@ -24,12 +24,12 @@ orbit_1 = orbit_computation(cr3bp, orbit_1, default, cst);
 orbit_2 = orbit_computation(cr3bp, orbit_2, default, cst);
 
 %% Continuation
-maxIter = 8;
+maxIter = 20;
 %Waitbar
 h = waitbar(0,'Computation in progress...');
 %Loop
 for i = 1:maxIter
-    yv = orbit_2.y0 + (orbit_2.y0 - orbit_1.y0);
+    yv = orbit_2.y0 + 1.1*(orbit_2.y0 - orbit_1.y0);
     orbit_1 = orbit_2;
     orbit_2 = orbit_refinement(cr3bp, orbit_2, default, yv, cst);
     waitbar(i / maxIter);
@@ -62,6 +62,8 @@ default.plot.orbit = false;
 options = optimset('Display','iter'); % show iterations
 fz = fzero(@(x0)zerof(x0, cr3bp, default, cst), [500 5000], options);
 default.plot.orbit = true;
+
+return
 %%
 close all
 orbit_2 = init_orbit(cr3bp, cr3bp.l1,  cst.orbit.type.PLYAP, cst.orbit.family.PLANAR, fz, cst);

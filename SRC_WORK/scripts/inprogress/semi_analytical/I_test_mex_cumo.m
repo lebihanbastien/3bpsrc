@@ -59,7 +59,7 @@ halo = orbit_computation(cr3bp, halo, default, cst);
 % Parameters
 %----------
 % Initial conditions
-st0_max = 2.0;
+st0_max = 0.1;
 st0     = st0_max*ones(1,4);
 st0(5)  = 0.0;
 
@@ -70,12 +70,12 @@ order = 12;
 % Time span
 tspan = [0 10*pi];
 % Time on the manifold
-tman = 5*pi;
+tman = 0.0001*pi;
 
 % Type of coordinate system as in the output
 outputType = cst.coord.VSYS;
 % Type of model
-model = 1; %CRTBP
+model = 0; %CRTBP
 % Type of framework
 fwrk = 0; %Earth-Moon
 % Man type
@@ -92,7 +92,7 @@ for k = 204:2:204
     %----------
     %Plot
     %----------
-    Lf = cr3bp.L*10^(-3);
+    Lf = cr3bp.L;
     index = 3;
     figure(4);
     hold on

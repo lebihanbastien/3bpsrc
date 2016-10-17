@@ -31,7 +31,7 @@ cr3bp = init_CR3BP('EARTH', 'MOON', default);
 
 %% Same for a halo orbit
 %Initialization
-for kalt = 15000:1000:20000
+for kalt = 15000:2000:24000
 halo = init_orbit(cr3bp, ...       % Parent CR3BP
     cr3bp.l2, ...                  % Parent libration point
     cst.orbit.type.HALO, ...       % HALO orbit
@@ -40,10 +40,10 @@ halo = init_orbit(cr3bp, ...       % Parent CR3BP
     cst);                          % Numerical constants
 
 %Computation
-halo = orbit_computation(cr3bp, halo, default, cst);
+halo = halo_orbit_interpolation(cr3bp, halo, halo_init_EML2, default, cst);
 end
 %Initialization
-for kalt = 5000:1000:10000
+for kalt = 15000:2000:24000
     halo = init_orbit(cr3bp, ...                     % Parent CR3BP
         cr3bp.l1, ...                  % Parent libration point
         cst.orbit.type.HALO, ...       % HALO orbit
@@ -52,18 +52,18 @@ for kalt = 5000:1000:10000
         cst);                          % Numerical constants
     
     %Computation
-    halo = orbit_computation(cr3bp, halo, default, cst);
+    halo = halo_orbit_interpolation(cr3bp, halo, halo_init_EML1, default, cst);
 end
 %% Change the orientation of the 3D plot, if it exists
 if(any(findall(0,'Type','Figure')==4))
     figure(4);
-    view([47 28]);
+    view([-60 30]);
 end
 
 %% Go on with matlab 2015a
 h = figure(4);
 set(h, 'Color',[1 1 1]);
-set(h, 'Position', [100, 100, 1050, 900]);
+set(h, 'Position', [100, 100, 1500, 800]);
 zoom(2)
 hold on;
 grid off;

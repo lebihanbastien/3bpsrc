@@ -3,10 +3,11 @@
 
 #include <complex.h>
 
-//------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 // Environment
-//------------------------------------------------------------------------------------
-/// Numerotation of the Solar System planets and objects, consistent with JPL's HORIZON numerotation
+//-------------------------------------------------------------------------
+/// Numerotation of the Solar System planets and objects, 
+//  consistent with JPL's HORIZON numerotation
 #define SUN 10
 #define MERCURY 199
 #define VENUS 299
@@ -20,44 +21,54 @@
 #define MOON 301
 /// Custom indix for the Sun+Earth system
 #define EARTH_AND_MOON 700
-/// Precision on the position of the librations points L1/L2/L3 in define_env.h
+/// Precision on the position of the librations points Li in define_env.h
 #define LIBRATION_POINT_PRECISION 1e-16
 
 
-//------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 //   Global constants
-//------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 extern int OFTS_ORDER;
 extern int OFS_ORDER;
 extern int OTS_ORDER;
 extern int MODEL_TYPE;
 extern int REDUCED_NV;
 
-//------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 //   typedef
-//------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 typedef complex double cdouble;
 
-
-//------------------------------------------------------------------------------------
-//   ORDER AND NUMBER OF VARIABLES FOR OFS AND OFTS OBJECTS
-//------------------------------------------------------------------------------------
-//Model
+//-------------------------------------------------------------------------
+// Model
+//-------------------------------------------------------------------------
 #define M_RTBP  0 // RTBP model indix
 #define M_QBCP  1 // QBCP model indix
 #define M_BCP   2 // BCP model indix
 #define M_ERTBP 3 // ERTBP model indix
-//Frameworks
-#define F_EM 0
-#define F_SEM 1
-#define F_SE 2
 
+//-------------------------------------------------------------------------
+//Frameworks
+//-------------------------------------------------------------------------
+#define F_EM  0
+#define F_SEM 1
+#define F_SE  2
+
+//-------------------------------------------------------------------------
+// Available coordinates system
+//-------------------------------------------------------------------------
+#define NC 0
+#define SYS 1
+#define VSYS 2
+
+//-------------------------------------------------------------------------
+// Order and variables
+//-------------------------------------------------------------------------
 //Order of the potential of the primaries
 #define POTENTIAL_ORDER 60
-
 //Number of variables
 #define NV 6
-/// Number of variables in the OFS object (a priori always 1)
+//Number of variables in the OFS object (a priori always 1)
 #define OFS_NV 1
 
 

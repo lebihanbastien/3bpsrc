@@ -47,7 +47,7 @@ halo = orbit_computation(cr3bp, halo, default, cst, cst.corr.Z0_FIXED);
 halo = orbit_refinement(cr3bp, halo, default, halo.y0, cst, cst.corr.MIN_NORM);
 
 %Arclength stepsize
-halo.cont.ds = 0.05;
+halo.cont.ds = 0.005;
 
 %% Pseudo-arclength continuation: loop
 
@@ -59,7 +59,7 @@ h = waitbar(0,'Computation in progress...');
 % steps of size halo.cont.ds.
 %--------------------------------------------------------------------------
 % step vector
-output.index = 1:50;
+output.index = 1:200;
 % Loop
 for i = output.index
     
@@ -101,9 +101,9 @@ for i = 1:freq:nlength
     % Orbit
     orbit_plot(output.orbit(i), default);
     % Perigee position
-    figure(4)
-    hold on;
-    plot3(pos(1)*cr3bp.L, pos(2)*cr3bp.L, pos(3)*cr3bp.L, 'ko', 'MarkerFaceColor', 'k');
+    %figure(4)
+    %hold on;
+    %plot3(pos(1)*cr3bp.L, pos(2)*cr3bp.L, pos(3)*cr3bp.L, 'ko', 'MarkerFaceColor', 'k');
 end
 
 

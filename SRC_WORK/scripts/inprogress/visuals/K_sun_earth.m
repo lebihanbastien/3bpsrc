@@ -15,15 +15,17 @@ init;
 
 %% Inner changes from default parameters
 
-default.plot.XY              = false; %plot also the results in X-Z plane
+default.plot.XY              = false;      %plot also the results in X-Z plane
 default.plot.firstPrimDisp   = cst.FALSE;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
-default.plot.allLibPoints    = cst.FALSE;  %are all libration points displayed?
-default.plot.names           = cst.TRUE;  %are the names displayed?
-default.plot.tdAxes          = cst.TRUE;  %are the pretty 3D axes displayed?
-default.plot.bigPrimFac      = 3.0;       %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
+default.plot.allLibPoints    = cst.TRUE;  %are all libration points displayed?
+default.plot.names           = cst.TRUE;   %are the names displayed?
+default.plot.tdAxes          = cst.TRUE;   %are the pretty 3D axes displayed?
+default.plot.bigPrimFac      = 3.0;        %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
 % 4. See parameters_default_init.m to see other options
 %--------------------------------------------------------------------------
+
+
 
 %% Environment init
 cr3bp = init_CR3BP('SUN', 'EARTH', default);
@@ -31,7 +33,7 @@ cr3bp = init_CR3BP('SUN', 'EARTH', default);
 
 %% Same for a halo orbit
 %Initialization
-for kalt = 120000:10000:170000
+for kalt = 100000:20000:190000
 halo = init_orbit(cr3bp, ...       % Parent CR3BP
     cr3bp.l2, ...                  % Parent libration point
     cst.orbit.type.HALO, ...       % HALO orbit
@@ -45,7 +47,7 @@ halo = orbit_computation(cr3bp, halo, default, cst);
 end
 %Initialization
 isOrbitOnly = 0;
-for kalt = 120000:10000:170000
+for kalt = 100000:20000:190000
     halo = init_orbit(cr3bp, ...                     % Parent CR3BP
         cr3bp.l1, ...                  % Parent libration point
         cst.orbit.type.HALO, ...       % HALO orbit
@@ -54,19 +56,19 @@ for kalt = 120000:10000:170000
         cst);                          % Numerical constants
     
     %Computation
-    halo = orbit_computation(cr3bp, halo, default, cst);
+    halo = orbit_computation(cr3bp, halo, default, cst);(cr3bp, orbit, abacus, params, cst)
 end
 %% Change the orientation of the 3D plot, if it exists
 if(any(findall(0,'Type','Figure')==4))
     figure(4);
-    view([47 28]);
+    view([0 30]);
 end
 
 %% Go on with matlab 2015a
-% h = figure(4);
-% set(h, 'Color',[1 1 1]);
-% set(h, 'Position', [100, 100, 1050, 900]);
-% zoom(2)
-% hold on;
-% grid off;
-% axis off;
+h = figure(4);
+set(h, 'Color',[1 1 1]);
+set(h, 'Position', [100, 100, 2000, 500]);
+zoom(4)
+hold on;
+grid off;
+axis off;

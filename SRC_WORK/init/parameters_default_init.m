@@ -54,6 +54,11 @@ default.plot.names           = false;  %are the names displayed?
 default.plot.tdAxes          = false;  %are the pretty 3D axes displayed?
 default.plot.bigPrimFac      = 1.0;        %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
+%--------------------------------------------------------------------------
+%Styles
+%--------------------------------------------------------------------------
+default.plot.style.linewidth = 2.0; %linewidth
+
 %[Deprecated]
 default.plot.halo_orbit      = true;  %during halo orbit computation (deprecated)
 default.plot.lyap_orbit      = true;  %during lyap orbit computation (deprecated)
@@ -65,7 +70,7 @@ default.plot.lyap_orbit      = true;  %during lyap orbit computation (deprecated
 %   speed. Some functionalities are lost, such as user-defined event
 %   routines.
 %--------------------------------------------------------------------------
-default.computation.type = cst.computation.MATLAB; %use MATLAB routines by default
+default.computation.type = cst.computation.MEX; %use MATLAB routines by default
 
 end
 

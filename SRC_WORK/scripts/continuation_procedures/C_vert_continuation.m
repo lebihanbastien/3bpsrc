@@ -29,9 +29,9 @@ orbit_2 = orbit_computation(cr3bp, orbit_2, default, cst);
 %Waitbar
 h = waitbar(0,'Computation in progress...');
 %Loop
-maxIter = 30;
+maxIter = 20;
 for i = 1:maxIter
-    yv = orbit_2.y0 + (orbit_2.y0 - orbit_1.y0);
+    yv = orbit_2.y0 + 1.1*(orbit_2.y0 - orbit_1.y0);
     orbit_1 = orbit_2;
     orbit_2 = orbit_refinement(cr3bp, orbit_2, default, yv, cst);
     waitbar(i / maxIter);

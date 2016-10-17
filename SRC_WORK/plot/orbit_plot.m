@@ -84,9 +84,9 @@ figure(index);
 hold on;
 switch(nargin)
     case 5
-        plot(orbit.yv(:,ip)*Lf,orbit.yv(:,jp)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.5);
+        plot(orbit.yv(:,ip)*Lf,orbit.yv(:,jp)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.2);
     case 6
-        plot(orbit.yv(:,ip)*Lf,orbit.yv(:,jp)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.5);
+        plot(orbit.yv(:,ip)*Lf,orbit.yv(:,jp)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.2);
     otherwise
         error('Wrong number of inputs.');
 end
@@ -123,9 +123,9 @@ figure(index);
 hold on;
 switch(nargin)
     case 3
-        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.5);
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.2);
     case 4
-        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.5);
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.2);
     otherwise
         error('Wrong number of inputs.');
 end
@@ -172,9 +172,9 @@ grid on;
 title('Best trajectories in the Earth-Moon synodical frame');
 switch(nargin)
     case 3
-        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.5);
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  rgb('dark blue'), 'LineWidth', 1.2);
     case 4
-        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.5);
+        plot3(orbit.yv(:,1)*Lf, orbit.yv(:,2)*Lf,orbit.yv(:,3)*Lf, 'Color',  varargin{1}, 'LineWidth', 1.2);
     otherwise
         error('Wrong number of inputs.');
 end

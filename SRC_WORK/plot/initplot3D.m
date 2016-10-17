@@ -20,24 +20,26 @@ Lf = cr3bp.L;
 %--------------------------------------------------------------------------
 %Create handle
 %--------------------------------------------------------------------------
-figure(index);
+fig = figure(index);
 hold on
+
+%Default size
+set(fig, 'defaultTextFontSize', 18);
+set(fig, 'defaultAxesFontSize', 18);
+set(fig, 'defaultTextFontWeight', 'bold');
+set(fig, 'defaultTextHorizontalAlignment', 'center');
+set(fig, 'defaultLineMarkerSize', 2);
 
 %--------------------------------------------------------------------------
 %Settings
 %--------------------------------------------------------------------------
 axis equal
 grid on
-xlabel('X (x km)')
-ylabel('Y (x km)')
-zlabel('Z (x km)')
-title ('3D trajectories in the synodical frame');
+xlabel('X (km)')
+ylabel('Y (km)')
+zlabel('Z (km)')
+%title ('3D trajectories in the synodical frame');
 
-%Default size
-set(figure(index), 'defaultTextFontSize', 12);
-set(figure(index), 'defaultTextFontWeight', 'bold');
-set(figure(index), 'defaultTextHorizontalAlignment', 'center');
-set(figure(index), 'defaultLineMarkerSize', 2);
 %--------------------------------------------------------------------------
 %Switch between models
 %--------------------------------------------------------------------------
@@ -60,6 +62,15 @@ function [] = sun_earth_system(cr3bp, params, li)
 
 %Distance in km
 Lf = cr3bp.L;
+
+%----------
+%Arrow axes
+%----------
+if(params.plot.tdAxes)    
+    arrow3([0.985*Lf 0 0], [1.015*Lf 0 0], 'k', 2, 5e-4*Lf, 0.5);
+    %arrow3([0 0 0], [0 0.5*Lf 0], 'k', 2, 5e-4*Lf, 0.5);
+    %arrow3([0 0 0], [0 0 0.5*Lf], 'k', 2, 5e-4*Lf, 0.5);   
+end
 
 %----------
 %First primary
@@ -102,53 +113,53 @@ plot3((1-cr3bp.mu)*Lf +x,y,z, 'Color', [0 0 0], 'LineWidth', 1.5);
 
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
-        text(-cr3bp.mu*Lf, 0,  -500, 'Sun');
+        text(-cr3bp.mu*Lf, 0,  -0.003*Lf, 'Sun');
     end
-    text((1-cr3bp.mu)*Lf,  0,  -500, 'Earth');
+    text((1-cr3bp.mu)*Lf,  0,  -0.003*Lf, 'Earth');
 end
 
 %----------
 % Moon's orbit (approximate)
 %----------
 theta = 0:0.01:2*pi;
-xM = (1-cr3bp.mu)*Lf + 480*cos(theta);
-yM = 480*sin(theta);
+xM = (1-cr3bp.mu)*Lf + 480000*cos(theta);
+yM = 480000*sin(theta);
 zM = 0*cos(theta);
-plot3(xM, yM, zM, 'k--', 'LineWidth', 1);
+plot3(xM, yM, zM, 'k--', 'LineWidth', 2);
 
 %----------
 %Libration points, with their names on top if desired
 %----------
 if(params.plot.allLibPoints)
     Li = cr3bp.l1.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
-        text(Li(1)*Lf, 0, 500, 'L_1');
+        text(Li(1)*Lf, 0, 0.005*Lf, 'L_1');
     end
     
     Li = cr3bp.l2.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
-        text(Li(1)*Lf, 0, 500, 'L_2');
+        text(Li(1)*Lf, 0, 0.005*Lf, 'L_2');
     end
     
-    Li = cr3bp.l3.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*Lf, 0, 500, 'L_3');
-    end
-    
-    Li = cr3bp.l4.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*Lf, Li(2)*Lf, 500, 'L_4');
-    end
-    
-    Li = cr3bp.l5.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*Lf, Li(2)*Lf, 500, 'L_5');
-    end
+    %     Li = cr3bp.l3.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*Lf, 0, 500, 'L_3');
+    %     end
+    %     
+    %     Li = cr3bp.l4.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*Lf, Li(2)*Lf, 500, 'L_4');
+    %     end
+    %     
+    %     Li = cr3bp.l5.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*Lf, Li(2)*Lf, 500, 'L_5');
+    %     end
     
 else
     Li = li.position;
@@ -159,12 +170,7 @@ else
 end
 
 
-%----------
-%Arrow axes
-%----------
-if(params.plot.tdAxes)    
-    arrow3([1.475e5 0 0], [1.52e5 0 0], 'k', 2, 50,0.5);   
-end
+
 
 end
 
@@ -175,6 +181,16 @@ function [] = earth_moon_system(cr3bp, params, li)
 
 %Distance in 10^3 km
 Lf = cr3bp.L;
+
+%----------
+%Arrow axes
+%----------
+if(params.plot.tdAxes)
+    arrow3([0 0 0], [1.3*Lf 0 0], 'k', 2, 1e-2*Lf, 0.5);
+    %arrow3([0 0 0], [0 0.5*Lf 0], 'k', 2, 10,0.5);
+    %arrow3([0 0 0], [0 0 0.5*Lf], 'k', 2, 10,0.5);
+end
+
 
 %----------
 %First primary
@@ -213,26 +229,26 @@ Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
 X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
 Y_M3D = 0           + Rm2*Y_M3D;
 Z_M3D = 0           + Rm2*Z_M3D;
-%HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
-HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf);%, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
+HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
+%HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf);
 
-% Load Moon Image
-%topoMoon = imread('moon.jpg');
-load moonalb
+% Load Moon Image. CAREFUL: quite heavy for images!
+%load moonalb
+
 % Set it on MOON
-set(HMOON,'facecolor','texture',...
-    'cdata',im2double(moonalb),...
-    'edgecolor','none');
-colormap(gray(256));
+% set(HMOON,'facecolor','texture',...
+%     'cdata',im2double(moonalb),...
+%     'edgecolor','none');
+% colormap(gray(256));
 
 %----------
 %Names
 %----------
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
-        text(-cr3bp.mu*cr3bp.L, 0,  -50, 'Earth');
+        text(-cr3bp.mu*cr3bp.L, 0,  -50*1e3, 'Earth');
     end
-    text((1-cr3bp.mu)*cr3bp.L, 0, -50, 'Moon');
+    text((1-cr3bp.mu)*cr3bp.L, 0, -50*1e3, 'Moon');
 end
 
 %----------
@@ -251,24 +267,24 @@ if(params.plot.allLibPoints)
         text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_2');
     end
     
-    Li = cr3bp.l3.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*cr3bp.L, 0, 0.0780*Lf, 'L_3');
-    end
-    
-    Li = cr3bp.l4.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_4');
-    end
-    
-    
-    Li = cr3bp.l5.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
-    if(params.plot.names)
-        text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_5');
-    end
+    %     Li = cr3bp.l3.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*cr3bp.L, 0, 0.0780*Lf, 'L_3');
+    %     end
+    %     
+    %     Li = cr3bp.l4.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_4');
+    %     end
+    %     
+    %     
+    %     Li = cr3bp.l5.position;
+    %     plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    %     if(params.plot.names)
+    %         text(Li(1)*cr3bp.L, Li(2)*cr3bp.L, 0.0780*Lf, 'L_5');
+    %     end
     
 else
     Li = li.position;
@@ -278,15 +294,4 @@ else
     end
 end
 
-
-%----------
-%Arrow axes
-%----------
-if(params.plot.tdAxes)
-    
-    arrow3([0 0 0], [1.3*Lf 0 0], 'k', 2, 10,0.5);
-    arrow3([0 0 0], [0 0.5*Lf 0], 'k', 2, 10,0.5);
-    arrow3([0 0 0], [0 0 0.5*Lf], 'k', 2, 10,0.5);
-    
-end
 end

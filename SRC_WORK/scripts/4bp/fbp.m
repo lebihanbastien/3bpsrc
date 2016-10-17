@@ -21,9 +21,9 @@ default.plot.firstPrimDisp  = true;  % plot the Earth
 
 %% User parameter
 user.Az    = 10000;                 %size of the orbit (km)
-user.tau = 0.01;                  %position on the orbit (adim, between 0 and 1)
-user.t0    = 1;                     %integration time on the manifold in cr3bp (adim)
-user.tl    = 2;                    %integration time on the rest of the trajectory (adim)
+user.tau   = 0.01;                  %position on the orbit (adim, between 0 and 1)
+user.t0    = 5;                     %integration time on the manifold in cr3bp (adim)
+user.tl    = 10;                     %integration time on the rest of the trajectory (adim)
 user.initSunPos = degtorad(100);    %initial position of the Sun (rad)
 
 %% Environment init
@@ -70,7 +70,7 @@ tspan = [user.t0 user.t0+user.tl];
 % With ode113
 %------------------------------------
 tic()
-[~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yv, options);
+[~, yarc_3bp] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),tspan, manifold_branch_unstable.yve, options);
 dtoc = toc();
 fprintf('ode113 integration in %5.5f s\n', dtoc);
 
@@ -163,7 +163,7 @@ initSunPos = user.initSunPos;
 % With ode113
 %------------------------------------
 tic()
-[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, 0.2, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options);
+[~, yarc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, 0.2, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yve, options);
 dtoc = toc();
 fprintf('ode113 integration in %5.5f s\n', dtoc);
 

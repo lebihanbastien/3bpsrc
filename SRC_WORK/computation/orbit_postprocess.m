@@ -79,18 +79,19 @@ if(params.computation.type == cst.computation.MATLAB)
     % If MATLAB routines only
     %-----------------------------
     options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
-    [~, yv] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T],orbit.y0, options);
+    [tv, yv] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),[0 orbit.T],orbit.y0, options);
     yf = yv(end,:);
 else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yf, ~, yv] = ode78_cr3bp([0 orbit.T], orbit.y0, cr3bp.mu);
+    [~, yf, tv, yv] = ode78_cr3bp([0 orbit.T], orbit.y0, cr3bp.mu);
 end
 
 %--------------------------------------------------------------------------
-% Save the state on a grid over one period
+% Save and time the state on a grid
 %--------------------------------------------------------------------------
+orbit.tv = tv;
 orbit.yv = yv;
 
 %--------------------------------------------------------------------------

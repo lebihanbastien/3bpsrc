@@ -62,7 +62,7 @@ h = waitbar(0,'Computation in progress...');
 % steps of size halo.cont.ds.
 %--------------------------------------------------------------------------
 % step vector
-output.index = 1:200;
+output.index = 1:150;
 % Loop
 for i = output.index
     
@@ -104,11 +104,10 @@ for i = 1:freq:nlength
     % Orbit
     orbit_plot(output.orbit(i), default);
     % Perigee position
-    figure(4)
-    hold on;
-    plot3(pos(1)*cr3bp.L, pos(2)*cr3bp.L, pos(3)*cr3bp.L, 'ko', 'MarkerFaceColor', 'k');
+    %figure(4)
+    %hold on;
+    %plot3(pos(1)*cr3bp.L, pos(2)*cr3bp.L, pos(3)*cr3bp.L, 'ko', 'MarkerFaceColor', 'k');
 end
-
 
 %% Jacobi constant
 figure;

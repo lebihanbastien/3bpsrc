@@ -388,7 +388,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
     output.leo.inclination = atan(output.comp.ef(3)/sqrt((output.comp.ef(1)-cr3bp.mu)^2 + output.comp.ef(2)^2))*180/pi;
     
     %Duration of the transfer
-    output.Ttot = abs(manifold_branch_stable.termination_time + tearc);
+    output.Ttot = abs(manifold_branch_stable.te + tearc);
     output.Ttot_dim = output.Ttot* cr3bp.T/(2*pi) * 1 / (24*3600);
     
     %----------------------------------------------------------------------
