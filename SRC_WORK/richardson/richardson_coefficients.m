@@ -113,20 +113,3 @@ RC.l1 = - 3/2 * c3*(2*RC.a21 + RC.a23 +5*RC.d21) - 3/8*c4*(12 - kappa^2) + 2*lam
 RC.l2 =   3/2 * c3*(RC.a24 - 2*RC.a22) + 9/8*c4 + 2*lambda^2*RC.s2;
 end
 
-%--------------------------------------------------------------------------
-% cn parameters (see Richardson 1980)
-%--------------------------------------------------------------------------
-function cn = cn(mu, gamma_i, pointNumber, n)
-
-switch(pointNumber)
-    case 1
-        cn =  gamma_i^(-3) * ( mu + (-1)^n*(1-mu)*gamma_i^(n+1)/(1-gamma_i)^(n+1) );
-    case 2
-        cn =  gamma_i^(-3) * ( (-1)^n*mu + (-1)^n*(1-mu)*gamma_i^(n+1)/(1+gamma_i)^(n+1) );
-    case 3
-        cn =  gamma_i^(-3) * ( 1 - mu + mu*gamma_i^(n+1)/(1+gamma_i)^(n+1) );
-    otherwise
-        cn = 0; %never here
-end
-
-end

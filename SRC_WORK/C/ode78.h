@@ -239,3 +239,70 @@ int ode78_bcp_vec_var(double *t,                  //current time
                       double tf,                  //final time
                       int nvar,                   //number of state variables
                       double *param);             //bcp parameters
+
+/*-------------------------------------------------------------------------
+ * Integration of the TDBCP vector field of mass ratio mu, from the initial
+ * state y0(t0) to the final time tf. 
+ * 
+ * The inputs are:
+ *  - double const *y0,  the initial conditions
+ *  - double const t0,   initial time
+ *  - double tf,         the final time
+ *  - int nvar,          the number of state variables
+ *  - Bcp3d *bcp3d,     a structure containing parameters
+ *
+ * The outputs are:
+ *  - double *t,  the current time (should be equal to tf at the end).
+ *  - double *y,  the current state, equal to y(tf) at the end of the process
+ *
+ *  Remarks:
+ *   - The number of variables is either 6 (full state) 
+ *          or 42 (full state + State Transition Matrix)
+ *
+ *   - The vector field is computed through either the routine 
+ *      tdbcp_derivatives_6 or tdbcp_derivatives_42
+ * ----------------------------------------------------------------------*/
+void ode78_tdbcp(double *t,                  //current time
+                 double *y,                  //current state
+                 double const *y0,           //initial condition
+                 double const t0,            //initial time
+                 double tf,                  //final time
+                 int nvar,                   //number of state variables
+                 Bcp3d *param);              //tdbcp parameters
+
+/*-------------------------------------------------------------------------
+ * Integration of the TDBCP vector field, from the initial
+ * state y0(t0) to the final time tf. The state is stored along the
+ * trajectory on a variable grid.
+ * 
+ * The inputs are:
+ *  - int nGrid,         nGrid+1 is the max number of point on the grid
+ *  - double const *y0,  the initial conditions
+ *  - double const t0,   initial time
+ *  - double tf,         the final time
+ *  - int nvar,          the number of state variables
+ *  - Bcp3d *bcp3d,      a structure containing parameters
+ *
+ * The outputs are:
+ *  - double *t,  the current time (should be equal to tf at the end).
+ *  - double *y,  the current state, equal to y(tf) at the end of the process
+ *  - double *tv, the time on the grid [0, ..., nGrid]
+ *  - double *yv, the state on the grid [0, ..., nGrid]
+ *
+ *  Remarks:
+ *   - The number of variables is either 6 (full state) 
+ *          or 42 (full state + State Transition Matrix)
+ *
+ *   - The vector field is computed through either the routine 
+ *      tdbcp_derivatives_6 or tdbcp_derivatives_42
+ * ----------------------------------------------------------------------*/
+int ode78_tdbcp_vec_var(double *t,                  //current time
+                        double *y,                  //current state
+                        double *tv,                 //time on a given grid of size [nGrid+1]
+                        double **yv,                //state on a given grid of size [nGrid+1]
+                        int    nGrid,               //size of the grid
+                        double const *y0,           //initial condition
+                        double const t0,            //initial time
+                        double tf,                  //final time
+                        int nvar,                   //number of state variables
+                        Bcp3d *param);              //tdbcp parameters

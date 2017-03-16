@@ -21,7 +21,7 @@
 // The gateway function.
 // The input must bet, in that order:
 // 1. [t0, tf] the time span
-// 2. double y0[6 or 42], the initial state
+// 2. double y0[6 or 42 or 48], the initial state
 // 3. double mu, the cr3bp mass ratio
 //-------------------------------------------------------------------------
 void mexFunction( int nlhs, mxArray *plhs[],
@@ -41,7 +41,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     //---------------------------------------------------------------------
     // Retrieve the variables:
     // 1. [t0, tf] the time span
-    // 2. double y0[6 or 42], the initial state
+    // 2. double y0[6 or 42 or 8], the initial state
     // 3. double mu, the cr3bp mass ratio
     //---------------------------------------------------------------------
     double *ts = mxGetPr(prhs[0]);
@@ -63,9 +63,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
         mexErrMsgIdAndTxt("custom:ode78_bcp:nts","The time vector (first input) must be of size 2: [t0 tf]");
     }
     
-    if(nvar!=6 && nvar!=42)
+    if(nvar!=6 && nvar!=42 && nvar!=48)
     {
-        mexErrMsgIdAndTxt("custom:ode78_bcp:nts","The state vector (second input) must be of size either 6 or 42.");
+        mexErrMsgIdAndTxt("custom:ode78_bcp:nts","The state vector (second input) must be of size either 6, 42, or 48.");
     }
     
     //---------------------------------------------------------------------

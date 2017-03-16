@@ -179,7 +179,7 @@ fprintf('ode113 integration in %5.5f s\n', dtoc);
 % With ode113 and event
 %------------------------------------
 % tic()
-% [~, yarc_bcp, ~, yearc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options_with_event);
+[~, yarc_bcp, ~, yearc_bcp] = ode113(@(t,y)bcfbp_derivatives_6(t,y,cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS),tspan, manifold_branch_unstable.yv, options_with_event);
 % dtoc = toc();
 % fprintf('ode113 integration in %5.5f s\n', dtoc);        
 
@@ -188,7 +188,7 @@ fprintf('ode113 integration in %5.5f s\n', dtoc);
 %------------------------------------
 % earth.event.max_events = 3;
 % tic()
-% [~, yearc_bcp, ~, yarc_bcp] = ode78_bcp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS, earth.event);
+[~, yearc_bcp, ~, yarc_bcp] = ode78_bcp_event(tspan, manifold_branch_unstable.yv(1:6), cr3bp.mu, initSunPos, cst.sun.ms, cst.sun.as, cst.sun.omegaS, earth.event);
 % dtoc = toc();
 % fprintf('ode78_bcp integration in %5.5f s\n', dtoc);
 

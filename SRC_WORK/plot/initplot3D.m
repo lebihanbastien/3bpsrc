@@ -87,6 +87,7 @@ end
 %----------
 %Second primary
 %----------
+if(params.plot.secondPrimDisp)
 Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/Lf;
 [X_M3D, Y_M3D, Z_M3D] = sphere;
 X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
@@ -109,13 +110,15 @@ x = r*cos(lat).*sin(long);
 y = r*cos(lat).*cos(long);
 z = r*sin(lat);
 plot3((1-cr3bp.mu)*Lf +x,y,z, 'Color', [0 0 0], 'LineWidth', 1.5);
-
+end
 
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
         text(-cr3bp.mu*Lf, 0,  -0.003*Lf, 'Sun');
     end
+    if(params.plot.secondPrimDisp)
     text((1-cr3bp.mu)*Lf,  0,  -0.003*Lf, 'Earth');
+    end
 end
 
 %----------
@@ -163,7 +166,7 @@ if(params.plot.allLibPoints)
     
 else
     Li = li.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
         text(Li(1)*Lf, 0, 500, ['L_', num2str(li.number)]);
     end
@@ -224,6 +227,7 @@ end
 %----------
 %Second primary
 %----------
+if(params.plot.secondPrimDisp)
 Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
 [X_M3D, Y_M3D, Z_M3D] = sphere;
 X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
@@ -240,6 +244,7 @@ HMOON = surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'Face
 %     'cdata',im2double(moonalb),...
 %     'edgecolor','none');
 % colormap(gray(256));
+end
 
 %----------
 %Names
@@ -248,7 +253,9 @@ if(params.plot.names)
     if(params.plot.firstPrimDisp)
         text(-cr3bp.mu*cr3bp.L, 0,  -50*1e3, 'Earth');
     end
-    text((1-cr3bp.mu)*cr3bp.L, 0, -50*1e3, 'Moon');
+    if(params.plot.secondPrimDisp)
+        text((1-cr3bp.mu)*cr3bp.L, 0, -50*1e3, 'Moon');
+    end
 end
 
 %----------
@@ -256,13 +263,13 @@ end
 %----------
 if(params.plot.allLibPoints)
     Li = cr3bp.l1.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
         text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_1');
     end
     
     Li = cr3bp.l2.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'), 'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
         text(Li(1)*cr3bp.L, 0, 0.1301*Lf, 'L_2');
     end
@@ -288,7 +295,7 @@ if(params.plot.allLibPoints)
     
 else
     Li = li.position;
-    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'));
+    plot3(Li(1)*Lf, Li(2)*Lf, Li(3)*Lf, 'o', 'Color',  rgb('dark red'),  'MarkerFaceColor',  rgb('dark red'), 'MarkerSize', 5);
     if(params.plot.names)
         text(Li(1)*cr3bp.L, 0, 0.1301*Lf, ['L_', num2str(li.number)]);
     end

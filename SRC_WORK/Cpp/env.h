@@ -35,14 +35,17 @@
 #define MAN_CENTER_U  2
 #define MAN_CENTER_US 3
 
+//Projection distance
+#define PROJ_EPSILON     1e-6
+#define PROJ_EPSILON_SEM 1e-6
 
 
 using namespace std;
 
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //            Structures
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 /**
  * \struct LibrationPoint
  * \brief Structure to describe a Libration point (position, energy...).
@@ -159,11 +162,15 @@ struct CSYS
 
     //Simple coefficients
     double c1;      //c1 coefficient, defined wrt to a given libration point li
+    double c2;      //c2 coefficient, defined wrt to a given libration point li
     double gamma;   //gamma coefficient, defined wrt to a given libration point li
     double mu;      //mass ratio
     USYS us;        //default unit system
     int li;         //associated libration point
     int manType;    //associated manifold type
+    int pmType;     //associated parameterization of manifold
+    int model;      //associated model
+    int fwrk;       //associated fwrk
 
     //Arrays
     double *coeffs; //Default set of vector field coefficients
@@ -179,12 +186,15 @@ struct CSYS
     Ofsc Zt;
     Ofsc ztdot;
     Ofsc Ztdot;
+    Ofsc ztddot;
+    Ofsc Ztddot;
 
     //Folders
     string F_COC;   //Change of coordinates Translation+Floquet+Complexification
     string F_PRINT; //For printing results
     string F_PLOT;  //For plotting
     string F_COEF;  //Coefficients alphas for integration in the Earth-Moon system.
+    string F_QBTBP; //Solution of the QBTBP
 
     //Parameterization folders
     string F_PMS;   //Global Parameterization folder, chosen within the folders below:
@@ -214,6 +224,33 @@ struct QBCP
 };
 
 /**
+ *  \brief Solar system structure
+ **/
+typedef struct SS SS;
+struct SS
+{
+    int *id;        //id of the bodies
+    double *Gmi;    //G*mi for all the bodies
+    double *mui;
+    double a;
+    double n;
+    double mu1;
+    double mu2;
+    double et0;
+    double t0;
+    int id1;
+    int id2;
+    int pos1;
+    int pos2;
+    int coord_eph;
+    int maxBodies;
+    int center;
+
+    double tshift;
+};
+
+
+/**
  * \struct QBCP_L
  * \brief  Environment of a given Quasi-Bicircular Four-Body Problem focused on one libration point. The libration point must be L1, L2 or L3.
  *
@@ -224,29 +261,24 @@ typedef struct QBCP_L QBCP_L;
 struct QBCP_L
 {
     int nf;             //Order of the Fourier expansions
-    int eff_nf;         //Effective order of the Fourier expansions, for some specific computations
+    int eff_nf_EM;      //Effective order of the Fourier expansions, for some specific computations
+    int eff_nf_SEM;     //Effective order of the Fourier expansions, for some specific computations
     int isNormalized;   //Are the equations of motion normalized?
 
     //Specific to one libration point
     int li_EM;            //number of the libration point considered
     int li_SEM;           //number of the libration point considered
 
-//  A SUPPRIMER EN l'ETAT! A RENTRER DANS LES cs
-    double c2;            //c2(m2-li)
-
-
-//  A SUPPRIMER EN l'ETAT! A RENTRER DANS LES cs OU supprimer
-//  POUR LE MOMENT, LAISSE LA POUR COMPILATION
-    double *betas;  //Sun-Earth coeffifients.
 
     //6*6 matrix B used for Floquet transformation
     double *B;
 
-//    //Model  ## A AJOUTER DANS L'INIT ET DANS LES FONCTIONS DE CHANGEMENT DE FOCUS
+    //Model
     int model;
     int fwrk;
     int li;
-    int pms;
+    int pms_EM;
+    int pms_SEM;
 
     int numberOfCoefs; //number of Fourier coefficients
 
@@ -272,6 +304,16 @@ struct QBCP_L
     //Is the Moon "on"? Allows to "wipe out" the Moon from the equations of motion
     //when using Sun-Earth or Sun-(Earth+Moon) coordinates systems.
     double epsilon;
+
+    //For ephemerides conversion we use the mean motion of the Sun-Bem system n_sem
+    double n_sem;
+    //For ephemerides conversion we use the mean motion of the Earth-Moon system n_em
+    double n_em;
+
+    //Solar systems
+    SS ss;      //default
+    SS ss_sem;  //focus on SEM
+    SS ss_em;   //focus on EM
 };
 
 /**
@@ -286,9 +328,29 @@ struct QBCP_I
     double epsilon;
 };
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
+// Initialize the invariant manifolds.
+//----------------------------------------------------------------------------------------
+/**
+ * \brief Initialize the invariant manifolds, as a form of FT fourier series.
+ *        The necessary data are retrieved from data folders  whose names are stored in
+ *        the CS structure.
+ *
+ *        IMPORTANT: to be consistent with old code, both the TFC and NC form are initialized.
+ *        However, the NC form is a priori NEVER used, since the numerical computation are
+ *        usually more precise evaluating the TFC form, then going back to the NC form via the equation:
+ *
+ *              IM_NC = P(theta)*IM_TFC + V(theta).
+ *
+ *        If ones would want to use the NC form, just uncomment the proper lines inside the code.
+ **/
+void initOFTS(vector<Oftsc> &IM_NC, vector<Oftsc> &IM_TFC,
+              int reduced_nv, int ofts_order, int ofs_order,
+              CSYS &csys);
+
+//----------------------------------------------------------------------------------------
 //            Init routines
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 /**
 * \brief Initialize one celestial body
 * \param body pointer on the current body
@@ -325,7 +387,7 @@ void EMtoNC_prim(double Zc[3], double zc[3], double c1, double gamma);
  * \param csys pointer on the CSYS structure to initialize.
  * \param qbcp_l pointer on the QBCP_L structure that contains csys.
  * \param qbcp pointer on the QBCP structure that contains parameters specific to each libration points (namely, gamma)
- * \param fwrk indix of the coordinate system to use (F_EM, F_SEM).
+ * \param fwrk indix of the framework to use (F_EM, F_SEM).
  * \param li number of the libration point to focus on (L1, L2).
  * \param coefNumber the number of vector field coefficients to initialize. It has been set in the QBCP_init function.
  * \param isNew boolean. if true, the qbtbp has not been computed via the qbtbp() routine, so the vector field coefficients cannot be initialized.
@@ -344,7 +406,7 @@ void init_CSYS(CSYS *csys, QBCP_L *qbcp_l, QBCP *qbcp, int fwrk, int li, int coe
 *
 * NEEDS TO BE MODIFIED TO GET RID OF THE HARD CODED VALUES
 **/
-void init_QBCP(QBCP *qbcp, int n1, int n2, int n3, int model);
+void init_QBCP(QBCP *qbcp, int n1, int n2, int n3);
 
 /**
 * \brief Initialize a QBCP_L structure, i.e. a QBCP focused on one libration point. The libration point must be L1 or L2 of qbcp.cr3bp1.
@@ -357,10 +419,14 @@ void init_QBCP(QBCP *qbcp, int n1, int n2, int n3, int model);
 *
 * NEEDS TO BE MODIFIED TO GET RID OF THE HARD CODED VALUES
 **/
-void init_QBCP_L(QBCP_L *qbcp_l, QBCP *qbcp, int isNormalized, int li_EM, int li_SEM, int isNew, int model, int fwrk, int pmType, int manType_EM, int manType_SEM);
+void init_QBCP_L(QBCP_L *qbcp_l, QBCP *qbcp, int isNormalized, int li_EM, int li_SEM,
+                 int isNew, int model, int coordsys, int pmType_EM, int pmType_SEM,
+                 int manType_EM, int manType_SEM);
 
 
-void init_QBCP_I(QBCP_I *model, QBCP_L *model1, QBCP_L *model2, int n1, int n2, int n3, int isNormalized, int li_EM, int li_SEM, int isNew, int mod1, int mod2, int fwrk, int pmType);
+void init_QBCP_I(QBCP_I *model, QBCP_L *model1, QBCP_L *model2, int n1, int n2, int n3,
+                 int isNormalized, int li_EM, int li_SEM, int isNew, int mod1, int mod2,
+                 int coordsys, int pmType1, int pmType2);
 
 /**
  * \brief Initializes a libration point.
@@ -370,12 +436,18 @@ void init_QBCP_I(QBCP_I *model, QBCP_L *model1, QBCP_L *model2, int n1, int n2, 
  **/
 void init_libp(LibrationPoint *libp, CR3BP cr3bp, int number);
 
+/**
+* \brief Initialize a solar system, composed of 11 bodies (Sun, planets and the Moon)
+**/
+void init_SS(SS *solarsys, QBCP_L *qbcp_l, int coordsys);
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //QBCP
-//-----------------------------------------------------------------------------------------------------------------------------
-extern QBCP SEM;               ///Sun-Earth-Moon system
-extern QBCP_L SEML;            ///Sun-Earth-Moon system around Li
+//----------------------------------------------------------------------------------------
+extern QBCP SEM;               //Sun-Earth-Moon system
+extern QBCP_L SEML;            //Sun-Earth-Moon system around Li
+extern QBCP_L SEML_EM;         //Sun-Earth-Moon system around EMLi
+extern QBCP_L SEML_SEM;        //Sun-Earth-Moon system around SEMLi
 
 /**
  *   \brief Initialization of the environnement (Sun, Earth, Moon, Li...).
@@ -385,70 +457,23 @@ extern QBCP_L SEML;            ///Sun-Earth-Moon system around Li
  *    Note that, in order for the initialization to be complete - Sun-(Earth+Moon) motion given as Fourier series within SEML -
  *    the routine qbtbp(true) must have been run *once.
  **/
-void init_env(int li_EM, int li_SEM, int isNormalized, int model, int fwrk, int pmStyle, int manType_EM, int manType_SEM);
-
-//---------------------------------------
-//Center manifold
-//---------------------------------------
-//extern vector<Oftsc>  CM;    ///center manifold in NC coordinates
-//extern vector<Oftsc> CMh;    ///center manifold in TFC coordinates
-//extern vector<Oftsc>  Fh;    ///reduced vector field
-//extern vector<Oftsc>  DWFh;   ///JCM * Fh
-//extern vector<Oftsc>  CMdot; ///center manifold in NC coordinates
-//extern matrix<Oftsc> JCM;    ///jacobian of CM
-
-
-/**
- *   \brief Initialization of the parameterization center manifold around LI, LI being given as an integer in the file parameters.h.
- *
- *    The parameterization is retrieved from text file given in the folder F_PM, F_PM being a global string array defined in parameters.h.
- *    Of course, these data files must have been previously computed through the use of the routine pm(int, int).
- *    Moreover, as always, the Fourier-Taylor algebra must have been initialized by the routine FTDA::init in the main program.
- *    The global variables initialized by this routine are:
- *    - vector<Oftsc>  CM, center manifold in NC coordinates
- *    - vector<Oftsc> CMh, center manifold in TFC coordinates
- *    - matrix<Oftsc> JCM, jacobian of CM
- *    - vector<Oftsc>  Fh, reduced vector field
- **/
-void initCM(QBCP_L &qbcp);
-/**
- *   \brief Update of the parameterization center manifold around LI, LI being given as an integer in the file parameters.h.
- *
- *    The parameterization is retrieved from text file given in the folder F_PM, F_PM being a global string array defined in parameters.h.
- *    Of course, these data files must have been previously computed through the use of the routine pm(int, int).
- *    Moreover, as always, the Fourier-Taylor algebra must have been initialized by the routine FTDA::init in the main program.
- *    The global variables initialized by this routine are:
- *    - vector<Oftsc>  CM, center manifold in NC coordinates
- *    - vector<Oftsc> CMh, center manifold in TFC coordinates
- *    - matrix<Oftsc> JCM, jacobian of CM
- *    - vector<Oftsc>  Fh, reduced vector field
- *
- **/
-void updateCM(QBCP_L &qbcp);
-
-//---------------------------------------
-//COC
-//---------------------------------------
-//extern matrix<Ofsc>  Mcoc;    ///COC matrix
-//extern matrix<Ofsc>  Pcoc;    ///COC matrix (Mcoc = Pcoc*Complex matrix)
-//extern vector<Ofsc>  Vcoc;    ///COC vector
-//extern matrix<Ofsc>  MIcoc;   ///COC matrix = inv(Mcoc)
-//extern matrix<Ofsc>  PIcoc;   ///COC matrix = inv(Pcoc)
+void initialize_environment(int li_EM, int li_SEM, int isNormalized, int model, int coordsys,  int pmStyle_EM, int pmStyle_SEM, int manType_EM, int manType_SEM);
 
 /**
  *  Main routine for the initialization of the COC
  **/
 void initCOC(QBCP_L &qbcp);
+
 /**
  *  Main routine for the update of the COC
  **/
 void updateCOC(QBCP_L &qbcp);
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //COC
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 /**
- *  \brief Lighter version of the init routine, with only P, PC and V retrieved.
+ *  \brief Lighter version of the init routine, with only P, PC, Q, QC, and V retrieved.
  **/
 void initCOC(matrix<Ofsc> &P,
              matrix<Ofsc> &PC,
@@ -457,22 +482,34 @@ void initCOC(matrix<Ofsc> &P,
              vector<Ofsc> &V,
              QBCP_L& qbcp_l);
 
+/**
+ *  \brief Lighter version of the init routine, with only PC, QC, and V retrieved.
+ **/
+void initCOC(matrix<Ofsc>& PC,
+             matrix<Ofsc>& CQ,
+             vector<Ofsc>& V,
+             CSYS& csys);
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //            Change Coord. System
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 /**
  *  \brief Change the default coordinate system
  **/
-void changeDCS(QBCP_L &qbcp_l, int fwrk);
+void changeDCS(QBCP_L &qbcp_l, int coordsys);
 /**
  *  \brief Change the default coordinate system and the libration point for this coordinate system
  **/
-void changeLIDCS(QBCP_L &qbcp_l, int fwrk, int li);
+void changeLIDCS(QBCP_L &qbcp_l, int coordsys, int li);
 
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
 //            Subroutines
-//-----------------------------------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------
+/**
+ *   \brief Initialize an evenly spaced grid of size gsize, in the interval [gmin, gmax]
+ **/
+void init_grid(double *grid, double gmin, double gmax, int gsize);;
+
 /**
  *  \brief Return the string corresponding to the libration point number provided (e.g. "L1" if li == 1).
  **/
@@ -484,9 +521,9 @@ string init_F_LI(int li);
 string init_F_MODEL(int model);
 
 /**
- *  \brief Return the string corresponding to the framework (coord. syst.) indix provided (e.g. "EM" if fwrk == F_EM).
+ *  \brief Return the string corresponding to the framework  indix provided (e.g. "EM" if coordsys == F_EM).
  **/
-string init_F_FWRK(int fwrk);
+string init_F_FRAMEWORK(int fwrk);
 
 /**
  *  \brief Return the folder name corresponding to the prefix/model/framework/libration point number combination provided (e.g. "prefix/QBCP/EM/L1").
@@ -532,6 +569,24 @@ double jacobi(double y[], double mu);
 double cn(QBCP_L& qbcp_l, int n);
 
 /**
+ * \brief Compute the coefficient cn for a given libration point (L1, L2, and L3 for now)
+ * \param li the number of the current libration point (1,2,3)
+ * \param gamma the gamma parameter associated to the current libration point
+ * \param mu the mass ratio of the current TBP system
+ * \param n the indix of the coefficient to compute.
+ *
+ * We recall that the cn coefficient are given by the following equation:
+ * \f$  c_n = \frac{1}{\gamma_j^3} \left( (\pm1)^n \mu + (-1)^n \frac{(1-\mu) \gamma_j^{(n+1)}}{(1 -\mp \gamma_j)^{(n+1)}} \right) \f$ for \f$ L_j, j = 1,2 \f$, and where:
+ * - The upper (resp. lower) signs stand for \f$ L_1 \f$ (resp. \f$ L_2 \f$).
+ * - \f$ \gamma_j \f$ is the distance from \f$ L_j \f$ to the smallest primary.
+ *
+ * The L3 value is taken from Richardson, 1980:
+ *
+ * \f$  c_n = \frac{1}{\gamma_j^3} \left( 1 - \mu  + \frac{\mu \gamma_j^{n+1}}{(1 + \gamma_j)^{n+1}} \right) \f$.
+ **/
+double cn(int li, double gamma, double mu, int n);
+
+/**
 * \brief Using the Newton-Raphson method, find the root of a function known to lie close to x1 The root
 *  /rtnewt will be refined until its accuracy is known within ± xacc.
 *  funcd is a user-supplied routine that returns both the function value and the first derivative of the
@@ -546,7 +601,14 @@ double rtnewt(void (*funcd)(double, int, double, double *, double *), double x1,
 **/
 void polynomialLi(double mu, int number, double y, double *f, double *df);
 
+/**
+ *  \brief Prompt "Press Enter to go on"
+ **/
+void pressEnter(bool isFlag);
 
-
+/**
+ *   \brief Number to string inner routine
+ **/
+string numTostring(double num);
 
 #endif // ENV_H_INCLUDED

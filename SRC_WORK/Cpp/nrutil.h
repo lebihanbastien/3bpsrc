@@ -64,7 +64,7 @@ double **dmatrix(long nrl, long nrh, long ncl, long nch);
 double complex **dcmatrix(long nrl, long nrh, long ncl, long nch);
 int **icmatrix(long nrl, long nrh, long ncl, long nch);
 float **subcmatrix(float **a, long oldrl, long oldrh, long oldcl, long oldch,
-	long newrl, long newcl);
+                   long newrl, long newcl);
 float **convert_cmatrix(float *a, long nrl, long nrh, long ncl, long nch);
 float ***f3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh);
 double ***d3tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh);
@@ -81,9 +81,19 @@ void free_icmatrix(int **m, long nrl, long nrh, long ncl, long nch);
 void free_subcmatrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_convert_cmatrix(float **b, long nrl, long nrh, long ncl, long nch);
 void free_f3tensor(float ***t, long nrl, long nrh, long ncl, long nch,
-	long ndl, long ndh);
+                   long ndl, long ndh);
 void free_d3tensor(double ***t, long nrl, long nrh, long ncl, long nch,
-	long ndl, long ndh);
+                   long ndl, long ndh);
+
+double ****d4tensor(long nrl, long nrh, long ncl, long nch, long ndl, long ndh, long nwl, long nwh);
+void free_d4tensor(double ****t, long nrl, long nrh, long ncl, long nch,
+                   long ndl, long ndh, long nwl, long nwh);
+
+float *****f5tensor(long n1l,long n1h,long n2l,long n2h,long n3l,long n3h,long n4l,long n4h,long n5l,long n5h);
+void free_f5tensor(float *****t,long n1l,long n1h,long n2l,long n2h,long n3l,long n3h,long n4l,long n4h,long n5l,long n5h);
+
+double *****d5tensor(long n1l,long n1h,long n2l,long n2h,long n3l,long n3h,long n4l,long n4h,long n5l,long n5h);
+void free_d5tensor(double *****t,long n1l,long n1h,long n2l,long n2h,long n3l,long n3h,long n4l,long n4h,long n5l,long n5h);
 
 #else /* ANSI */
 /* traditional - K&R */

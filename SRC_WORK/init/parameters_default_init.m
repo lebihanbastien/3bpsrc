@@ -14,8 +14,8 @@ default.ode45.RelTol  = 3e-14; %minimum allowed by ode45
 default.ode45.AbsTol  = 1e-14; 
 default.ode45.options = odeset('Reltol', default.ode45.RelTol, 'Abstol', default.ode45.AbsTol);
 
-default.ode113.RelTol = 3e-14; %minimum allowed by ode113
-default.ode113.AbsTol = 1e-15; 
+default.ode113.RelTol  = 3e-14; %minimum allowed by ode113
+default.ode113.AbsTol  = 1e-14; 
 default.ode113.options = odeset('Reltol', default.ode113.RelTol, 'Abstol', default.ode113.AbsTol);
 
 default.ode87.RelTol  = 3e-14; 
@@ -25,7 +25,7 @@ default.ode87.options = odeset('Reltol', default.ode87.RelTol, 'Abstol', default
 %--------------------------------------------------------------------------
 %Differential correction
 %--------------------------------------------------------------------------
-default.diff_corr.precision = 1e-10;
+default.diff_corr.precision = 1e-13;
 default.diff_corr.type = cst.corr.Z0_FIXED;  %Rq: Z0_FIXED should be used with small Az, X0_FIXED otherwise. See orbit_refinement.m for details.
 %[Deprecated]
 default.diff_corr.isON = false;
@@ -48,7 +48,8 @@ default.plot.SUBTD           = false; %Plot the 3D view
 default.plot.manifold_branch = true;  %during manifold computation
 default.plot.LineSmoothing   = 'off'; %during manifold computation
 
-default.plot.firstPrimDisp   = false;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed?
+default.plot.firstPrimDisp   = false;  %is the first primary (e.g. the Sun in the Sun-Earth system) displayed
+default.plot.secondPrimDisp  = true;   %is the second primary (e.g. the Earth in the Sun-Earth system) displayed
 default.plot.allLibPoints    = false;  %are all libration points displayed?
 default.plot.names           = false;  %are the names displayed?
 default.plot.tdAxes          = false;  %are the pretty 3D axes displayed?

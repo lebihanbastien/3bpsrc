@@ -190,4 +190,4 @@ default.plot.orbit = true;
 halo = init_orbit(cr3bp, cr3bp.l2, cst.orbit.type.HALO, cst.orbit.family.NORTHERN, 0, cst);
 
 % Interpolation and plot
-halo = halo_orbit_interpolation_2(cr3bp, halo, halo2_init_EML2, default, cst, 'X0', 389429);
+halo = orbit_interpolation(cr3bp, halo, default, cst, 'X0', 389429);

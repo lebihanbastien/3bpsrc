@@ -3,12 +3,12 @@ function [] = initsubplot3D(index,  m, n, p, cr3bp, params, li)
 %
 % INITPLOT3D(INDEX, CR3BP, PARAMS) initializes a 3D plot
 % associated to the structures CR3BP (system), PARAMS (user-defined
-% parameters). INDEX gives the number of the figure. 
+% parameters). INDEX gives the number of the figure.
 %
 % By default, the Lagrange points L1 and L2 are plotted on the figure.
 %
 % See also INITPLOT2D
-% 
+%
 % BLB 2016
 
 %--------------------------------------------------------------------------
@@ -77,35 +77,38 @@ end
 %----------
 %Second primary
 %----------
-Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/Lf;
-[X_M3D, Y_M3D, Z_M3D] = sphere;
-X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
-Y_M3D = 0           + Rm2*Y_M3D;
-Z_M3D = 0           + Rm2*Z_M3D;
-surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [0 0.6  0.9], 'FaceLighting', 'none', 'EdgeColor', 'none');
-
-%Earth globe
-%----------
-%Longitude shift
-h = 50;
-%Radius of the Earth
-r = (params.plot.bigPrimFac+0.01)*cr3bp.m2.Req;
-%Loading continents
-load coast
-lat = lat/180*pi;
-long = -(long-h)/180*pi;
-%Building the coast
-x = r*cos(lat).*sin(long);
-y = r*cos(lat).*cos(long);
-z = r*sin(lat);
-plot3((1-cr3bp.mu)*Lf +x,y,z, 'Color', [0 0 0], 'LineWidth', 1.5);
-
+if(params.plot.secondPrimDisp)
+    Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/Lf;
+    [X_M3D, Y_M3D, Z_M3D] = sphere;
+    X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
+    Y_M3D = 0           + Rm2*Y_M3D;
+    Z_M3D = 0           + Rm2*Z_M3D;
+    surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [0 0.6  0.9], 'FaceLighting', 'none', 'EdgeColor', 'none');
+    
+    %Earth globe
+    %----------
+    %Longitude shift
+    h = 50;
+    %Radius of the Earth
+    r = (params.plot.bigPrimFac+0.01)*cr3bp.m2.Req;
+    %Loading continents
+    load coast
+    lat = lat/180*pi;
+    long = -(long-h)/180*pi;
+    %Building the coast
+    x = r*cos(lat).*sin(long);
+    y = r*cos(lat).*cos(long);
+    z = r*sin(lat);
+    plot3((1-cr3bp.mu)*Lf +x,y,z, 'Color', [0 0 0], 'LineWidth', 1.5);
+end
 
 if(params.plot.names)
     if(params.plot.firstPrimDisp)
         text(-cr3bp.mu*Lf, 0,  -500, 'Sun');
     end
-    text((1-cr3bp.mu)*Lf,  0,  -500, 'Earth');
+    if(params.plot.secondPrimDisp)
+        text((1-cr3bp.mu)*Lf,  0,  -500, 'Earth');
+    end
 end
 
 %----------
@@ -163,8 +166,8 @@ end
 %----------
 %Arrow axes
 %----------
-if(params.plot.tdAxes)    
-    arrow3([1.475e5 0 0], [1.52e5 0 0], 'k', 2, 50,0.5);   
+if(params.plot.tdAxes)
+    arrow3([1.475e5 0 0], [1.52e5 0 0], 'k', 2, 50,0.5);
 end
 
 end
@@ -209,13 +212,14 @@ end
 %----------
 %Second primary
 %----------
-Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
-[X_M3D, Y_M3D, Z_M3D] = sphere;
-X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
-Y_M3D = 0           + Rm2*Y_M3D;
-Z_M3D = 0           + Rm2*Z_M3D;
-surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
-
+if(params.plot.secondPrimDisp)
+    Rm2 = params.plot.bigPrimFac*cr3bp.m2.Req/cr3bp.L;
+    [X_M3D, Y_M3D, Z_M3D] = sphere;
+    X_M3D = 1-cr3bp.mu  + Rm2*X_M3D;
+    Y_M3D = 0           + Rm2*Y_M3D;
+    Z_M3D = 0           + Rm2*Z_M3D;
+    surf(X_M3D*Lf, Y_M3D*Lf, Z_M3D*Lf, 'FaceColor', [23 153 179]./255, 'FaceLighting', 'none', 'EdgeColor', [9 63 87]./255);
+end
 
 %----------
 %Names
@@ -224,7 +228,9 @@ if(params.plot.names)
     if(params.plot.firstPrimDisp)
         text(-cr3bp.mu*cr3bp.L, 0,  -50, 'Earth');
     end
-    text((1-cr3bp.mu)*cr3bp.L, 0, -50, 'Moon');
+    if(params.plot.secondPrimDisp)
+        text((1-cr3bp.mu)*cr3bp.L, 0, -50, 'Moon');
+    end
 end
 
 %----------

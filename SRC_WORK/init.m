@@ -21,12 +21,31 @@ set(0, 'defaultLineMarkerSize', 2);
 addpath(genpath('.'));
 
 %% Data loading (abacuses)
+
+%--------------------------------------------------------------------------
+% For halo orbits
+%--------------------------------------------------------------------------
 load halo_init_matrix_EML2 halo_init_EML2;
 load halo_init_matrix_EML1 halo_init_EML1;
 % New abacuses (more complete)
 load halo2_init_EML2 halo2_init_EML2;
 load halo2_init_EML1 halo2_init_EML1;
 
+%--------------------------------------------------------------------------
+% For Planar lyapunov
+%--------------------------------------------------------------------------
+load plyap_init_EML2 plyap_init_EML2;
+load plyap_init_EML1 plyap_init_EML1;
+
+%--------------------------------------------------------------------------
+% For Vertical lyapunov
+%--------------------------------------------------------------------------
+load vlyap_init_EML2 vlyap_init_EML2;
+load vlyap_init_EML1 vlyap_init_EML1;
+
+%--------------------------------------------------------------------------
+% For NRO
+%--------------------------------------------------------------------------
 load nro_init_EML1 nro_init_EML1;
 load nro_init_EML2 nro_init_EML2;
 

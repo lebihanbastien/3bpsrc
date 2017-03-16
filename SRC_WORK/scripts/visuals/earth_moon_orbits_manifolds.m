@@ -67,7 +67,7 @@ order = 20;
 % Time span (integration)
 tspan = [0 30*pi];
 % Type of coordinate system as in the output
-outputType = cst.coord.VSYS; 
+outputType = cst.coord2.VSYS; 
 % Type of model
 model = cst.model.RTBP; %CRTBP
 % Type of framework

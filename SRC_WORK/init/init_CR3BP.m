@@ -67,6 +67,7 @@ switch number
         gamma_i = rtnewt(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);   %newton-raphson method
         libp.gamma_i = gamma_i;
         libp.c1      = (cr3bp.mu-1.0+libp.gamma_i)/libp.gamma_i;
+        libp.c2      = cn(cr3bp.mu, libp.gamma_i, 1, 2);
         
         %Position
         libp.position(1) = 1 - cr3bp.mu - gamma_i;
@@ -79,6 +80,7 @@ switch number
         gamma_i = rtnewt(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);
         libp.gamma_i = gamma_i;
         libp.c1      = (cr3bp.mu-1.0-libp.gamma_i)/libp.gamma_i;
+        libp.c2      = cn(cr3bp.mu, libp.gamma_i, 2, 2);
         
         %Position
         libp.position(1) = 1 - cr3bp.mu + gamma_i;
@@ -91,7 +93,8 @@ switch number
         gamma_i = rtnewt(gamma_i, LIBRATION_POINT_PRECISION, cr3bp.mu, number);
         libp.gamma_i = 1-gamma_i;  %BEWARE  for L3, gamma3 = L3-M1 distance != L3-M2
         libp.c1      = (cr3bp.mu+libp.gamma_i)/libp.gamma_i;
-         
+        libp.c2      = cn(cr3bp.mu, libp.gamma_i, 3, 2);
+        
         %Position
         libp.position(1) = -1 - cr3bp.mu + gamma_i;
         libp.position(2) = 0;
@@ -120,7 +123,7 @@ end
 libp.Ci = jacobi(libp.position, cr3bp.mu);
 libp.Ei = -0.5*libp.Ci;
 end
- 
+
 %-------------------------------------------------------------------------- 
 % Using the Newton-Raphson method, find the root of a function known to lie 
 % close to y. The root rtnewt will be refined until its accuracy is known 

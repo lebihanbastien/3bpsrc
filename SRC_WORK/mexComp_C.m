@@ -10,9 +10,16 @@
              
 %% Alternative build, with command lines (use -v option for verbose mode)
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_cr3bp.c       lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/cr3bp_derivatives.c  C/custom.c C/custom_ode.c      
+
+%%
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_cr3bp_event.c lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_bcp.c         lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_bcp_event.c   lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
+
+%%
+mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_tdbcp.c         lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
+%%
+mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_tdbcp_event.c   lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
 
 %% Build C files via mex()
 % Define some paths

@@ -38,13 +38,13 @@ if(params.computation.type == cst.computation.MATLAB)
     % If MATLAB routines only
     %-----------------------------
     options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
-    [~,yv] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), [0 orbit.T12], orbit.y0(1:6), options);
+    [~,yv] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu), [0 orbit.T12], orbit.y0, options);
     yve = yv(end,:);
 else
     %-----------------------------
     % If MEX routines are allowed
     %-----------------------------
-    [~, yve] = ode78_cr3bp([0 orbit.T12], orbit.y0(1:6), cr3bp.mu);
+    [~, yve] = ode78_cr3bp([0 orbit.T12], orbit.y0, cr3bp.mu);
 end
 
 % Choose the maximum value between yve and yv0.
@@ -95,6 +95,34 @@ orbit.tv = tv;
 orbit.yv = yv;
 
 %--------------------------------------------------------------------------
+% Angular parameter
+%--------------------------------------------------------------------------
+% Position vectors wrt to the center of m2
+rMoon = zeros(size(orbit.yv(:,1:3)));
+rMoon(:,1) = (1 - cr3bp.mu)*ones(size(orbit.yv(:,1)));
+r_MT = orbit.yv(:,1:3) - rMoon;
+
+% Initial position vector
+bT = r_MT(1,:);
+% Initial velocity vector
+bTdot = orbit.yv(1,4:6);
+% Initial momentum vector (normal to the (bTdot, bT) plane
+nT = cross(bTdot, bT)/norm(cross(bTdot, bT));
+
+% Loop on all the position vectors
+for ii=1:size(r_MT,1)
+    % Current position vector
+    aT = r_MT(ii,:);
+    %Projection on the (bTdot, bT) plane
+    aT = aT - dot(aT, nT) * nT;
+    % Computation of the angle parameter
+    orbit.alpha(ii) = atan2(norm(cross(aT,bT)),dot(aT,bT));
+    if (orbit.tv(ii)/orbit.T > 0.5)
+        orbit.alpha(ii) = 2*pi - orbit.alpha(ii);
+    end
+end
+
+%--------------------------------------------------------------------------
 % Max/Min distance with each primary
 %--------------------------------------------------------------------------
 [orbit.minDistToM1, ~, orbit.maxDistToM1]  = distToPrimary(yv, cr3bp.m1);
@@ -114,24 +142,60 @@ orbit.apogee.altitude = orbit.maxDistToM2;
 orbit.apogee.position = yv(maxDistIndex, 1:3);
 
 %--------------------------------------------------------------------------
-% Linear algebra (monodromy matrix, etc)
+% Monodromay matrix, old version
 %--------------------------------------------------------------------------
 %Monodromy matrix
-orbit.monodromy = eye(6);
+% orbit.monodromy = eye(6);
+% for ii = 1 : 6
+%     for j = 1 : 6
+%         m = 6*(ii-1) + j;
+%         orbit.monodromy(ii,j) = yf(m+6);
+%     end
+% end
+
+%--------------------------------------------------------------------------
+% Monodromay matrix, new version
+%--------------------------------------------------------------------------
+%M12 matrix
+orbit.M12 = eye(6);
 for i = 1 : 6
     for j = 1 : 6
         m = 6*(i-1) + j;
-        orbit.monodromy(i,j) = yf(m+6);
+        orbit.M12(i,j) = yve(m+6);
     end
 end
 
-%Eigen
+% A
+A = eye(6);
+A(2,2) = -1;
+A(4,4) = -1;
+A(6,6) = -1;
+
+% Omega, H1, H2 (cf Howell 1984)
+Omega = [0 1 0 ;
+        -1 0 0 ; 
+         0 0 0];
+     
+H1 = [zeros(3) -eye(3) ; +eye(3)  -2*Omega];     
+H2 = [-2*Omega +eye(3) ; -eye(3) +zeros(3)];
+
+
+%Monodromy matrix
+orbit.monodromy = A * H1 * orbit.M12' * H2 * A * orbit.M12;
+
+
+%--------------------------------------------------------------------------
+% Linear algebra
+%--------------------------------------------------------------------------
+%Eigenvalues
 [V,E] = eig(orbit.monodromy);
 
-%Eigenvalues
-for i = 1:6
-    orbit.eigenvalues(i) = E(i,i);
+for ii = 1:6
+    orbit.eigenvalues(ii) = E(ii,ii);
 end
+
+% Eigenvectors
+orbit.V = V;
 
 %Stable and unstable direction (linear approx of the manifolds)
 [~, posEigen] = min(abs(orbit.eigenvalues));

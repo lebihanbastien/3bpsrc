@@ -1,4 +1,3 @@
-
 /*-------------------------------------------------------------------------*/
 /**
   @file     gnuplot_i.h
@@ -31,7 +30,7 @@
 #include <stdio.h>
 
 /** Maximal number of simultaneous temporary files */
-#define GP_MAX_TMP_FILES    256
+#define GP_MAX_TMP_FILES    512
 
 /*---------------------------------------------------------------------------
                                 New Types
@@ -50,7 +49,8 @@
   This structure is meant to remain opaque, you normally do not need
   to know what is contained in there.
  */
-typedef struct gnuplot_ctrl {
+typedef struct gnuplot_ctrl
+{
     /** Pipe to gnuplot process */
     FILE    * gnucmd ;
 
@@ -64,7 +64,12 @@ typedef struct gnuplot_ctrl {
     char*      tmp_filename_tbl[GP_MAX_TMP_FILES] ;
     /** Number of temporary files */
     int       ntmp ;
-}gnuplot_ctrl;
+    /** Ranges **/
+    double xrange[2];
+    double yrange[2];
+    double zrange[2];
+
+} gnuplot_ctrl;
 
 /*---------------------------------------------------------------------------
                         Function ANSI C prototypes
@@ -250,6 +255,17 @@ void gnuplot_plot_x(gnuplot_ctrl * handle, double * d, int n, char * title);
   @endcode
  */
 /*--------------------------------------------------------------------------*/
+void gnuplot_plotc_xy(
+    gnuplot_ctrl    * handle,
+    const double    * x,
+    const double    * y,
+    int               n,
+    char const      * title,
+    char const      * ls,
+    char const      * lt,
+    char const      * lw,
+    int               lc);
+
 void gnuplot_plot_xy(
     gnuplot_ctrl    *   handle,
     double          *   x,
@@ -266,6 +282,16 @@ void gnuplot_plot_xyz(
     double          * x,
     double          * y,
     double          * z,
+    int               n,
+    char const      * title,
+    char const      * ls,
+    char const      * lt,
+    char const      * lw,
+    int lc);
+
+void gnuplot_plot_X(
+    gnuplot_ctrl    * handle,
+    double          **X,
     int               n,
     char const      * title,
     char const      * ls,
@@ -292,6 +318,41 @@ void gnuplot_fplot_txyz(
     double          * x,
     double          * y,
     double          * z,
+    int               n,
+    char const      * tmpfname,
+    char const      *mode);
+
+void gnuplot_fplot_txyzv(
+    double          *  t,
+    double          ** Z,
+    int             n,
+    char const      * tmpfname,
+    char const      *mode);
+
+void gnuplot_fplot_txp(
+    double          * t,
+    double          * x,
+    double          * y,
+    double          * z,
+    double          * px,
+    double          * py,
+    double          * pz,
+    int               n,
+    char const      * tmpfname);
+
+void gnuplot_fplot_txps(
+    double          * t,
+    double          * x,
+    double          * y,
+    double          * z,
+    double          * px,
+    double          * py,
+    double          * pz,
+    double          * s1,
+    double          * s2,
+    double          * s3,
+    double          * s4,
+    double          * s5,
     int               n,
     char const      * tmpfname);
 /*-------------------------------------------------------------------------*/

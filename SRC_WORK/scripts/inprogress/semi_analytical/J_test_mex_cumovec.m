@@ -70,7 +70,7 @@ tspan = [0 1];
 tman = 10;
 
 % Inputs
-outputType = cst.coord.VSEM;
+outputType = cst.coord2.VSEM;
 model      = cst.model.QBCP;
 fwrk       = cst.fwrk.EM;
 manType    = cst.mantype.MAN_CENTER_U;

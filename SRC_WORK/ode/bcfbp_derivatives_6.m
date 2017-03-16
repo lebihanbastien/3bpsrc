@@ -36,6 +36,7 @@ out(4) = d1_ub(1) + 2*y(5);
 out(5) = d1_ub(2) - 2*y(4);
 out(6) = d1_ub(3);
 
+
 end
 
 
@@ -53,4 +54,5 @@ rs = sqrt((x-as*cos(theta))^2 + (y-as*sin(theta))^2 + z^2);
 xout(1) = x - (1-mu)/r1^3*(x+mu) - mu/r2^3*(x-1+mu) - ms/rs^3*(x-as*cos(theta)) - ms/as^2*cos(theta);
 xout(2) = y - (1-mu)/r1^3*y      - mu/r2^3*y        - ms/rs^3*(y-as*sin(theta)) - ms/as^2*sin(theta);
 xout(3) =   - (1-mu)/r1^3*z      - mu/r2^3*z        - ms/rs^3*z;
+
 end

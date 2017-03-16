@@ -5,13 +5,13 @@ function [] = initplot2D(index, cr3bp, params, li, ip, jp)
 % associated to the structures CR3BP (system), PARAMS (user-defined
 % parameters), and LI (Lagrange point of reference). INDEX gives the number
 % of the figure. The scalars IP and JP gives the dimensions that will be
-% plotted. Examples: 
+% plotted. Examples:
 %           - IP = 1 and JP = 2 will initialize an XY plot.
 %           - IP = 2 and JP = 3 will initialize an YZ plot.
 %           - IP = 3 and JP = 1 will initialize an ZX plot.
 %
 % See also INITPLOT3D
-% 
+%
 % BLB 2016
 
 %--------------------------------------------------------------------------
@@ -66,15 +66,17 @@ set(figure(index), 'defaultLineMarkerSize', 2);
 %----------
 %Second primary
 %----------
-Rm2 = cr3bp.m2.Req/cr3bp.L;
-VTheta = 0:0.01:2*pi;
-%Sphere
-S_L = zeros(2, size(VTheta,2));
-S_L(1,:) = Rm2 *cos(VTheta);
-S_L(2,:) = Rm2 *sin(VTheta);
-%Position
-V_L = [1 - cr3bp.mu  0  0];
-fill((V_L(ip) + S_L(1,:))*Lf,(V_L(jp) + S_L(2,:))*Lf, 'k');
+if(params.plot.secondPrimDisp)
+    Rm2 = cr3bp.m2.Req/cr3bp.L;
+    VTheta = 0:0.01:2*pi;
+    %Sphere
+    S_L = zeros(2, size(VTheta,2));
+    S_L(1,:) = Rm2 *cos(VTheta);
+    S_L(2,:) = Rm2 *sin(VTheta);
+    %Position
+    V_L = [1 - cr3bp.mu  0  0];
+    fill((V_L(ip) + S_L(1,:))*Lf,(V_L(jp) + S_L(2,:))*Lf, 'k');
+end
 
 %----------
 %First primary

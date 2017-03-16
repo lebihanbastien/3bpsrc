@@ -64,13 +64,13 @@ h = waitbar(0,'Computation in progress...');
 % step vector
 output.index = 1:150;
 % Loop
-for i = output.index
+for ii = output.index
     
     %----------------------------------------------------------------------
     % Save outputs
     %----------------------------------------------------------------------
-    output.orbit(i) = halo;
-    output.X0(i)    = halo.y0(1)*cr3bp.L;
+    output.orbit(ii) = halo;
+    output.X0(ii)    = halo.y0(1)*cr3bp.L;
     
     %----------------------------------------------------------------------
     % Differential correction
@@ -80,7 +80,7 @@ for i = output.index
     %----------------------------------------------------------------------
     % Waitbar
     %----------------------------------------------------------------------
-    waitbar(i / length(output.index));
+    waitbar(ii / length(output.index));
 end
 close(h)
 
@@ -98,11 +98,11 @@ output.perigeeDistanceToMoonCenter = extractfield(output.perigee,'radius');
 freq = 10;
 nlength = length(output.index);
 
-for i = 1:freq:nlength
+for ii = 1:freq:nlength
     %Get the perigee position
-    pos = output.orbit(i).perigee.position;
+    pos = output.orbit(ii).perigee.position;
     % Orbit
-    orbit_plot(output.orbit(i), default);
+    orbit_plot(output.orbit(ii), default);
     % Perigee position
     %figure(4)
     %hold on;
@@ -192,4 +192,15 @@ default.plot.orbit = true;
 halo = init_orbit(cr3bp, cr3bp.l1, cst.orbit.type.HALO, cst.orbit.family.NORTHERN, 0, cst);
 
 % Interpolation and plot
-halo = halo_orbit_interpolation_2(cr3bp, halo, halo2_init_EML1, default, cst, 'Az', 1000);
+halo = orbit_interpolation(cr3bp, halo, default, cst, 'Az', 1000);
+
+
+%% Test ode
+y = rand()*ones(1,48);
+
+for ii = 1:48
+    y(ii) = rand();
+end
+
+
+norm(crtbp(1.1, y,cr3bp.mu))

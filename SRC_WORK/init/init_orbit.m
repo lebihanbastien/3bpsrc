@@ -6,14 +6,18 @@ function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)
 % 
 % - cr3bp the structure containing the parent CR3BP
 % - li the structure containing the parent libration point.
-% - type the orbit type: either Halo, vertical lyapunov, planar lyapunov
+% - type the orbit type: either halo (HALO), verticl lyapunov (VLYAP),
+% planar lyapunov (PLYAP), lissajous (LISS), or quasihalo (QHALO). The
+% variables accepted here are defined in cst.orbit.type.
 % - family: the orbit family: either NORTHERN or SOUTHER for halo and
 %    vertical lyapunov orbits. Always PLANAR for planar lyapunov orbits. 
 %    Note that the family is forced to PLANAR for planar lyapunov orbits,
 %    regardless of the input.
 % - Afdim: the size of the orbit (in km). Equal to the vertical extension
-%    Azdim in the case of halo and vertical lyapunov orbits; equal to the
-%    planar extension Axdim in the case of a planar lyapunov orbit.
+%    Azdim in the case of halo, qhalo, vlyap and lissajous; equal to the
+%    planar extension Axdim in the case of a planar lyapunov orbit. Note
+%    that this value can be set to zero if the future orbit is not defined
+%    by its extension.
 % - cst the structure containing the numerical constants
 %
 % Outputs:
@@ -22,7 +26,7 @@ function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)
 %           - orbit.cr3bp       |
 %           - orbit.li          |
 %           - orbit.type        |
-%           - orbit.Azdim       |   for Halo/Vertical lyapunov
+%           - orbit.Azdim       |   for Halo/Vlyapunov/Lissajous/QHalo
 %           - orbit.Az          |
 %           - orbit.family      |
 %           - orbit.m           |
@@ -36,6 +40,7 @@ function orbit =  init_orbit(cr3bp, li, type, family, Afdim, cst)
 %           - orbit.Ax          |
 %           - orbit.family      |
 %           - orbit.status      |   
+%
 %
 % BLB 2016
 
@@ -51,7 +56,7 @@ orbit.type  = type;
 
 %Family
 switch(type)
-    case {cst.orbit.type.HALO, cst.orbit.type.VLYAP}
+    case {cst.orbit.type.HALO, cst.orbit.type.VLYAP, cst.orbit.type.QHALO, cst.orbit.type.LISS}
         orbit.family = family;
     case cst.orbit.type.PLYAP
         %family forced to PLANAR, regardless of the input
@@ -88,7 +93,7 @@ end
 
 %Extension
 switch(type)
-    case {cst.orbit.type.HALO, cst.orbit.type.VLYAP}
+    case {cst.orbit.type.HALO, cst.orbit.type.VLYAP, cst.orbit.type.QHALO, cst.orbit.type.LISS}
         %--------------
         %Afdim = Azdim
         %--------------

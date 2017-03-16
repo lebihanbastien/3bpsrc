@@ -15,20 +15,20 @@ cst.FALSE = 0;
 %-------------------------------------------------------------------------%
 %Type of coordinates
 %-------------------------------------------------------------------------%
-cst.coord.NC   = 0; % Normalized-Centered coordinates coordinates (x, p) (canonical)
-cst.coord.SYS  = 1; % Three-Body Problem coordinates (x, p) (canonical) with the US convention (the Earth has a negative abscissa)
-cst.coord.VSYS = 2; % Three-Body Problem (EM or SEM) coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
-cst.coord.VSEM = 3; % SEM coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
+cst.coord2.NC   = 0; % Normalized-Centered coordinates coordinates (x, p) (canonical)
+cst.coord2.SYS  = 1; % Three-Body Problem coordinates (x, p) (canonical) with the US convention (the Earth has a negative abscissa)
+cst.coord2.VSYS = 2; % Three-Body Problem (EM or SEM) coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
+cst.coord2.VSEM = 3; % SEM coordinates (x, v) (non canonical) again with the US convention (the Earth has a negative abscissa)
 
-% Same but for cpp2 (for now)
-cst.coord2.NCSEM  = 0;
-cst.coord2.NCEM   = 1;
-cst.coord2.VNCSEM = 2;
-cst.coord2.VNCEM  = 3;
-cst.coord2.PSEM   = 4;
-cst.coord2.PEM    = 5;
-cst.coord2.VSEM   = 6;
-cst.coord2.VEM    = 7;
+% Same but for cpp2/ccpN (for now)
+cst.coord.NCSEM  = 0;
+cst.coord.NCEM   = 1;
+cst.coord.VNCSEM = 2;
+cst.coord.VNCEM  = 3;
+cst.coord.PSEM   = 4;
+cst.coord.PEM    = 5;
+cst.coord.VSEM   = 6;
+cst.coord.VEM    = 7;
 
 %-------------------------------------------------------------------------%
 %Type of framework
@@ -47,9 +47,9 @@ cst.model.QBCP = 1; %Quasi-Bicircular model
 %-------------------------------------------------------------------------%
 %Type of manifold
 %-------------------------------------------------------------------------%
-cst.mantype.MAN_CENTER = 0;
-cst.mantype.MAN_CENTER_S = 1;
-cst.mantype.MAN_CENTER_U = 2;
+cst.mantype.MAN_CENTER    = 0;
+cst.mantype.MAN_CENTER_S  = 1;
+cst.mantype.MAN_CENTER_U  = 2;
 cst.mantype.MAN_CENTER_US = 3;
 
 %-------------------------------------------------------------------------%
@@ -61,16 +61,19 @@ cst.env.julian.y2015 = 2457023.5; %Julian date of 01/01/2015 at 00:00
 cst.env.julian.y2000 = 2451544.5; %Julian date of 01/01/2015 at 00:00
 cst.env.hours = 3600;             %in seconds
 cst.env.days  = 86400;            %in seconds
-cst.env.years = 31556926;         %in seconds (true value)
+
+cst.env.years.sidereal    = 365.256363004*cst.env.days;  %in seconds
+cst.env.years.tropical    = 365.242190000*cst.env.days;  %in seconds
+cst.env.years.anomalistic = 365.259636000*cst.env.days;  %in seconds
 
 % Three-body sphere of influence of the Moon in the Sun-Earth-Moon system
 % (see Parker 2007). In km
 cst.env.em3bsoi = cst.env.AU*(0.07345814120628661/1988544)^(2/5);
 
 % Sun constants
-cst.sun.ms = 328900.54;              %Sun mass in Earth-Moon units
-cst.sun.as = 388.81114;              %Sun semi-major axis in Earth-Moon units
-cst.sun.omegaS = -0.925195985520347; %Sun mean motion axis in Earth-Moon units
+cst.sun.as     = 388.81114;              %Sun semi-major axis in Earth-Moon units
+cst.sun.omegaS = -0.925195985520347;     %Sun mean motion axis in Earth-Moon units
+cst.sun.ms     = (1 + cst.sun.omegaS)^2*cst.sun.as^3 - 1;%Sun mass in Earth-Moon units
 
 %-------------------------------------------------------------------------%
 % Orbit
@@ -92,6 +95,9 @@ cst.orbit.STM0 = eye(6);
 cst.orbit.type.HALO  = 'HALO';
 cst.orbit.type.VLYAP = 'VERTICAL_LYAPUNOV';
 cst.orbit.type.PLYAP = 'PLANAR_LYAPUNOV';
+cst.orbit.type.NRO   = 'NRO';
+cst.orbit.type.LISS  = 'LISSAJOUS';
+cst.orbit.type.QHALO = 'QUASI_HALO';
 
 %-------------------------------------------------------------------------%
 % Type of differential corrector

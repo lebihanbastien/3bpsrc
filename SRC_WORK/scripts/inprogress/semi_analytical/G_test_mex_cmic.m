@@ -54,7 +54,7 @@ halo = orbit_computation(cr3bp, halo, default, cst);
 %--------------------------------------------------------------------------
 st0 = [0.0 0.3 0.0 0.3];
 index = 1;
-outputType = cst.coord.VSYS;
+outputType = cst.coord2.VSYS;
 li = cr3bp.l2;
 t0 = 0.0;
 
@@ -69,10 +69,10 @@ for order = 10:10:40
     %Integration
     %----------
     switch(outputType)
-        case cst.coord.NC
+        case cst.coord2.NC
             options = odeset('Reltol', default.ode45.RelTol, 'Abstol', default.ode45.AbsTol);
             [~,yv] = ode45(@(t,y)cr3bp_mn_6(t,y, cr3bp.mu, li.c1, li.gamma_i) ,[0 5], y0, options);
-        case cst.coord.VSYS
+        case cst.coord2.VSYS
             [~, yf, ~, yv] = ode78_cr3bp([0 5], y0, cr3bp.mu);
     end
     

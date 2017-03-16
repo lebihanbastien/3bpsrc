@@ -80,7 +80,7 @@ yv0 = matrixToVector(yv0, cst.orbit.STM0, 6, 6, 6);
 %--------------------------------------------------------------------------
 %Switch between orbit types (Halo, Vertical, Lyapunov)
 switch(orbit.type)
-    case cst.orbit.type.HALO
+    case {cst.orbit.type.HALO, cst.orbit.type.NRO}
         %---------------------------------------------
         % Select the type of differential corrector procedure (DCP)
         %---------------------------------------------

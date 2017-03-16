@@ -46,7 +46,7 @@ orbit.cr3bp = cr3bp;
 orbit.li = li;
 
 %Type
-orbit.type  = cst.orbit.type.HALO;
+orbit.type  = cst.orbit.type.NRO;
 
 %Family
 orbit.family = family;

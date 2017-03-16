@@ -15,7 +15,7 @@ function orbit = nro_interpolation(cr3bp, orbit, abacus, params, cst, varargin)
 %
 % Different ways to uniquely define the orbit are available, via the couple
 % (NAME, VALUE). Namely:
-%       - NAME = 'altitudeOfPerigee', allows to defined the orbit via the
+%       - NAME = 'altitudeOfPerigee', allows to define the orbit via the
 %       altitude of its perigee wrt the Moon surface (in km).
 %       - NAME = 'perigeeDistanceToMoonCenter', allows to defined the
 %       via the distance of its perigee wrt to the Moon center. We

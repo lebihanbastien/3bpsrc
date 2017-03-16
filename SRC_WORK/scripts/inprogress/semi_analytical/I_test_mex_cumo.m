@@ -73,7 +73,7 @@ tspan = [0 10*pi];
 tman = 0.0001*pi;
 
 % Type of coordinate system as in the output
-outputType = cst.coord.VSYS;
+outputType = cst.coord2.VSYS;
 % Type of model
 model = 0; %CRTBP
 % Type of framework
