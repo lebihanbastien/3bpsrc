@@ -82,8 +82,8 @@ earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the 
 %% Additional options
 %Associated ode options
 earth.options = odeset('Events',@(t,y)odezero_flightpathangle(t,y,earth.event),...
-                       'Reltol', default.ode45.RelTol,...
-                       'Abstol', default.ode45.AbsTol);
+                       'Reltol', default.ode113.RelTol,...
+                       'Abstol', default.ode113.AbsTol);
 
 % Position of the primaries
 moon.position  = cr3bp.m2.pos;

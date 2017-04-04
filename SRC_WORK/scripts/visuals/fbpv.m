@@ -20,7 +20,7 @@ default.plot.diff_corr      = false; % plot the differential correction steps
 default.plot.firstPrimDisp  = true;  % plot the Earth
 
 %--------------------------------------------------------------------------
-% See parameters_default_init.m to see other options
+% See init_parameters_default.m to see other options
 %--------------------------------------------------------------------------
 
 %% "Good" User parameters (provide a good connection) 

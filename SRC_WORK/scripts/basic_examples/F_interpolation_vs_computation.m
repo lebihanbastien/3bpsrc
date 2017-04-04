@@ -18,7 +18,7 @@
 % Important remarks:
 %
 % A. If MATLAB routines are used:
-% When the precision of the integration is high (see default.ode45
+% When the precision of the integration is high (see default.ode113
 % structure), the difference in CPU time between the interpolation process 
 % and the computation from an initial 3rd order guess can be important.
 %

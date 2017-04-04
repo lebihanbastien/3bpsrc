@@ -129,5 +129,5 @@ for ii = 1:size(ym,3)
     plot3(ym(:,1,ii)*Lf, ym(:,2,ii)*Lf, ym(:,3,ii)*Lf, 'LineWidth', linewidth, 'Color', rgb('light red'));
 end
 
-%% Print
-figtoprint(gcf, 'plot/earth_moon_orbits_lissajous_manifold', [-150 14]);
+%% Printk
+%figtoprint(gcf, 'plot/earth_moon_orbits_lissajous_manifold', [-150 14]);

@@ -44,13 +44,7 @@ out(6) = d1_ub(3);
 % STM derivatives
 %--------------------------------------------------------------------------
 %STM is updated
-Phi = eye(6);
-for i = 1 : 6
-    for j = 1 : 6
-        m = 6*(i-1) + j;
-        Phi(i,j) = y(6+m);
-    end
-end
+Phi = vectorToMatrix(y, 6, 6, 6);
 
 % Omega 3*3
 Omega = zeros(3);
@@ -68,12 +62,13 @@ Df = [Z3 I3 ; d2_ub 2*Omega];
 d_Phi = Df * Phi;
 
 %Storage in output
-for i = 1 : 6
-    for j = 1 : 6
-        m = 6*(i-1) + j;
-        out(6+m) = d_Phi(i,j);
-    end
-end
+out = matrixToVector(out, d_Phi, 6, 6, 6);
+% for i = 1 : 6
+%     for j = 1 : 6
+%         m = 6*(i-1) + j;
+%         out(6+m) = d_Phi(i,j);
+%     end
+% end
 
 
 

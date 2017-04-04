@@ -126,7 +126,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             %-----------------------------
             % If MATLAB routines only
             %-----------------------------
-            [~, yarc, tearc, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
+            [~, yarc, tearc, yearc, ~] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
         else
             %-----------------------------
             % If MEX routines are allowed
@@ -186,7 +186,7 @@ if(output.flyby.distanceToMoon > cr3bp.m2.Rm/cr3bp.L)
             %-----------------------------
             % If MATLAB routines only
             %-----------------------------
-            [~, yarc, tearc, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
+            [~, yarc, tearc, yearc, ~] = ode113(@(t,y)cr3bp_derivatives_42(t,y,cr3bp.mu),tspan,output.flyby.ystatem, earth.options);
         else
             %-----------------------------
             % If MEX routines are allowed
@@ -453,7 +453,7 @@ if(params.computation.type == cst.computation.MATLAB)
     %-----------------------------
     % If MATLAB routines only
     %-----------------------------
-    [~, ~, ~, yearc, ~] = ode45(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), tspan, output.flyby.ystatem(1:6), earth.options);
+    [~, ~, ~, yearc, ~] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu), tspan, output.flyby.ystatem(1:6), earth.options);
 else
     %-----------------------------
     % If MEX routines are allowed

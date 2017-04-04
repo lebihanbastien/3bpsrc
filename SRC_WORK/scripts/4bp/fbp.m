@@ -16,7 +16,7 @@ default.plot.YZ             = false; % plot also the results in Y-Z plane
 default.plot.diff_corr      = false; % plot the differential correction steps
 default.plot.firstPrimDisp  = true;  % plot the Earth
 
-% See parameters_default_init.m to see other options
+% See init_parameters_default.m to see other options
 %--------------------------------------------------------------------------
 
 %% User parameter

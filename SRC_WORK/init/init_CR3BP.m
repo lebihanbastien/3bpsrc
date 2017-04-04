@@ -48,6 +48,9 @@ end
 cr3bp.m1.pos = [-cr3bp.mu 0 0];
 cr3bp.m2.pos = [1-cr3bp.mu 0 0];
 
+%Constant, for portability
+cr3bp.cst = init_constants();
+
 end
 
 %% Lib points

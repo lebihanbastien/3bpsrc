@@ -133,7 +133,18 @@ end
 
 figure(index);
 hold on;
-
+% ----------
+% Selenographic frame
+% ----------
+for i = 1:3
+  axsg = zeros(6,1);
+  axsg(i) = 1e-2;
+  %axsynmc = selenographic2synodical(axsg, cr3bp);
+  axsynmc =  mcmf2syn(axsg, cr3bp);
+  c = zeros(1,3);
+  c(i) = 1;
+  arrow3(cr3bp.m2.pos*Lf, axsynmc(1:3)'*Lf, c, 2, 10,0.5);
+end
 
 end
 

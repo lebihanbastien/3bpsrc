@@ -16,10 +16,10 @@ init;
 %--------------------------------------------------------------------------
 % default.computation.type = cst.computation.MATLAB;
 
-% 2. Decomment the next lines to change the absolute and relative precision during integration with MATLAB routines  (ode45)
+% 2. Decomment the next lines to change the absolute and relative precision during integration with MATLAB routines  (ode113)
 %--------------------------------------------------------------------------
-% default.ode45.AbsTol = 1e-12;
-% default.ode45.RelTol = 1e-12;
+% default.ode113.AbsTol = 1e-12;
+% default.ode113.RelTol = 1e-12;
 
 % 3. Decomment the next lines to change the plotting options
 %--------------------------------------------------------------------------
@@ -27,7 +27,7 @@ default.plot.XZ             = false; % plot also the results in X-Z plane
 default.plot.YZ             = false; % plot also the results in Y-Z plane
 default.plot.diff_corr      = false; % plot the differential correction steps
 
-% 4. See parameters_default_init.m to see other options
+% 4. See init_parameters_default.m to see other options
 %--------------------------------------------------------------------------
 
 %% Environment init

@@ -77,7 +77,7 @@ iter = 0;
 % Update the MATLAB ode options
 %--------------------------------------------------------------------------
 if(params.computation.type == cst.computation.MATLAB)
-    options = odeset('Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);
+    options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
 end
 
 %--------------------------------------------------------------------------

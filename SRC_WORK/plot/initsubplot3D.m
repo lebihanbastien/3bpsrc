@@ -1,4 +1,4 @@
-function [] = initsubplot3D(index,  m, n, p, cr3bp, params, li)
+function [] = initsubplot3D(index, m, n, p, cr3bp, params, li)
 % INITPLOT3D initializes the 2D plots used throughout the computations.
 %
 % INITPLOT3D(INDEX, CR3BP, PARAMS) initializes a 3D plot
@@ -12,12 +12,6 @@ function [] = initsubplot3D(index,  m, n, p, cr3bp, params, li)
 % BLB 2016
 
 %--------------------------------------------------------------------------
-%Constants
-%--------------------------------------------------------------------------
-%Distance in  km
-Lf = cr3bp.L;
-
-%--------------------------------------------------------------------------
 %Create handle
 %--------------------------------------------------------------------------
 figure(index);
@@ -27,7 +21,6 @@ hold on
 %--------------------------------------------------------------------------
 %Settings
 %--------------------------------------------------------------------------
-axis equal
 grid on
 xlabel('X (x km)')
 ylabel('Y (x km)')

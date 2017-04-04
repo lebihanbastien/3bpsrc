@@ -121,7 +121,7 @@ int halo_orbit_refinement(Orbit *halo,
 
     //Monodromy matrix
     gsl_matrix *monodromy = gsl_matrix_calloc(6,6);
-    custom_vectorToMatrix(monodromy,y,6, 6, 6);
+    custom_vectorToMatrix(monodromy,y, 6, 6, 6);
 
     //Output
     halo->monodromy = monodromy;

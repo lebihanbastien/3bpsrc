@@ -89,7 +89,7 @@ st0 = st0_max*ones(1,4);
 %--------------------------------------------------------------------------
 % Choose the orbit
 %--------------------------------------------------------------------------
-orbit = plyap;
+orbit = halo;
 
 %--------------------------------------------------------------------------
 % Manifold initialization
@@ -133,10 +133,10 @@ end
 
 %% Plots of the orbits
 
-plot3(halo.yv(:,1)*Lf, halo.yv(:,2)*Lf, halo.yv(:,3)*Lf    , 'LineWidth', linewidth, 'Color', rgb('gray'));
+plot3(halo.yv(:,1)*Lf, halo.yv(:,2)*Lf, halo.yv(:,3)*Lf    , 'LineWidth', 1.5)%, linewidth, 'Color', rgb('gray'));
 plot3(vlyap.yv(:,1)*Lf, vlyap.yv(:,2)*Lf, vlyap.yv(:,3)*Lf , 'LineWidth', linewidth, 'Color', rgb('gray'));
 plot3(plyap.yv(:,1)*Lf, plyap.yv(:,2)*Lf, plyap.yv(:,3)*Lf ,'LineWidth', 1.5);%, 'LineWidth', linewidth, 'Color', rgb('gray'));
 plot3(yo(:,1)*Lf, yo(:,2)*Lf, yo(:,3)*Lf                   , 'LineWidth', linewidth, 'Color', rgb('gray'));
 
 %% Print
-figtoprint(gcf, 'plot/earth_moon_orbits_plyap_manifold', [-150 14]);
+%figtoprint(gcf, 'plot/earth_moon_orbits_plyap_manifold', [-150 14]);

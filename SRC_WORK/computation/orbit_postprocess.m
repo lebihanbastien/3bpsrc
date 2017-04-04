@@ -203,6 +203,7 @@ orbit.stable_direction = V(:,posEigen);
 [~, posEigen] = max(abs(orbit.eigenvalues));
 orbit.unstable_direction = V(:,posEigen);
 
+orbit.lu = orbit.eigenvalues(posEigen);
 end
 
 

@@ -41,7 +41,7 @@ default.plot.names           = cst.FALSE;  %are the names displayed?
 default.plot.tdAxes          = cst.FALSE;  %are the pretty 3D axes displayed?
 default.plot.bigPrimFac      = 1.0;        %the primaries appear bigPrimFac x bigger than they actually are (easier to see on screen)
 
-% 4. See parameters_default_init.m to see other options
+% 4. See init_parameters_default.m to see other options
 %--------------------------------------------------------------------------
 
 %% Structures init
@@ -92,8 +92,8 @@ earth.event = init_event(cst.manifold.event.type.FLIGHT_PATH_ANGLE,...     %the 
 %% Additional options
 %Associated ode options
 earth.options = odeset('Events',@(t,y)odezero_flightpathangle(t,y,earth.event),...
-                       'Reltol', default.ode45.RelTol,...
-                       'Abstol', default.ode45.AbsTol);
+                       'Reltol', default.ode113.RelTol,...
+                       'Abstol', default.ode113.AbsTol);
 
 % Position of the primaries
 moon.position  = cr3bp.m2.pos;

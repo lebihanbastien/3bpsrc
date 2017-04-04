@@ -9,13 +9,6 @@
 clear all;
 close all;
 
-%% Plot settings
-set(0, 'defaultTextFontSize', 18);
-set(0, 'defaultAxesFontSize', 18);
-set(0, 'defaultTextFontWeight', 'bold');
-set(0, 'defaultTextHorizontalAlignment', 'center');
-set(0, 'defaultLineMarkerSize', 2);
-
 %% Add subfolders to the path
 % Recursively add all subfolders
 addpath(genpath('.'));
@@ -50,7 +43,15 @@ load nro_init_EML1 nro_init_EML1;
 load nro_init_EML2 nro_init_EML2;
 
 %% Constants init
-cst = constants_init();
+cst = init_constants();
 
 %% Parameters init (to default values, see values within routine)
-default = parameters_default_init(cst);
+default = init_parameters_default(cst);
+
+%% Plot settings
+
+set(0, 'defaultTextFontSize',            default.plot.defaultTextFontSize);
+set(0, 'defaultAxesFontSize',            default.plot.defaultAxesFontSize);
+set(0, 'defaultTextFontWeight',          default.plot.defaultTextFontWeight);
+set(0, 'defaultTextHorizontalAlignment', default.plot.defaultTextHorizontalAlignment);
+set(0, 'defaultLineMarkerSize',          default.plot.defaultLineMarkerSize);

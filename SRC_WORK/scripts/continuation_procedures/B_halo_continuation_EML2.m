@@ -90,6 +90,8 @@ output.Azdim   = extractfield(output.orbit,'Azdim');
 output.perigee = cell2mat(extractfield(output.orbit,'perigee'));
 output.altitudeOfPerigee = extractfield(output.perigee,'altitude');
 output.perigeeDistanceToMoonCenter = extractfield(output.perigee,'radius');
+output.lu   = extractfield(output.orbit, 'lu');
+
 
 %% Family of orbits
 freq = 10;
@@ -106,6 +108,13 @@ for i = 1:freq:nlength
     %plot3(pos(1)*cr3bp.L, pos(2)*cr3bp.L, pos(3)*cr3bp.L, 'ko', 'MarkerFaceColor', 'k');
 end
 
+ %% Unstable eigenvalue
+figure; 
+hold on;
+grid on;
+plot(output.Azdim, output.lu, 'LineWidth', 2);
+xlabel('Az [km]');
+ylabel('Unstable eigenvalue');
 
 %% Jacobi constant
 figure;

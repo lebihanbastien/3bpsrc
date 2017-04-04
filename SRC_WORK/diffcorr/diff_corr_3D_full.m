@@ -72,7 +72,7 @@ else
     %----------------------------------------------------------------------
     % Numerical integration with ode113
     %----------------------------------------------------------------------
-    options = odeset('Events', @odezero_y,'Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);
+    options = odeset('Events', @odezero_y,'Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
     [~,~,T12] = ode113(@(t,y)cr3bp_derivatives_6(t,y,cr3bp.mu),[0 10],v0(1:6),options);
 end
 
@@ -80,7 +80,7 @@ end
 % Update the options: no event is necessary after this point.
 %--------------------------------------------------------------------------
 if(params.computation.type == cst.computation.MATLAB)
-    options = odeset('Reltol', params.ode45.RelTol, 'Abstol', params.ode45.AbsTol);
+    options = odeset('Reltol', params.ode113.RelTol, 'Abstol', params.ode113.AbsTol);
 end
 
 %--------------------------------------------------------------------------

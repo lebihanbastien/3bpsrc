@@ -18,6 +18,7 @@ mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_bcp_event.c   lib/libg
 
 %%
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_tdbcp.c         lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
+
 %%
 mex  -I/lib/gsl  CFLAGS="\$CFLAGS -std=c99" -I∕C  ode78_tdbcp_event.c   lib/libgsl.a lib/libgslcblas.a  C/ode78.c C/custom_odezero.c C/cr3bp_derivatives.c C/custom.c C/custom_ode.c
 

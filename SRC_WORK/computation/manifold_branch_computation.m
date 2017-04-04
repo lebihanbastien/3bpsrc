@@ -142,13 +142,8 @@ end
 %--------------------------------------------------------------------------
 % Current STM at POS
 %--------------------------------------------------------------------------
-STM = eye(6);
-for i = 1 : 6
-    for j = 1 : 6
-        m = 6*(i-1) + j;
-        STM(i,j) = ytraj(m+6);
-    end
-end
+STM = vectorToMatrix(ytraj, 6, 6, 6);
+
 
 %--------------------------------------------------------------------------
 % New vectors and initial state at POS
@@ -235,6 +230,7 @@ manifold_branch.te    = te;      %time of the events
 manifold_branch.yve   = yve;     %state at the events
 manifold_branch.ytraj = ytraj;   %entire trajectory
 manifold_branch.ttraj = ttraj;   %entire trajectory
+
 %--------------------------------------------------------------------------
 % Plotting (potentially)
 %--------------------------------------------------------------------------

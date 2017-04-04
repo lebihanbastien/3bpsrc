@@ -270,7 +270,7 @@ int cr3bp_derivatives_48 (double t, const double y[], double f[], void *params)
     //---------------------------------------------------------------------
     //STM is updated
     gsl_matrix *STM = gsl_matrix_calloc(6,6);
-    custom_vectorToMatrix_transp(STM, (double *)y, 6, 6, 12);
+    custom_vectorToMatrix(STM, (double *)y, 6, 6, 12);
 
     //Trivial matrices
     gsl_matrix *eye3_gsl = gsl_matrix_calloc(3,3);
@@ -311,7 +311,7 @@ int cr3bp_derivatives_48 (double t, const double y[], double f[], void *params)
     //---------------------------------------------------------------------
     //Update f (from row 13 to 48)
     //---------------------------------------------------------------------
-    custom_matrixToVector_transp(f, STMp, 6, 6, 12);
+    custom_matrixToVector_rc(f, STMp, 6, 6, 12, COLUMNWISE);
 
 
     //Memory release
