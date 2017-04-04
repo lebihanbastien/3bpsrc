@@ -1,19 +1,14 @@
-function ysg  = selenocentric2selenographic(ysc, t)
+function ysg  = selenocentric2selenographic(ysc, cr3bp, t)
 %
 % YSG  = SELENOCENTRIC2SELENOGRAPHIC(YSC, CR3BP) computes the coordinates 
 % YSC into selenographic coordinates.
 %
 % BLB 2016
 
-%Rotation matrix
-R = [cos(t) sin(t) 0 ; -sin(t) cos(t) 0 ; 0 0 1];
-Rdot = [-sin(t) cos(t) 0 ; -cos(t) -sin(t) 0 ; 0 0 0];
+% Selenocentric to synodical
+ysyn = selenocentric2synodical(ysc, cr3bp, t);
 
-ysg = zeros(6,1);
-% Position
-ysg(1:3) = R*ysc(1:3);
-
-% Velocity
-ysg(4:6) = R*ysc(4:6) + Rdot*ysc(1:3);
+% Synodical to selenographic
+ysg = synodical2selenographic(ysyn, cr3bp);
 
 end

@@ -53,8 +53,7 @@ output.altitude = norm(yvm(1:3)) -  rm;
 output.rvm = norm(yvm(1:3));
 
 %State vector in selenocentric coordinates
-ysg = synodical2selenographic(yv, cr3bp);
-ysc = selenographic2selenocentric(ysg, tv);
+ysc = synodical2selenocentric(yv, cr3bp, tv);
 
 %--------------------------------------------------------------------------
 %Osculating circular LLO
@@ -78,8 +77,7 @@ for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
     yc(:,i)    = kep2cart(llc.a, llc.e, llc.I, llc.omega, llc.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg        = selenocentric2selenographic(yc(:,i), Mv(i)/llc.n+tv);
-    ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    ysyn(:,i)   = selenocentric2synodical(yc(:,i), cr3bp, Mv(i)/llc.n+tv);
 end
 
 %Maneuver to perform to insert into the first orbit
@@ -118,10 +116,9 @@ ell.yc = zeros(6, size(Mv, 2));
 ell.ysyn = zeros(6, size(Mv, 2));
 for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
-    ell.yc(:,i)    = kep2cart(ell.a, ell.e, ell.I, ell.omega, ell.Omega, Mv(i), cr3bp.mu);
+    ell.yc(:,i)   = kep2cart(ell.a, ell.e, ell.I, ell.omega, ell.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg            = selenocentric2selenographic(ell.yc(:,i), (Mv(i)-pi)/ell.n+ell.tv);
-    ell.ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    ell.ysyn(:,i) = selenocentric2synodical(ell.yc(:,i), cr3bp, (Mv(i)-pi)/ell.n+ell.tv);
 end
 
 %Time after half the llc + the Hohmann transfer:
@@ -165,8 +162,7 @@ for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
     llo.yc(:,i)    = circkep2cart(llo.a, llo.e, llo.I, llo.omega, llo.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg              = selenocentric2selenographic(llo.yc(:,i), Mv(i)/llo.n+llo.tv);
-    llo.ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    llo.ysyn(:,i)  = selenocentric2synodical(llo.yc(:,i), cr3bp, Mv(i)/llo.n+llo.tv);
 end
 
 %--------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 function  ysyn  = selenographic2synodical(ysg, cr3bp)
 %
-% YSYNMC  = SYNODICAL2SELENOGRAPHIC(YSG) computes the coordinates YSYN
+% YSYN  = SYNODICAL2SELENOGRAPHIC(YSG) computes the coordinates YSYN
 % into synodical coordinates.
 %
 % BLB 2016

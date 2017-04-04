@@ -53,8 +53,7 @@ output.altitude = norm(yvm(1:3)) -  rm;
 output.rvm = norm(yvm(1:3));
 
 %State vector in selenocentric coordinates
-ysg = synodical2selenographic(yv, cr3bp);
-ysc = selenographic2selenocentric(ysg, tv);
+ysc = synodical2selenocentric(yv, cr3bp, tv);
 
 %--------------------------------------------------------------------------
 %Osculating circular LLO
@@ -78,8 +77,7 @@ for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
     yc(:,i)    = kep2cart(llc.a, llc.e, llc.I, llc.omega, llc.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg        = selenocentric2selenographic(yc(:,i), Mv(i)/llc.n+tv);
-    ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    ysyn(:,i)   = selenocentric2synodical(yc(:,i), cr3bp, Mv(i)/llc.n+tv);
 end
 
 %Maneuver to perform to insert into the first orbit
@@ -93,19 +91,13 @@ hold on
 quiver3(yv(1)*Lf, yv(2)*Lf, yv(3)*Lf, yv(4)*1e3*Tf, yv(5)*1e3*Tf, yv(6)*1e3*Tf, 'Color', 'b');
 plot3(ysyn(1,:)*Lf, ysyn(2,:)*Lf, ysyn(3,:)*Lf, 'b');
 
-%% Elliptic part (Hohmann transfer)
+%% Elliptic part
 
-%--------------------------------------------------------------------------
-% Time considerations
-%--------------------------------------------------------------------------
 %We go on the llc on half an orbit
 llc.T   = 2*pi/llc.n;
 %Time after half an orbit:
 ell.tv = llc.T/2+tv;
 
-%--------------------------------------------------------------------------
-% Orbital elements
-%--------------------------------------------------------------------------
 % Altitude of the targeted orbit: 100 km
 llo.a     = 100/Lf+rm;
 ell.a     = 0.5*(llc.a + llo.a);
@@ -117,20 +109,16 @@ ell.Omega = llc.Omega;
 % Mean motion
 ell.n = sqrt(cr3bp.mu/ell.a^3);
 
-%--------------------------------------------------------------------------
-% Vector of positions
-%--------------------------------------------------------------------------
-% Vector of position (mean anomaly) on the elliptic arc
+% Vector of position (mean anomaly) on the ellptic arc
 Mv = pi:0.005:2*pi;
 % Compute the corresponding orbit
 ell.yc = zeros(6, size(Mv, 2));
 ell.ysyn = zeros(6, size(Mv, 2));
 for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
-    ell.yc(:,i)    = kep2cart(ell.a, ell.e, ell.I, ell.omega, ell.Omega, Mv(i), cr3bp.mu);
+    ell.yc(:,i)   = kep2cart(ell.a, ell.e, ell.I, ell.omega, ell.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg            = selenocentric2selenographic(ell.yc(:,i), (Mv(i)-pi)/ell.n+ell.tv);
-    ell.ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    ell.ysyn(:,i) = selenocentric2synodical(ell.yc(:,i), cr3bp, (Mv(i)-pi)/ell.n+ell.tv);
 end
 
 %Time after half the llc + the Hohmann transfer:
@@ -146,7 +134,6 @@ plot3(ell.ysyn(1,end)*Lf, ell.ysyn(2,end)*Lf, ell.ysyn(3,end)*Lf, 'o', 'MarkerSi
 plot3(ell.ysyn(1,:)*Lf, ell.ysyn(2,:)*Lf, ell.ysyn(3,:)*Lf, 'b');
 
 
-%% Maneuvers
 % Maneuver to perform to insert into the elliptic part
 output.dv2 = hohmannDV1(llc.a, llo.a, cr3bp.mu);
 
@@ -156,11 +143,8 @@ output.dv3 = hohmannDV2(llc.a, llo.a, cr3bp.mu);
 % Total maneuver cost
 output.dvtot = output.dv1 + output.dv2 + output.dv3;
 
-%% Targeted orbit (LLO)
+%% Targeted orbit 
 
-%--------------------------------------------------------------------------
-% Orbital elements
-%--------------------------------------------------------------------------
 llo.e = 0.0;
 llo.I = llc.I;
 llo.omega = llc.omega;
@@ -169,9 +153,6 @@ llo.Omega = llc.Omega;
 % Mean motion
 llo.n = sqrt(cr3bp.mu/llo.a^3);
 
-%--------------------------------------------------------------------------
-% Vector of positions
-%--------------------------------------------------------------------------
 % Vector of position (mean anomaly) on the LLO
 Mv = 0:0.005:2*pi;
 % Compute the corresponding orbit
@@ -181,8 +162,7 @@ for i = 1:size(Mv, 2)
     % Keplerian elements to selenocentric state
     llo.yc(:,i)    = circkep2cart(llo.a, llo.e, llo.I, llo.omega, llo.Omega, Mv(i), cr3bp.mu);
     % Back to synodical coordinates
-    ysg              = selenocentric2selenographic(llo.yc(:,i), Mv(i)/llo.n+llo.tv);
-    llo.ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+    llo.ysyn(:,i)  = selenocentric2synodical(llo.yc(:,i), cr3bp, Mv(i)/llo.n+llo.tv);
 end
 
 %--------------------------------------------------------------------------

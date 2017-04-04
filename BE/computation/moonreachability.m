@@ -8,9 +8,9 @@ function [ output ] = moonreachability(cr3bp, orbit, msi, thetav, maxalt, params
 % 
 
 %--------------------------------------------------------------------------
-% Integration duration of the manifold arbitrarily fixed to 22 days
+% Integration duration of the manifold arbitrarily fixed to 20 days
 %--------------------------------------------------------------------------
-t = 22*cst.env.days*2*pi/cr3bp.T;
+t = 20*cst.env.days*2*pi/cr3bp.T;
 
 %--------------------------------------------------------------------------
 % Computation of the manifold branches that stops at the
@@ -42,7 +42,6 @@ Lf = cr3bp.L;
 % 1000 x the velocity factor
 Tf = 1e3*cr3bp.L*2*pi/cr3bp.T;
 
-
 %--------------------------------------------------------------------------
 % Initialize the outputs
 %--------------------------------------------------------------------------
@@ -69,7 +68,7 @@ title('Selenographic frame');
 %--------------------------------------------------------------------------
 % Final Low Lunar orbits
 %--------------------------------------------------------------------------
-initsubplot3D(6, 2, 3, 3, cr3bp, params, cr3bp.l2);
+initsubplotMoon(6, 2, 3, 3, cr3bp, params, cr3bp.l2);
 
 %--------------------------------------------------------------------------
 % Loop on all the positions on the Halo orbit
@@ -94,7 +93,8 @@ for li = 1:thetan
     output.longitude(li)= rad2deg(atan2(ysg(2), ysg(1)));
     
     %State vector in selenocentric coordinates
-    ysc = selenographic2selenocentric(ysg, tv);
+    ysc = synodical2selenocentric(yv, cr3bp, tv);
+    
     
     %----------------------------------------------------------------------
     %Osculating circular LLO
@@ -116,8 +116,8 @@ for li = 1:thetan
         % Keplerian elements to selenocentric state
         yc(:,i)    = circkep2cart(a, e, I, omega, Omega, Mv(i), cr3bp.mu);
         % Back to synodical coordinates
-        ysg        = selenocentric2selenographic(yc(:,i), Mv(i)/n+tv);
-        ysyn(:,i)  = selenographic2synodical(ysg, cr3bp);
+        ysg         = selenocentric2selenographic(yc(:,i), cr3bp, Mv(i)/n+tv);
+        ysyn(:,i)   = selenocentric2synodical(yc(:,i), cr3bp, Mv(i)/n+tv);
         % Store in output
         output.llo.lat(li, i)  = rad2deg(atan2(ysg(3), norm(ysg(1:2))));
         output.llo.long(li, i) = rad2deg(atan2(ysg(2), ysg(1)));
@@ -177,11 +177,11 @@ for li = 1:thetan
         % Lunar altitude VS position on the initial halo orbit
         subplot(2,3,4);
         hold on
-        plot(output.halo.theta(li), output.altitude(li)*Lf, 'o', 'Color', 'k', 'MarkerFaceColor', 'k', 'MarkerSize', 7);
+        plot(output.halo.theta(li), output.lfb.tv(li)*cr3bp.T/(2*pi*cst.env.days), 'o', 'Color', 'k', 'MarkerFaceColor', 'k', 'MarkerSize', 7);
         grid on
-        title('Minimum lunar altitude (periselene)');
+        title('Arrival from Halo orbit');
         xlabel('Departure position on the halo orbit (-)');
-        ylabel('Minimum lunar altitude (km)');
+        ylabel('Time of Flight (days)');
         
         % Inclination vs Altitude of the LLO
         subplot(2,3,6);
